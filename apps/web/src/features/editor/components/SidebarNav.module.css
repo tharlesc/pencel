@@ -1409,3 +1409,7 @@
 .swatchHoverLabel {
   display: none;
 }
+
+.hiddenFileInput {
+  display: none;
+}
