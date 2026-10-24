@@ -1,7 +1,12 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, Ref } from 'react';
 import { Icon } from '../Icon/Icon.js';
 import type { IconName } from '../Icon/iconRegistry.js';
 import styles from './Tabs.module.css';
+
+/**
+ * Layout variants for `<Tabs />`.
+ */
+export type TabsVariant = 'segmented' | 'pills';
 
 export interface TabItem<T extends string> {
   readonly id: T;
@@ -14,6 +19,9 @@ export interface TabsProps<T extends string> {
   readonly items: readonly TabItem<T>[];
   readonly activeId: T;
   readonly onChange: (id: T) => void;
+  readonly variant?: TabsVariant;
+  readonly className?: string;
+  readonly ref?: Ref<HTMLDivElement>;
 }
 
 export function Tabs<T extends string>({
@@ -21,9 +29,15 @@ export function Tabs<T extends string>({
   items,
   activeId,
   onChange,
+  variant = 'segmented',
+  className,
+  ref,
 }: TabsProps<T>): ReactElement {
+  const classes = [styles.tabList, styles[`variant-${variant}`], className]
+    .filter(Boolean)
+    .join(' ');
   return (
-    <div className={styles.tabList} role="tablist" aria-label={ariaLabel}>
+    <div ref={ref} className={classes} role="tablist" aria-label={ariaLabel}>
       {items.map((item) => {
         const isSelected = item.id === activeId;
         return (

@@ -6,17 +6,17 @@
 }
 
 .sm {
-  height: 22px;
+  height: var(--space-5-5);
   width: auto;
 }
 
 .md {
-  height: 28px;
+  height: var(--control-height-sm);
   width: auto;
 }
 
 .lg {
-  height: 36px;
+  height: var(--control-height-lg);
   width: auto;
 }
 

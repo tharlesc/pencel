@@ -4,15 +4,25 @@
   gap: var(--space-1);
 }
 
+.inline {
+  background-color: transparent;
+}
+
 .floating {
   composes: glass-float from global;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-pill);
 }
 
+.chrome {
+  composes: glass-chrome from global;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+}
+
 .divider {
   width: var(--border-width-hairline);
-  height: 18px;
+  height: var(--icon-size-md);
   background-color: var(--color-border-subtle);
   margin: 0 var(--space-1);
 }
