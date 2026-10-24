@@ -1,0 +1,1413 @@
+/* ==========================================================================
+   Apple Pro Studio Navigation Rail & Expandable Drawer (SidebarNav)
+   Clean Borderless Design System with Infinite Media Feed,
+   AI Palettes, Emojis, Vector Icons & Brand Elements.
+   ========================================================================== */
+
+.container {
+  display: flex;
+  height: 100%;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   1. Left Vertical Rail (~68px)
+   -------------------------------------------------------------------------- */
+.rail {
+  width: 68px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  background-color: var(--color-surface-secondary);
+  border-right: var(--border-width-hairline) solid var(--color-border-subtle);
+  overflow-y: auto;
+  z-index: var(--z-rail);
+  user-select: none;
+}
+
+.railItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 56px;
+  height: 52px;
+  padding: 4px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.railItem:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.railItem:active {
+  transform: scale(0.95);
+}
+
+.railItem:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.railItemActive {
+  background-color: var(--color-surface-primary);
+  color: var(--color-accent-primary);
+  border: none;
+  box-shadow: var(--shadow-xs);
+}
+
+.railLabel {
+  font-family: var(--font-family-ui);
+  font-size: 10.5px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+/* --------------------------------------------------------------------------
+   2. Expandable Studio Drawer (~320px)
+   -------------------------------------------------------------------------- */
+.drawer {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-primary);
+  border-right: var(--border-width-hairline) solid var(--color-border-subtle);
+  overflow: hidden;
+  z-index: var(--z-drawer);
+  user-select: none;
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-3) 0 var(--space-4);
+  height: 46px;
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-primary);
+  flex-shrink: 0;
+}
+
+.drawerTitle {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.drawerBody {
+  flex: 1;
+  padding: var(--space-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.drawerBodyLayers {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Studio Search Input Wrapper */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  height: var(--control-height-sm);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.searchWrapper:focus-within {
+  background-color: var(--color-surface-primary);
+  box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  outline: none;
+  box-shadow: none;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.subSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.subTitle {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.fullWidthBtn {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   3. Design & Format Presets Cards (Clean Borderless)
+   -------------------------------------------------------------------------- */
+/* Custom Size Creator (Photoshop style) */
+.customSizeHeaderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  height: var(--control-height-md);
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-on-accent);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-instant) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.customSizeHeaderBtn:hover {
+  background-color: var(--color-accent-primary-hover);
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.25);
+}
+
+.customSizeHeaderBtn:active {
+  transform: scale(0.98);
+  background-color: var(--color-accent-primary-active);
+}
+
+.customSizeCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-lg);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  animation: popoverFadeIn var(--duration-fast) var(--ease-apple);
+}
+
+.customInputsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.customInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.customInputLabel {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.customNumberInput {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.customNumberInput:focus,
+.customNumberInput:focus-visible {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 1.5px var(--color-focus-ring);
+}
+
+.customSelectGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.customSelectInput {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  outline: none;
+  cursor: pointer;
+}
+
+.customSelectInput:focus-visible {
+  outline: none;
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 1.5px var(--color-focus-ring);
+}
+
+.customApplyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--control-height-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-on-accent);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.customApplyBtn:hover {
+  background-color: var(--color-accent-primary-hover);
+}
+
+.customApplyBtn:active {
+  transform: scale(0.98);
+}
+
+/* GIPHY Stickers Grid */
+.giphyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.giphyItemBtn {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 4px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.giphyItemBtn:hover {
+  transform: scale(1.06);
+  box-shadow: var(--shadow-sm);
+}
+
+.giphyImageThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-xs);
+}
+
+.presetsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.presetPill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.presetPill:hover {
+  background-color: var(--color-surface-tertiary);
+}
+
+.presetPill:active {
+  transform: scale(0.98);
+}
+
+.presetPill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.presetPillActive {
+  background-color: var(--color-selection-bg);
+  border: none;
+}
+
+.presetPillName {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.presetPillDim {
+  font-family: var(--font-family-mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-tertiary);
+}
+
+/* Templates Grid */
+.templatesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.templateCard {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-md);
+  border: none;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+  overflow: hidden;
+}
+
+.templateCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.templateCard:active {
+  transform: scale(0.97);
+}
+
+.templateBadge {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-on-accent);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.03em;
+}
+
+.templateHeadline {
+  font-size: 13px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-on-accent);
+  line-height: 1.25;
+}
+
+.templateMeta {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* --------------------------------------------------------------------------
+   4. Elements Subtabs & Grids (Shapes, Icons, Emojis, Brands)
+   -------------------------------------------------------------------------- */
+.segmentedSubTabs {
+  display: flex;
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+
+.subTabBtn {
+  flex: 1;
+  height: 26px;
+  border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple);
+}
+
+.subTabBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.subTabBtnActive {
+  background-color: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.shapesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.shapeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.shapeBtn:hover {
+  background-color: var(--color-surface-tertiary);
+  color: var(--color-text-primary);
+}
+
+.shapeBtn:active {
+  transform: scale(0.96);
+}
+
+.shapeBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.shapePreviewRect {
+  width: 30px;
+  height: 30px;
+  background-color: var(--color-swatch-blue);
+  border-radius: var(--radius-xs);
+}
+
+.shapePreviewCircle {
+  width: 30px;
+  height: 30px;
+  background-color: var(--color-swatch-amber);
+  border-radius: 50%;
+}
+
+.shapePreviewPill {
+  width: 38px;
+  height: 20px;
+  background-color: var(--color-swatch-emerald);
+  border-radius: var(--radius-pill);
+}
+
+.shapePreviewTriangle {
+  width: 30px;
+  height: 28px;
+  background-color: var(--color-swatch-violet);
+  clip-path: polygon(50% 6%, 4% 94%, 96% 94%);
+}
+
+.shapePreviewLine {
+  width: 38px;
+  height: 3px;
+  background-color: var(--color-text-primary);
+  border-radius: 2px;
+}
+
+/* Badges Grid */
+.badgesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.badgeItemBtn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.badgeItemBtn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-pill);
+}
+
+.badgeSale,
+.badgeNew,
+.badgeVerified {
+  display: inline-block;
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-on-accent);
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.badgeSale:hover,
+.badgeNew:hover,
+.badgeVerified:hover {
+  transform: scale(1.04);
+}
+
+.badgeSale:active,
+.badgeNew:active,
+.badgeVerified:active {
+  transform: scale(0.96);
+}
+
+.badgeSale {
+  background-color: var(--color-swatch-rose);
+}
+
+.badgeNew {
+  background-color: var(--color-swatch-emerald);
+}
+
+.badgeVerified {
+  background-color: var(--color-swatch-blue);
+}
+
+/* Iconify Vector Icons Grid */
+.iconsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.iconElementCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    background-color var(--duration-fast) var(--ease-apple);
+}
+
+.iconElementCard:hover {
+  background-color: var(--color-surface-tertiary);
+  transform: scale(1.06);
+}
+
+.iconElementSvg {
+  width: 24px;
+  height: 24px;
+}
+
+.iconElementName {
+  font-size: 9px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Emojis Grid */
+.emojisGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-1);
+}
+
+.emojiCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+  font-size: 20px;
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    background-color var(--duration-fast) var(--ease-apple);
+}
+
+.emojiCard:hover {
+  transform: scale(1.18);
+  background-color: var(--color-surface-tertiary);
+}
+
+.emojiChar {
+  line-height: 1;
+}
+
+/* Brand Favicons Grid */
+.brandQuickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.brandCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.brandCard:hover {
+  background-color: var(--color-surface-tertiary);
+  transform: scale(1.02);
+}
+
+.brandFavicon {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+}
+
+.brandDomainName {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-transform: capitalize;
+}
+
+/* --------------------------------------------------------------------------
+   5. Typography & Text Presets
+   -------------------------------------------------------------------------- */
+.textPresets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.textPresetHeading,
+.textPresetSubheading,
+.textPresetBody {
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.textPresetHeading:hover,
+.textPresetSubheading:hover,
+.textPresetBody:hover {
+  background-color: var(--color-surface-tertiary);
+}
+
+.textPresetHeading:active,
+.textPresetSubheading:active,
+.textPresetBody:active {
+  transform: scale(0.98);
+}
+
+.textPresetHeading:focus-visible,
+.textPresetSubheading:focus-visible,
+.textPresetBody:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.textPresetHeading {
+  font-family: var(--font-family-ui);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.textPresetSubheading {
+  font-family: var(--font-family-ui);
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.textPresetBody {
+  font-family: var(--font-family-ui);
+  font-size: 12.5px;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+}
+
+/* Font Combinations */
+.fontCombosGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.comboCard {
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-md);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    background-color var(--duration-fast) var(--ease-apple);
+}
+
+.comboCard:hover {
+  transform: scale(1.02);
+  background-color: var(--color-surface-tertiary);
+}
+
+.comboCard:active {
+  transform: scale(0.97);
+}
+
+.comboSale {
+  font-family: var(--font-family-text);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-swatch-rose);
+  letter-spacing: -0.02em;
+}
+
+.comboEditorial {
+  font-family: var(--font-family-text);
+  font-size: 16px;
+  font-style: italic;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+  padding-bottom: 2px;
+  color: var(--color-text-primary);
+}
+
+.comboBold {
+  font-family: var(--font-family-mono);
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-swatch-blue);
+  letter-spacing: 0.04em;
+}
+
+/* --------------------------------------------------------------------------
+   6. Media & Photos Section with Infinite Feed & Hover Overlay
+   -------------------------------------------------------------------------- */
+.mediaCategoryChips {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: var(--space-3);
+  scrollbar-width: none;
+}
+
+.mediaCategoryChips::-webkit-scrollbar {
+  display: none;
+}
+
+.mediaCategoryChip {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple);
+}
+
+.mediaCategoryChip:hover {
+  background-color: var(--color-surface-tertiary);
+  color: var(--color-text-primary);
+}
+
+.mediaCategoryChipActive {
+  background-color: var(--color-accent-primary);
+  border: none;
+  color: var(--color-text-on-accent);
+}
+
+.mediaHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.mediaHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.loadingTag {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.unsplashBadgeLink {
+  font-family: var(--font-family-ui);
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-decoration: none;
+  padding: 2px 6px;
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-xs);
+  transition:
+    color var(--duration-fast) var(--ease-apple),
+    background-color var(--duration-fast) var(--ease-apple);
+}
+
+.unsplashBadgeLink:hover {
+  color: var(--color-accent-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.photosGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.photoCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.photoThumbWrapper {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-secondary);
+}
+
+.photoThumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: block;
+  background: transparent;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.photoThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photoSourceTag {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  background-color: rgba(12, 12, 14, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--color-text-on-accent);
+  border-radius: var(--radius-xs);
+  font-size: 8.5px;
+  font-weight: var(--font-weight-medium);
+  z-index: var(--z-raised);
+}
+
+/* Hover Overlay: Photographer attribution appears ONLY on hover (as requested) */
+.photoHoverOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-2);
+  background: linear-gradient(
+    to top,
+    rgba(12, 12, 14, 0.88) 0%,
+    rgba(12, 12, 14, 0.45) 55%,
+    transparent 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  z-index: var(--z-overlay);
+}
+
+.photoThumbWrapper:hover .photoHoverOverlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hoverTitle {
+  font-family: var(--font-family-ui);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-on-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.hoverAttribution {
+  font-family: var(--font-family-ui);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.hoverLink {
+  color: var(--color-text-on-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.hoverLink:hover {
+  color: var(--color-accent-primary-hover);
+}
+
+/* Infinite Scroll Sentinel */
+.infiniteScrollSentinel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) 0;
+  min-height: 44px;
+}
+
+.loadingMoreText {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
+.loadMoreBtn {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.loadMoreBtn:hover {
+  background-color: var(--color-surface-tertiary);
+}
+
+.loadMoreBtn:active {
+  transform: scale(0.97);
+}
+
+/* --------------------------------------------------------------------------
+   7. Background AI Palettes & Pickshade Tints/Shades
+   -------------------------------------------------------------------------- */
+.aiPaletteHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.studioSuggestBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    border-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.studioSuggestBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-default);
+  transform: translateY(-0.5px);
+}
+
+.studioSuggestBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.studioSuggestBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebarColorPickerWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.spectrumBarWrapper {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.spectrumBarVisual {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    #ff0000 0%,
+    #ff8000 12.5%,
+    #ffff00 25%,
+    #00ff00 37.5%,
+    #00ffff 50%,
+    #0071e3 62.5%,
+    #8000ff 75%,
+    #ff00ff 87.5%,
+    #ff0000 100%
+  );
+}
+
+.spectrumBarNativeInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.savedPalettesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.savedPalettesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.savedPaletteCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--space-2);
+  background-color: var(--color-surface-secondary);
+  border-radius: var(--radius-sm);
+  gap: var(--space-2);
+}
+
+.savedPaletteName {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.savedPaletteSwatches {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.savedSwatchItem {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-xs);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.savedSwatchItem:hover {
+  transform: scale(1.2);
+  z-index: 2;
+}
+
+.savedPaletteDeleteBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  transition: color var(--duration-fast) var(--ease-apple);
+}
+
+.savedPaletteDeleteBtn:hover {
+  color: var(--color-status-danger);
+}
+
+.savedPalettesEmpty {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  padding: var(--space-1) 0;
+}
+
+.paletteBarPreview {
+  display: flex;
+  height: 34px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.paletteBarItem {
+  flex: 1;
+  border: none;
+  cursor: pointer;
+  transition: flex var(--duration-fast) var(--ease-spring);
+}
+
+.paletteBarItem:hover {
+  flex: 1.4;
+}
+
+.shadesStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shadesLabel {
+  font-family: var(--font-family-ui);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  margin-top: 2px;
+}
+
+.shadesRow {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.shadeSwatch {
+  height: 22px;
+  border-radius: var(--radius-xs);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.shadeSwatch:hover {
+  transform: scale(1.14);
+}
+
+.curatedPalettesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.curatedPaletteRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+}
+
+.curatedPaletteName {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.curatedPaletteSwatches {
+  display: flex;
+  gap: 4px;
+}
+
+.curatedSwatchItem {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.curatedSwatchItem:hover {
+  transform: scale(1.15);
+}
+
+.colorSwatchesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.colorGridItem {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.colorGridItem:hover {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-sm);
+}
+
+.colorGridItem:active {
+  transform: scale(0.95);
+}
+
+.colorGridItem:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.swatchHoverLabel {
+  display: none;
+}

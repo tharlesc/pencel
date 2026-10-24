@@ -1,0 +1,36 @@
+{
+  "name": "pencel-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pencel — Web Graphic Editor with Apple-Inspired Design System",
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node ./scripts/dev.mjs",
+    "dev:web": "npm run dev --workspace=@pencel/web",
+    "dev:api": "npm run dev --workspace=@pencel/api",
+    "build": "npm run build --workspace=@pencel/shared-types && npm run build --workspace=@pencel/editor-core && npm run build --workspace=@pencel/api && npm run build --workspace=@pencel/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,css,md,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,css,md,yml}\"",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
+  }
+}

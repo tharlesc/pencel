@@ -1,0 +1,29 @@
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+  user-select: none;
+  transition: color var(--duration-instant) var(--ease-standard);
+}
+
+.tone-default {
+  color: currentColor;
+}
+
+.tone-muted {
+  color: var(--color-text-secondary);
+}
+
+.tone-active {
+  color: var(--color-accent-primary);
+}
+
+.tone-disabled {
+  color: var(--color-text-disabled);
+}
+
+.tone-accent {
+  color: var(--color-accent-primary);
+}

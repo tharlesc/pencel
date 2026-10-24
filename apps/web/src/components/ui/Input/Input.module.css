@@ -1,0 +1,110 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--control-height-sm);
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-2);
+  gap: var(--space-1-5);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.inputWrapper:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-default);
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--color-focus-ring);
+  background-color: var(--color-surface-primary);
+  box-shadow: 0 0 0 1.5px var(--color-focus-ring);
+}
+
+.prefixIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  flex: 1;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  padding: 0;
+  margin: 0;
+}
+
+.input:focus-visible {
+  outline: none !important;
+}
+
+.input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.monospace {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.clearButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  border-radius: var(--radius-full);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.clearButton:hover {
+  color: var(--color-text-primary);
+}
+
+.clearButton:active {
+  transform: scale(0.95);
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.suffix {
+  margin-left: var(--space-1);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-mono);
+  user-select: none;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@pencel/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Apple-inspired semantic CSS design tokens and Light/Dark themes for Pencel",
+  "exports": {
+    ".": "./src/index.css",
+    "./tokens.css": "./src/tokens.css",
+    "./theme-light.css": "./src/theme-light.css",
+    "./theme-dark.css": "./src/theme-dark.css"
+  }
+}

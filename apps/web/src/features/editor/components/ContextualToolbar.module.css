@@ -1,0 +1,637 @@
+/* ==========================================================================
+   Apple Pro Studio Contextual Toolbar (Floating HUD & Canvas Bar)
+   Fidelity: macOS Sequoia Liquid Glass System
+   Principles: Dynamic tooling, specular borders, tabular steppers.
+   ========================================================================== */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  box-shadow: var(--surface-glass-specular), var(--shadow-xs);
+  overflow: visible;
+  z-index: var(--z-toolbar);
+  user-select: none;
+}
+
+.group,
+.trailingGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.label {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------------
+   Typography Controls (Font Picker & Steppers)
+   -------------------------------------------------------------------------- */
+.fontSelect {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  outline: none;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-apple);
+}
+
+.fontSelect:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.fontSelect:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+/* --------------------------------------------------------------------------
+   Apple Liquid Glass Font Selector Popover
+   -------------------------------------------------------------------------- */
+.fontPickerContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.fontPickerTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: var(--control-height-sm);
+  min-width: 130px;
+  max-width: 180px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-apple);
+}
+
+.fontPickerTrigger:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.fontPickerTrigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.fontPickerActiveLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.fontMenuPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 240px;
+  max-height: 360px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2);
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border: var(--border-width-hairline) solid var(--surface-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--surface-glass-shadow), var(--surface-glass-specular);
+  z-index: var(--z-popover);
+  transform-origin: top left;
+  animation: popoverFadeIn var(--duration-fast) var(--ease-out);
+}
+
+.fontSearchContainer {
+  margin-bottom: var(--space-2);
+}
+
+.fontMenuList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 290px;
+}
+
+.fontMenuCategory {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fontCategoryHeader {
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  padding: 4px var(--space-2);
+  letter-spacing: 0.05em;
+}
+
+.fontMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-apple);
+}
+
+.fontMenuItem:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.fontMenuItemActive {
+  background-color: var(--color-selection-bg);
+  color: var(--color-accent-primary);
+}
+
+.fontSampleText {
+  font-size: 13.5px;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sizeControl {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+  height: var(--control-height-sm);
+  overflow: hidden;
+}
+
+.stepperBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.stepperBtn:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.stepperBtn:active {
+  transform: scale(0.92);
+}
+
+.stepperBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.sizeDisplay {
+  min-width: 32px;
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Color Swatches & Spectrum Popover
+   -------------------------------------------------------------------------- */
+.colorPickerContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.colorSwatchButton {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.colorSwatchButton:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-sm);
+}
+
+.colorSwatchButton:active {
+  transform: scale(0.95);
+}
+
+.colorSwatchButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.colorHex {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.palettePopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 256px;
+  padding: var(--space-3);
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border: var(--border-width-hairline) solid var(--surface-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--surface-glass-shadow), var(--surface-glass-specular);
+  z-index: var(--z-popover);
+  transform-origin: top left;
+  animation: popoverFadeIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.spectrumHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.spectrumPickerLabel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-apple);
+}
+
+.spectrumPickerLabel:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.nativeColorInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.spectrumGradientThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #ff0000 0deg,
+    #ff8000 30deg,
+    #ffff00 60deg,
+    #80ff00 90deg,
+    #00ff00 120deg,
+    #00ff80 150deg,
+    #00ffff 180deg,
+    #0080ff 210deg,
+    #0000ff 240deg,
+    #8000ff 270deg,
+    #ff00ff 300deg,
+    #ff0080 330deg,
+    #ff0000 360deg
+  );
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.spectrumLabelText {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.hexInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 var(--space-2);
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-secondary);
+  border: none;
+}
+
+.hexPrefix {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+}
+
+.hexInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  text-transform: uppercase;
+}
+
+.hexInput:focus-visible {
+  outline: none;
+}
+
+.popoverDivider {
+  height: 1px;
+  background-color: var(--color-border-subtle);
+  margin: var(--space-2) 0;
+}
+
+.swatchesSectionTitle {
+  display: block;
+  font-family: var(--font-family-ui);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-2);
+}
+
+.shadesStrip {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+}
+
+.miniSwatch {
+  flex: 1;
+  height: 18px;
+  border-radius: var(--radius-xs);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.miniSwatch:hover {
+  transform: scale(1.18);
+  z-index: 2;
+}
+
+.paletteGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.paletteSwatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.paletteSwatch:hover {
+  transform: scale(1.15);
+}
+
+/* --------------------------------------------------------------------------
+   Opacity & Range Slider
+   -------------------------------------------------------------------------- */
+.opacityControl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rangeInput {
+  width: 68px;
+  accent-color: var(--color-accent-primary);
+  cursor: pointer;
+}
+
+.opacityValue {
+  min-width: 36px;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Text Spacing Popover (Apple Liquid Glass)
+   -------------------------------------------------------------------------- */
+.spacingContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.spacingPopover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  padding: var(--space-3);
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border: var(--border-width-hairline) solid var(--surface-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--surface-glass-shadow), var(--surface-glass-specular);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  z-index: var(--z-popover);
+  transform-origin: top center;
+  animation: popoverFadeIn var(--duration-fast) var(--ease-out);
+}
+
+.spacingHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.spacingHeaderTitle {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.spacingResetBtn {
+  font-family: var(--font-family-ui);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-xs);
+  transition: opacity var(--duration-fast) var(--ease-apple);
+}
+
+.spacingResetBtn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.spacingRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.spacingLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spacingLabel {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.spacingBadge {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-secondary);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+/* Sleek Apple-styled range slider */
+.appleRangeSlider {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-tertiary);
+  outline: none;
+  cursor: pointer;
+  margin: 4px 0;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.appleRangeSlider:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+.appleRangeSlider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-knob-surface);
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.25),
+    0 0 1px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.appleRangeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.08);
+}
+
+.appleRangeSlider::-webkit-slider-thumb:active {
+  transform: scale(0.96);
+}
+
+.appleRangeSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-knob-surface);
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.25),
+    0 0 1px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}

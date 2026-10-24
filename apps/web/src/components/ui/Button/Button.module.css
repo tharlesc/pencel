@@ -1,0 +1,118 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  border: none;
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    color var(--duration-fast) var(--ease-apple),
+    box-shadow var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.size-sm {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+}
+
+.size-md {
+  height: var(--control-height-md);
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+}
+
+.size-lg {
+  height: var(--control-height-lg);
+  padding: 0 var(--space-4);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-lg);
+}
+
+.iconOnly.size-sm {
+  width: var(--control-height-sm);
+  padding: 0;
+}
+
+.iconOnly.size-md {
+  width: var(--control-height-md);
+  padding: 0;
+}
+
+.iconOnly.size-lg {
+  width: var(--control-height-lg);
+  padding: 0;
+}
+
+.variant-primary {
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-on-accent);
+  box-shadow:
+    var(--shadow-xs),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: none;
+}
+
+.variant-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-primary-hover);
+}
+
+.variant-primary:active:not(:disabled) {
+  background-color: var(--color-accent-primary-active);
+}
+
+.variant-secondary {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  border: none;
+}
+
+.variant-secondary:hover:not(:disabled) {
+  background-color: var(--color-surface-tertiary);
+}
+
+.variant-ghost,
+.variant-toolbar {
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border: none;
+}
+
+.variant-ghost:hover:not(:disabled),
+.variant-toolbar:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+}
+
+.active {
+  background-color: var(--color-selection-bg);
+  color: var(--color-accent-primary);
+  border: none;
+}
+
+.label {
+  display: inline-block;
+}

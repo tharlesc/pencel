@@ -1,0 +1,36 @@
+.logo {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.sm {
+  height: 22px;
+  width: auto;
+}
+
+.md {
+  height: 28px;
+  width: auto;
+}
+
+.lg {
+  height: 36px;
+  width: auto;
+}
+
+.symbol {
+  fill: var(--color-accent-primary);
+  transition: fill var(--duration-fast) var(--ease-apple);
+}
+
+.wordmark {
+  fill: var(--color-text-primary);
+  transition: fill var(--duration-fast) var(--ease-apple);
+}
+
+.monochrome .symbol,
+.monochrome .wordmark {
+  fill: currentColor;
+}

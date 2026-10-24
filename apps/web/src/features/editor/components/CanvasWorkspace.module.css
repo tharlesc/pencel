@@ -1,0 +1,129 @@
+/* ==========================================================================
+   Apple Pro Studio Canvas Stage & Viewport (CanvasWorkspace)
+   Fidelity: macOS Sequoia / Sonoma Stage Experience
+   Principles: Maximum deference to artwork, tactile panning, tabular HUD.
+   ========================================================================== */
+
+.stageContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg-canvas-stage);
+}
+
+.viewportScroll {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+  /* High-fidelity studio stage dot grid */
+  background-image: radial-gradient(var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.viewportScrollGrab {
+  cursor: grab !important;
+}
+
+.viewportScrollPanning {
+  cursor: grabbing !important;
+}
+
+.artboardFrame {
+  position: relative;
+  border-radius: var(--radius-sm);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.16),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+  border: var(--border-width-hairline) solid var(--surface-glass-border-outer);
+  overflow: visible;
+  flex-shrink: 0;
+  will-change: transform;
+  transition: box-shadow var(--duration-fast) var(--ease-apple);
+}
+
+.canvasPositioner {
+  pointer-events: auto;
+}
+
+:global([data-theme='dark']) .artboardFrame {
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.55),
+    0 4px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   3. Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
+   -------------------------------------------------------------------------- */
+.bottomBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  height: 38px;
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+  box-shadow: var(--surface-glass-specular);
+  z-index: 10;
+  user-select: none;
+}
+
+.bottomLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statTag {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+}
+
+.statDivider {
+  color: var(--color-text-disabled);
+  font-size: 10px;
+}
+
+.bottomCenter {
+  display: flex;
+  align-items: center;
+}
+
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pageIndicator {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-2);
+  white-space: nowrap;
+}
+
+.zoomReadout {
+  min-width: 48px;
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  user-select: none;
+}

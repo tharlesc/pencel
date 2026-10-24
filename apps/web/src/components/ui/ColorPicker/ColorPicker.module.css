@@ -1,0 +1,271 @@
+.pickerContainer {
+  width: 232px;
+  padding: var(--space-2-5);
+  background-color: var(--surface-glass-bg);
+  backdrop-filter: var(--backdrop-blur-glass);
+  -webkit-backdrop-filter: var(--backdrop-blur-glass);
+  border: var(--border-width-hairline) solid var(--surface-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--surface-glass-shadow), var(--surface-glass-specular);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  user-select: none;
+  transform-origin: top left;
+  animation: popoverFadeIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 2D Saturation/Brightness Canvas Area */
+.saturationMap {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  border-radius: var(--radius-sm);
+  cursor: crosshair;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.whiteGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.blackGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.mapHandle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--color-knob-surface);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform var(--duration-instant) var(--ease-spring);
+}
+
+/* Controls Row */
+.controlsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pipetteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pipetteBtn:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-primary);
+  }
+}
+
+.pipetteBtn:active {
+  transform: scale(0.96);
+}
+
+.pipetteBtn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.sliderAndPreview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hueTrack {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    rgb(255, 0, 0) 0%,
+    rgb(255, 255, 0) 17%,
+    rgb(0, 255, 0) 33%,
+    rgb(0, 255, 255) 50%,
+    rgb(0, 0, 255) 67%,
+    rgb(255, 0, 255) 83%,
+    rgb(255, 0, 0) 100%
+  );
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.hueHandle {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-knob-surface);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.colorPreviewCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+    var(--shadow-xs);
+  flex-shrink: 0;
+}
+
+/* Values Input Row */
+.inputsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.hexFieldWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 var(--space-2);
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.hexFieldWrapper:focus-within {
+  border-color: var(--color-focus-ring);
+}
+
+.inputPrefix {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+  margin-right: 2px;
+}
+
+.hexInput {
+  width: 100%;
+  border: none !important;
+  outline: none !important;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  padding: 0;
+}
+
+.hexInput:focus-visible {
+  outline: none !important;
+}
+
+.rgbChips {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rgbChip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 26px;
+  padding: 0 5px;
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.rgbChannel {
+  font-family: var(--font-family-ui);
+  font-size: 9px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+
+.rgbValue {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* Swatches Strip */
+.swatchesStrip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.quickSwatch {
+  flex: 1;
+  height: 18px;
+  border-radius: var(--radius-xs);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .quickSwatch:hover {
+    transform: scale(1.08);
+    z-index: var(--z-raised);
+  }
+}
+
+.quickSwatch:active {
+  transform: scale(0.95);
+}
+
+.quickSwatch:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}

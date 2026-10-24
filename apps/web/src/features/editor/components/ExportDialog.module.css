@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Apple Pro Studio Export & Download Dialog (ExportDialog)
+   Fidelity: macOS Sequoia Export Flow
+   ========================================================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  user-select: none;
+}
+
+.formatSelectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.optionCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-apple),
+    border-color var(--duration-fast) var(--ease-apple),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.optionCard:hover {
+  background-color: var(--color-surface-tertiary);
+  border-color: var(--color-border-default);
+}
+
+.optionCard:active {
+  transform: scale(0.99);
+}
+
+.optionCard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.optionCardActive {
+  background-color: var(--color-selection-bg);
+  border-color: var(--color-selection-border);
+}
+
+.radioInput {
+  margin-top: 3px;
+  accent-color: var(--color-accent-primary);
+  cursor: pointer;
+}
+
+.optionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.optionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.formatName {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.tag {
+  padding: 1px var(--space-2);
+  background-color: var(--color-selection-bg);
+  color: var(--color-accent-primary);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.02em;
+}
+
+.tagNeutral {
+  padding: 1px var(--space-2);
+  background-color: var(--color-surface-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: var(--font-weight-medium);
+}
+
+.formatDesc {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-snug);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.metaRow strong {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
