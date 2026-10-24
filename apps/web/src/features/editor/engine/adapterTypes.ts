@@ -1,3 +1,4 @@
+import type { ShapeVariant } from '@pencel/editor-core';
 import type { Dimensions } from '@pencel/shared-types';
 import {
   ActiveSelection,
@@ -6,6 +7,25 @@ import {
   type FabricObject,
 } from 'fabric';
 import { createElementId } from '../../../shared/lib/idUtils.js';
+
+export interface AddTextOptions {
+  readonly text: string;
+  readonly fontSize?: number;
+  readonly fontWeight?: string | number;
+  readonly fontFamily?: string;
+  readonly fill?: string;
+  readonly textAlign?: 'left' | 'center' | 'right' | 'justify';
+  readonly charSpacing?: number;
+  readonly lineHeight?: number;
+  readonly boxMode?: 'point' | 'area';
+}
+
+export interface AddShapeOptions {
+  readonly shapeVariant: ShapeVariant;
+  readonly fill?: string;
+  readonly stroke?: string;
+  readonly strokeWidth?: number;
+}
 
 export interface CanvasAdapterConfig {
   readonly dimensions: Dimensions;
