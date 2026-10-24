@@ -1,8 +1,10 @@
-import type { BooleanPathOperation, Point2D, ShapeVariant } from '@pencel/editor-core';
+import type { BooleanPathOperation, Point2D } from '@pencel/editor-core';
 import type { Dimensions } from '@pencel/shared-types';
 import type { Canvas as FabricCanvas } from 'fabric';
 import {
   extractSelectedProperties,
+  type AddShapeOptions,
+  type AddTextOptions,
   type CanvasAdapterConfig,
   type CanvasEventCallbacks,
   type LayerItem,
@@ -58,7 +60,6 @@ export class FabricCanvasAdapter {
     callbacks?: CanvasEventCallbacks,
   ): boolean {
     if (this.isMounted) this.dispose();
-
     this.callbacks = callbacks ?? null;
     this.pageDimensions = config.dimensions;
     this.currentScale = config.displayScale;
@@ -151,27 +152,12 @@ export class FabricCanvasAdapter {
     this.callbacks?.onCanvasChange();
   }
 
-  public addText(options: {
-    text: string;
-    fontSize?: number;
-    fontWeight?: string | number;
-    fontFamily?: string;
-    fill?: string;
-    textAlign?: 'left' | 'center' | 'right' | 'justify';
-    charSpacing?: number;
-    lineHeight?: number;
-    boxMode?: 'point' | 'area';
-  }): void {
+  public addText(options: AddTextOptions): void {
     if (!this.fabricCanvas) return;
     shapeText.addTextToCanvas(this.fabricCanvas, this.pageDimensions, options, this.onSelUpdate);
   }
 
-  public addShape(options: {
-    shapeVariant: ShapeVariant;
-    fill?: string;
-    stroke?: string;
-    strokeWidth?: number;
-  }): void {
+  public addShape(options: AddShapeOptions): void {
     if (!this.fabricCanvas) return;
     shapeText.addShapeToCanvas(this.fabricCanvas, this.pageDimensions, options, this.onSelUpdate);
   }
@@ -498,13 +484,13 @@ export class FabricCanvasAdapter {
       void this.fabricCanvas.dispose();
       this.fabricCanvas = null;
     }
-    for (const objectUrl of this.managedObjectUrls) {
+    this.managedObjectUrls.forEach((u) => {
       try {
-        URL.revokeObjectURL(objectUrl);
+        URL.revokeObjectURL(u);
       } catch {
-        // Ignore in test environments
+        // Ignored in test environments
       }
-    }
+    });
     this.managedObjectUrls.clear();
     this.history.reset();
     this.isMounted = false;

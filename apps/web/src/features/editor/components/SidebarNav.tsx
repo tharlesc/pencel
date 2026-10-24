@@ -1,14 +1,22 @@
-import type { ReactElement } from 'react';
-import { Button, Icon } from '../../../components/ui/index.js';
+import { lazy, Suspense, type ReactElement } from 'react';
+import { Button, Icon, Skeleton } from '../../../components/ui/index.js';
 import { useOptionalEditorSession } from '../state/EditorProvider.js';
 import type { SidebarCategory } from '../types/editorUi.types.js';
-import { ColorsPanel } from './sidebar/ColorsPanel.js';
 import { ElementsPanel } from './sidebar/ElementsPanel.js';
 import { LayersCategoryPanel } from './sidebar/LayersCategoryPanel.js';
-import { MediaPanel } from './sidebar/MediaPanel.js';
 import { TemplatesPanel } from './sidebar/TemplatesPanel.js';
 import { TextPanel } from './sidebar/TextPanel.js';
 import styles from './SidebarNav.module.css';
+
+const LazyMediaPanel = lazy(async () => {
+  const mod = await import('./sidebar/MediaPanel.js');
+  return { default: mod.MediaPanel };
+});
+
+const LazyColorsPanel = lazy(async () => {
+  const mod = await import('./sidebar/ColorsPanel.js');
+  return { default: mod.ColorsPanel };
+});
 
 export interface SidebarNavProps {
   readonly activeCategory?: SidebarCategory;
@@ -41,6 +49,8 @@ const CATEGORY_TITLES: Readonly<Record<SidebarCategory, string>> = {
   layers: 'Camadas da Página',
 };
 
+const NOOP = (): void => {};
+
 export function SidebarNav({
   activeCategory: propActiveCategory,
   onSelectCategory: propOnSelectCategory,
@@ -51,9 +61,9 @@ export function SidebarNav({
   const session = useOptionalEditorSession();
 
   const activeCategory = propActiveCategory ?? session?.sidebarCategory ?? 'design';
-  const onSelectCategory = propOnSelectCategory ?? session?.setSidebarCategory ?? (() => {});
+  const onSelectCategory = propOnSelectCategory ?? session?.setSidebarCategory ?? NOOP;
   const isDrawerOpen = propIsDrawerOpen ?? session?.isDrawerOpen ?? true;
-  const onToggleDrawer = propOnToggleDrawer ?? session?.toggleDrawer ?? (() => {});
+  const onToggleDrawer = propOnToggleDrawer ?? session?.toggleDrawer ?? NOOP;
 
   return (
     <div className={[styles.container, className].filter(Boolean).join(' ')}>
@@ -112,8 +122,16 @@ export function SidebarNav({
             {activeCategory === 'design' ? <TemplatesPanel /> : null}
             {activeCategory === 'elements' ? <ElementsPanel /> : null}
             {activeCategory === 'text' ? <TextPanel /> : null}
-            {activeCategory === 'media' || activeCategory === 'uploads' ? <MediaPanel /> : null}
-            {activeCategory === 'background' ? <ColorsPanel /> : null}
+            {activeCategory === 'media' || activeCategory === 'uploads' ? (
+              <Suspense fallback={<Skeleton variant="rect" count={4} />}>
+                <LazyMediaPanel />
+              </Suspense>
+            ) : null}
+            {activeCategory === 'background' ? (
+              <Suspense fallback={<Skeleton variant="rect" count={3} />}>
+                <LazyColorsPanel />
+              </Suspense>
+            ) : null}
             {activeCategory === 'layers' ? <LayersCategoryPanel /> : null}
           </div>
         </aside>

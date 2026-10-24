@@ -7,7 +7,7 @@ Este documento estabelece as diretrizes arquiteturais, técnicas, de design e de
 ## 1. Stack Tecnológica Oficial
 
 - **Gerenciamento de Monorepositório:** npm Workspaces (`apps/*`, `packages/*`).
-- **Frontend (`@pencel/web`):** React 19, TypeScript 5, Vite 6, CSS Modules + CSS Custom Properties (`@pencel/design-tokens`).
+- **Frontend (`@pencel/web`):** React 19, TypeScript 5, Vite 8, CSS Modules + CSS Custom Properties (`@pencel/design-tokens`).
 - **Motor Gráfico Isolado:** Fabric.js (`fabric`) encapsulado em `apps/web/src/features/editor/engine/`, desacoplado do modelo de domínio puro em `@pencel/editor-core`.
 - **Backend (`@pencel/api`):** Node.js (>= 22.19 / 24.11+), Express 5, TypeScript.
 - **Iconografia:** `lucide-react` (Licença ISC), acessada exclusivamente pela camada de abstração `<Icon />` (`apps/web/src/components/ui/Icon/`).
