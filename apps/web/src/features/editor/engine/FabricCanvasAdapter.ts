@@ -29,6 +29,8 @@ import {
   loadSVGFromURL,
   util,
 } from 'fabric';
+import { httpClient } from '../services/httpClient.js';
+import { removeImageBackgroundViaApi } from '../services/imageProcessingService.js';
 
 export interface CanvasAdapterConfig {
   readonly dimensions: Dimensions;
@@ -767,9 +769,9 @@ export class FabricCanvasAdapter {
           if (url.startsWith('data:image/svg+xml')) {
             normalizedSvgText = decodeURIComponent(url.replace(/^data:image\/svg\+xml;[^,]*,/, ''));
           } else {
-            const resp = await fetch(url);
+            const resp = await httpClient.getText(url);
             if (resp.ok) {
-              normalizedSvgText = await resp.text();
+              normalizedSvgText = resp.data;
             }
           }
 
@@ -832,10 +834,9 @@ export class FabricCanvasAdapter {
       // Stage 2: Blob ObjectURL fetch fallback (bypasses redirect CORS header quirks)
       if (!img || !img.width || !img.height) {
         try {
-          const response = await fetch(url);
+          const response = await httpClient.getBlob(url);
           if (response.ok) {
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
+            const blobUrl = URL.createObjectURL(response.data);
             this.managedObjectUrls.add(blobUrl);
             img = await FabricImage.fromURL(blobUrl);
           }
@@ -1238,51 +1239,34 @@ export class FabricCanvasAdapter {
       // 1. Try PhotoCraft AI Segmentation via backend API if available
       if (mode === 'removeBg') {
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 4500);
+          const json = await removeImageBackgroundViaApi(originalDataUrl);
+          if (json?.success && json.imageBase64) {
+            const newImg = await FabricImage.fromURL(json.imageBase64, {
+              crossOrigin: 'anonymous',
+            });
+            newImg.set({
+              left: fabricImg.left,
+              top: fabricImg.top,
+              scaleX: fabricImg.scaleX,
+              scaleY: fabricImg.scaleY,
+              angle: fabricImg.angle,
+              name: `${(fabricImg.get('name') as string) || 'Imagem'} (Recorte IA)`,
+            });
 
-          const apiRes = await fetch('http://localhost:3000/api/v1/image/remove-background', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: originalDataUrl }),
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-
-          if (apiRes.ok) {
-            interface ApiResponse {
-              success?: boolean;
-              imageBase64?: string;
+            const currentIdx = this.fabricCanvas.getObjects().indexOf(fabricImg);
+            this.fabricCanvas.remove(fabricImg);
+            if (currentIdx >= 0) {
+              this.fabricCanvas.insertAt(currentIdx, newImg);
+            } else {
+              this.fabricCanvas.add(newImg);
             }
-            const json = (await apiRes.json()) as ApiResponse;
-            if (json.success && json.imageBase64) {
-              const newImg = await FabricImage.fromURL(json.imageBase64, {
-                crossOrigin: 'anonymous',
-              });
-              newImg.set({
-                left: fabricImg.left,
-                top: fabricImg.top,
-                scaleX: fabricImg.scaleX,
-                scaleY: fabricImg.scaleY,
-                angle: fabricImg.angle,
-                name: `${(fabricImg.get('name') as string) || 'Imagem'} (Recorte IA)`,
-              });
 
-              const currentIdx = this.fabricCanvas.getObjects().indexOf(fabricImg);
-              this.fabricCanvas.remove(fabricImg);
-              if (currentIdx >= 0) {
-                this.fabricCanvas.insertAt(currentIdx, newImg);
-              } else {
-                this.fabricCanvas.add(newImg);
-              }
+            this.fabricCanvas.setActiveObject(newImg);
+            this.fabricCanvas.requestRenderAll();
+            this.saveHistoryState();
+            this.handleSelectionUpdate();
 
-              this.fabricCanvas.setActiveObject(newImg);
-              this.fabricCanvas.requestRenderAll();
-              this.saveHistoryState();
-              this.handleSelectionUpdate();
-
-              return { success: true, message: 'Fundo removido com sucesso via IA PhotoCraft!' };
-            }
+            return { success: true, message: 'Fundo removido com sucesso via IA PhotoCraft!' };
           }
         } catch {
           // Backend API offline or timed out; proceed seamlessly to client-side flood-fill

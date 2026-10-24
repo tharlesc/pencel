@@ -170,7 +170,8 @@ describe('Public Media Service (public-apis integration)', () => {
     await trackUnsplashDownload('https://api.unsplash.com/photos/xyz/download');
     expect(fetchSpy).toHaveBeenCalled();
     const calledUrl = fetchSpy.mock.calls[0]?.[0] as string;
-    expect(calledUrl).toContain('client_id=');
+    expect(calledUrl).toContain('/api/v1/media/download');
+    expect(calledUrl).not.toContain('client_id=');
 
     fetchSpy.mockRestore();
   });

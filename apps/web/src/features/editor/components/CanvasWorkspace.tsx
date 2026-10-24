@@ -58,6 +58,8 @@ export interface CanvasWorkspaceProps {
   readonly onSetClipToArtboard?: (enabled: boolean) => void;
 }
 
+const NOOP = (): void => {};
+
 export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
   const session = useOptionalEditorSession();
   const selection = useOptionalEditorSelection();
@@ -80,11 +82,10 @@ export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
   const selectedObject =
     props.selectedObject !== undefined ? props.selectedObject : (selection?.selectedObject ?? null);
   const elementCount = props.elementCount ?? layersCtx?.layers.length ?? 0;
-  const onZoomIn = props.onZoomIn ?? session?.zoomIn ?? (() => {});
-  const onZoomOut = props.onZoomOut ?? session?.zoomOut ?? (() => {});
-  const onResetZoom = props.onResetZoom ?? session?.resetZoomToFit ?? (() => {});
-  const onPageBackgroundChange =
-    props.onPageBackgroundChange ?? session?.setPageBackground ?? (() => {});
+  const onZoomIn = props.onZoomIn ?? session?.zoomIn ?? NOOP;
+  const onZoomOut = props.onZoomOut ?? session?.zoomOut ?? NOOP;
+  const onResetZoom = props.onResetZoom ?? session?.resetZoomToFit ?? NOOP;
+  const onPageBackgroundChange = props.onPageBackgroundChange ?? session?.setPageBackground ?? NOOP;
   const onDeselectAll = props.onDeselectAll ?? engine?.deselectAll;
   const onSetClipToArtboard = props.onSetClipToArtboard ?? engine?.setClipToArtboard;
 

@@ -3,9 +3,17 @@ export interface ApiEnvConfig {
   readonly host: string;
   readonly nodeEnv: 'development' | 'test' | 'production';
   readonly corsOrigin: string;
+  readonly photocraftCliPath?: string;
+  readonly photocraftTimeoutMs: number;
+  readonly maxImageBytes: number;
+  readonly unsplashAccessKey?: string;
+  readonly pexelsApiKey?: string;
+  readonly giphyApiKey?: string;
 }
 
 const VALID_ENVIRONMENTS = new Set(['development', 'test', 'production'] as const);
+const DEFAULT_PHOTOCRAFT_TIMEOUT_MS = 5000;
+const DEFAULT_MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 /**
  * Validates and normalizes environment variables required to boot `@pencel/api`.
@@ -24,10 +32,39 @@ export function loadApiEnvConfig(rawEnv: NodeJS.ProcessEnv = process.env): ApiEn
     ? (rawNodeEnv as 'development' | 'test' | 'production')
     : 'development';
 
+  const parsedTimeout = Number.parseInt(
+    rawEnv.PHOTOCRAFT_TIMEOUT_MS ?? String(DEFAULT_PHOTOCRAFT_TIMEOUT_MS),
+    10,
+  );
+  const photocraftTimeoutMs =
+    Number.isInteger(parsedTimeout) && parsedTimeout > 0
+      ? parsedTimeout
+      : DEFAULT_PHOTOCRAFT_TIMEOUT_MS;
+
+  const parsedMaxBytes = Number.parseInt(
+    rawEnv.MAX_IMAGE_BYTES ?? String(DEFAULT_MAX_IMAGE_BYTES),
+    10,
+  );
+  const maxImageBytes =
+    Number.isInteger(parsedMaxBytes) && parsedMaxBytes > 0
+      ? parsedMaxBytes
+      : DEFAULT_MAX_IMAGE_BYTES;
+
+  const photocraftCliPath = rawEnv.PHOTOCRAFT_CLI_PATH?.trim() || undefined;
+  const unsplashAccessKey = rawEnv.UNSPLASH_ACCESS_KEY?.trim() || undefined;
+  const pexelsApiKey = rawEnv.PEXELS_API_KEY?.trim() || undefined;
+  const giphyApiKey = rawEnv.GIPHY_API_KEY?.trim() || undefined;
+
   return {
     port: parsedPort,
     host: rawEnv.HOST?.trim() || '127.0.0.1',
     nodeEnv,
     corsOrigin: rawEnv.CORS_ORIGIN?.trim() || 'http://localhost:5173',
+    ...(photocraftCliPath ? { photocraftCliPath } : {}),
+    photocraftTimeoutMs,
+    maxImageBytes,
+    ...(unsplashAccessKey ? { unsplashAccessKey } : {}),
+    ...(pexelsApiKey ? { pexelsApiKey } : {}),
+    ...(giphyApiKey ? { giphyApiKey } : {}),
   };
 }

@@ -1,7 +1,9 @@
 /**
  * @pencel/web - Elements Service
- * Integrates vector icons (Iconify API & IconHorse) and emojis (Emojihub & Unicode categories).
+ * Integrates vector icons (Iconify API) and emojis (Unicode categories).
  */
+
+import { httpClient } from './httpClient.js';
 
 export interface VectorIconItem {
   readonly id: string;
@@ -190,42 +192,29 @@ export async function searchIconifyIcons(
     clean || CURATED_ICON_TOPICS[Math.floor(offset / limit) % CURATED_ICON_TOPICS.length] || 'star';
   const effectiveStart = clean ? offset : Math.max(0, offset - POPULAR_CURATED_ICONS.length);
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const result = await httpClient.get<{ readonly icons?: readonly string[] }>(
+    `https://api.iconify.design/search?query=${encodeURIComponent(effectiveQuery)}&limit=${limit}&start=${effectiveStart}`,
+    { timeoutMs: 5000 },
+  );
 
-    const res = await fetch(
-      `https://api.iconify.design/search?query=${encodeURIComponent(effectiveQuery)}&limit=${limit}&start=${effectiveStart}`,
-      {
-        signal: controller.signal,
-      },
-    );
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      interface IconifySearchResponse {
-        icons?: string[];
-      }
-      const data = (await res.json()) as IconifySearchResponse;
-      if (Array.isArray(data.icons) && data.icons.length > 0) {
-        return data.icons.map((fullId) => {
-          const parts = fullId.split(':');
-          const prefix = parts[0] || 'lucide';
-          const name = parts[1] || parts[0] || 'icon';
-          return {
-            id: fullId,
-            name,
-            prefix,
-            svgUrl: `https://api.iconify.design/${prefix}/${name}.svg?width=512&height=512&color=%231D1D1F`,
-          };
-        });
-      }
-      if (Array.isArray(data.icons) && data.icons.length === 0) {
-        return [];
-      }
+  if (result.ok) {
+    const icons = result.data.icons;
+    if (Array.isArray(icons) && icons.length > 0) {
+      return icons.map((fullId) => {
+        const parts = fullId.split(':');
+        const prefix = parts[0] || 'lucide';
+        const name = parts[1] || parts[0] || 'icon';
+        return {
+          id: fullId,
+          name,
+          prefix,
+          svgUrl: `https://api.iconify.design/${prefix}/${name}.svg?width=512&height=512&color=%231D1D1F`,
+        };
+      });
     }
-  } catch {
-    // Fall back to filtered curated icons on first page
+    if (Array.isArray(icons) && icons.length === 0) {
+      return [];
+    }
   }
 
   if (offset > 0) {
