@@ -22,12 +22,12 @@
 
 .symbol {
   fill: var(--color-accent-primary);
-  transition: fill var(--duration-fast) var(--ease-apple);
+  transition: fill var(--duration-fast) var(--ease-out);
 }
 
 .wordmark {
   fill: var(--color-text-primary);
-  transition: fill var(--duration-fast) var(--ease-apple);
+  transition: fill var(--duration-fast) var(--ease-out);
 }
 
 .monochrome .symbol,

@@ -1,5 +1,5 @@
 /**
- * @pencel/design-tokens - Structural, Spatial, Typographic & Motion Tokens
+ * @pencel/design-tokens - Structural, Spatial, Typographic, Motion & Material Utility Tokens
  * Grounded in Apple Human Interface Guidelines (macOS desktop density, SF typography principles,
  * optical alignment, semantic layering, and responsive ease-out motion).
  */
@@ -17,12 +17,14 @@
     monospace;
 
   /* Typographic Scale (macOS desktop calibrated sizes - fixed rem scale for Operate UI) */
+  --font-size-3xs: 0.625rem; /* 10px - micro labels & shortcuts */
   --font-size-2xs: 0.6875rem; /* 11px - compact captions, shortcuts & badges */
   --font-size-xs: 0.75rem; /* 12px - inspector labels & secondary controls */
   --font-size-sm: 0.8125rem; /* 13px - standard macOS toolbar/control body */
   --font-size-md: 0.875rem; /* 14px - primary UI text */
   --font-size-lg: 1rem; /* 16px - section headers & dialog titles */
   --font-size-xl: 1.25rem; /* 20px - prominent headings */
+  --font-size-2xl: 1.5rem; /* 24px - hero / template preview headings */
 
   /* Font Weights (Apple HIG: avoid weights below 400 in UI controls) */
   --font-weight-regular: 400;
@@ -31,47 +33,120 @@
   --font-weight-bold: 700;
 
   /* Line Heights & Letter Spacing */
+  --line-height-none: 1;
   --line-height-tight: 1.2;
   --line-height-snug: 1.35;
   --line-height-normal: 1.5;
   --letter-spacing-tight: -0.012em;
   --letter-spacing-normal: 0em;
   --letter-spacing-wide: 0.03em;
+  --letter-spacing-wider: 0.06em;
 
-  /* Spacing Scale (4px base grid with optical half-steps) */
-  --space-0: 0px;
+  /* Opacity Scale */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-15: 0.15;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-45: 0.45;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-72: 0.72;
+  --opacity-75: 0.75;
+  --opacity-80: 0.8;
+  --opacity-85: 0.85;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
+  --opacity-100: 1;
+  --opacity-disabled: 0.42;
+  --opacity-muted: 0.65;
+
+  /* Icon Size Scale */
+  --icon-size-xs: 0.875rem; /* 14px */
+  --icon-size-sm: 1rem; /* 16px */
+  --icon-size-md: 1.125rem; /* 18px */
+  --icon-size-lg: 1.25rem; /* 20px */
+  --icon-size-xl: 1.5rem; /* 24px */
+
+  /* Spacing Scale (4px base grid with optical half-steps in rem) */
+  --space-0: 0rem;
+  --space-px: 0.0625rem; /* 1px */
   --space-0-5: 0.125rem; /* 2px */
+  --space-0-75: 0.1875rem; /* 3px */
   --space-1: 0.25rem; /* 4px */
+  --space-1-25: 0.3125rem; /* 5px */
   --space-1-5: 0.375rem; /* 6px */
   --space-2: 0.5rem; /* 8px */
+  --space-2-25: 0.5625rem; /* 9px */
   --space-2-5: 0.625rem; /* 10px */
   --space-3: 0.75rem; /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
   --space-4: 1rem; /* 16px */
+  --space-4-5: 1.125rem; /* 18px */
   --space-5: 1.25rem; /* 20px */
+  --space-5-5: 1.375rem; /* 22px */
   --space-6: 1.5rem; /* 24px */
+  --space-7: 1.75rem; /* 28px */
   --space-8: 2rem; /* 32px */
+  --space-9: 2.25rem; /* 36px */
   --space-10: 2.5rem; /* 40px */
+  --space-11: 2.75rem; /* 44px */
+  --space-12: 3rem; /* 48px */
+  --space-14: 3.5rem; /* 56px */
+  --space-16: 4rem; /* 64px */
 
   /* Control Heights & Layout Dimensions */
-  --control-height-xs: 24px;
-  --control-height-sm: 28px;
-  --control-height-md: 32px;
-  --control-height-lg: 36px;
-  --topbar-height: 50px;
-  --sidebar-width: 268px;
-  --inspector-width: 288px;
+  --control-height-2xs: 1.25rem; /* 20px */
+  --control-height-xs: 1.5rem; /* 24px */
+  --control-height-sm: 1.75rem; /* 28px */
+  --control-height-md: 2rem; /* 32px */
+  --control-height-lg: 2.25rem; /* 36px */
+  --control-height-xl: 2.75rem; /* 44px */
+  --topbar-height: 3.125rem; /* 50px */
+  --sidebar-rail-width: 4.25rem; /* 68px */
+  --sidebar-width: 16.75rem; /* 268px */
+  --sidebar-drawer-width: 18.125rem; /* 290px */
+  --inspector-width: 18rem; /* 288px */
+  --size-rail-btn: 3.25rem; /* 52px */
+  --size-dot-sm: 0.375rem; /* 6px */
+  --size-dot-md: 0.5rem; /* 8px */
+  --size-thumb-sm: 0.75rem; /* 12px */
+  --size-thumb-md: 0.875rem; /* 14px */
+  --size-thumb-lg: 1rem; /* 16px */
+  --size-swatch-sm: 1.125rem; /* 18px */
+  --size-swatch-md: 1.375rem; /* 22px */
+  --size-swatch-lg: 1.625rem; /* 26px */
+  --size-popover-sm: 14.5rem; /* 232px */
+  --size-popover-md: 16.25rem; /* 260px */
+  --size-popover-lg: 20rem; /* 320px */
+  --size-dialog-sm: 22.5rem; /* 360px */
+  --size-dialog-md: 30rem; /* 480px */
+  --size-dialog-lg: 33.75rem; /* 540px */
+  --size-color-area-h: 8.125rem; /* 130px */
+  --size-preview-h: 7.5rem; /* 120px */
+  --size-list-max-h: 15rem; /* 240px */
+  --size-input-num-sm: 3.25rem; /* 52px */
+  --size-input-num-md: 4rem; /* 64px */
+  --size-input-hex: 4.5rem; /* 72px */
 
   /* Border Radii & Stroke Widths (Concentric & Capsule System) */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 14px;
-  --radius-liquid: 16px;
-  --radius-pill: 9999px;
-  --radius-full: 9999px;
-  --border-width-hairline: 1px;
-  --border-width-focus: 2px;
+  --radius-2xs: 0.125rem; /* 2px */
+  --radius-xs: 0.25rem; /* 4px */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 0.875rem; /* 14px */
+  --radius-liquid: 1rem; /* 16px */
+  --radius-pill: 624.9375rem; /* 9999px */
+  --border-width-none: 0rem;
+  --border-width-hairline: 0.0625rem; /* 1px */
+  --border-width-medium: 0.09375rem; /* 1.5px */
+  --border-width-focus: 0.125rem; /* 2px */
+  --focus-ring-offset: 0.125rem; /* 2px */
+  --focus-ring-spread: 0.1875rem; /* 3px */
 
   /* Documented Semantic Z-Index Scale (Operate Mode Restraint) */
   --z-base: 1;
@@ -86,9 +161,39 @@
   --z-modal: 300;
   --z-tooltip: 400;
 
-  /* Backdrop Blur & Vibrancy (Restrained Floating Glass Material) */
-  --backdrop-blur-glass: saturate(180%) blur(16px);
-  --backdrop-blur-liquid: saturate(195%) blur(24px);
+  /* Color Picker Spectrum Gradients */
+  --gradient-hue-horizontal: linear-gradient(
+    to right,
+    #ff0000 0%,
+    #ffff00 17%,
+    #00ff00 33%,
+    #00ffff 50%,
+    #0000ff 67%,
+    #ff00ff 83%,
+    #ff0000 100%
+  );
+  --gradient-hue-vertical: linear-gradient(
+    to bottom,
+    #ff0000 0%,
+    #ff8000 8%,
+    #ffff00 17%,
+    #80ff00 25%,
+    #00ff00 33%,
+    #00ff80 42%,
+    #00ffff 50%,
+    #0080ff 58%,
+    #0000ff 67%,
+    #8000ff 75%,
+    #ff00ff 83%,
+    #ff0080 92%,
+    #ff0000 100%
+  );
+  --gradient-sv-white: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0));
+  --gradient-sv-black: linear-gradient(to top, #000000, rgba(0, 0, 0, 0));
+
+  /* Backdrop Blur & Vibrancy (Legacy aliases resolved to Material Pencel tiers) */
+  --backdrop-blur-glass: var(--material-chrome-blur);
+  --backdrop-blur-liquid: var(--material-float-blur);
 
   /* Motion & Transitions (Emil Kowalski & Apple HIG: sub-220ms responsive ease-out) */
   --duration-instant: 90ms;
@@ -98,8 +203,66 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-apple: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Material Pencel - Three-Layer Glass Utility System */
+.glass-chrome {
+  background-color: var(--material-chrome-bg);
+  backdrop-filter: var(--material-chrome-blur);
+  -webkit-backdrop-filter: var(--material-chrome-blur);
+  border-color: var(--material-chrome-border);
+  box-shadow: var(--material-chrome-specular), var(--material-chrome-shadow);
+}
+
+.glass-float {
+  background-color: var(--material-float-bg);
+  backdrop-filter: var(--material-float-blur);
+  -webkit-backdrop-filter: var(--material-float-blur);
+  border: var(--border-width-hairline) solid var(--material-float-border);
+  box-shadow: var(--material-float-specular), var(--material-float-shadow);
+}
+
+.glass-sheet {
+  background-color: var(--material-sheet-bg);
+  backdrop-filter: var(--material-sheet-blur);
+  -webkit-backdrop-filter: var(--material-sheet-blur);
+  border: var(--border-width-hairline) solid var(--material-sheet-border);
+  box-shadow: var(--material-sheet-specular), var(--material-sheet-shadow);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-chrome {
+    background-color: var(--material-chrome-fallback-bg);
+  }
+
+  .glass-float {
+    background-color: var(--material-float-fallback-bg);
+  }
+
+  .glass-sheet {
+    background-color: var(--material-sheet-fallback-bg);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-chrome {
+    background-color: var(--material-chrome-fallback-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-float {
+    background-color: var(--material-float-fallback-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .glass-sheet {
+    background-color: var(--material-sheet-fallback-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

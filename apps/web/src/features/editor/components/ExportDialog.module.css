@@ -41,8 +41,8 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition:
-    background-color var(--duration-fast) var(--ease-apple),
-    border-color var(--duration-fast) var(--ease-apple),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-spring);
 }
 

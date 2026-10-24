@@ -12,9 +12,9 @@
   user-select: none;
   white-space: nowrap;
   transition:
-    background-color var(--duration-fast) var(--ease-apple),
-    color var(--duration-fast) var(--ease-apple),
-    box-shadow var(--duration-fast) var(--ease-apple),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-spring);
 }
 

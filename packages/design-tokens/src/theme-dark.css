@@ -1,6 +1,6 @@
 /**
  * @pencel/design-tokens - Dark Theme Semantic Tokens
- * Uses dedicated elevated graphite luminance tiers rather than naive color inversion.
+ * Uses dedicated elevated graphite luminance tiers with 1:1 token parity to Light theme.
  */
 
 [data-theme='dark'] {
@@ -15,43 +15,73 @@
   --color-surface-elevated: #26262b;
   --color-surface-hover: rgba(255, 255, 255, 0.07);
   --color-surface-active: rgba(255, 255, 255, 0.12);
+  --color-surface-inverse: #fbfbfd;
+  --color-surface-overlay-subtle: rgba(255, 255, 255, 0.05);
+  --color-surface-overlay-strong: rgba(0, 0, 0, 0.72);
 
-  /* Floating Glass & Vibrancy (Dark Appearance - Reserved for HUDs, Popovers & Modals) */
-  --surface-glass-bg: rgba(24, 24, 27, 0.84);
-  --surface-glass-clear: rgba(24, 24, 27, 0.52);
-  --surface-glass-border: rgba(255, 255, 255, 0.1);
-  --surface-glass-border-outer: rgba(0, 0, 0, 0.45);
-  --surface-glass-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-  --surface-glass-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.35);
+  /* Material Pencel Layer 1 - Chrome (TopToolbar & Rail: Blur 24, Sat 180%, ~72% alpha) */
+  --material-chrome-bg: rgba(24, 24, 27, 0.72);
+  --material-chrome-fallback-bg: #18181b;
+  --material-chrome-blur: saturate(180%) blur(24px);
+  --material-chrome-border: rgba(255, 255, 255, 0.09);
+  --material-chrome-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  --material-chrome-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+
+  /* Material Pencel Layer 2 - Float (ContextualToolbar, Popovers, Menus, Tooltips: Blur 32) */
+  --material-float-bg: rgba(28, 28, 32, 0.84);
+  --material-float-fallback-bg: #222226;
+  --material-float-blur: saturate(180%) blur(32px);
+  --material-float-border: rgba(255, 255, 255, 0.12);
+  --material-float-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+  --material-float-shadow: 0 14px 34px rgba(0, 0, 0, 0.56), 0 3px 8px rgba(0, 0, 0, 0.36);
+
+  /* Material Pencel Layer 3 - Sheet (Dialogs & Export: Blur 40 over scrim) */
+  --material-sheet-bg: rgba(30, 30, 35, 0.88);
+  --material-sheet-fallback-bg: #26262b;
+  --material-sheet-blur: saturate(190%) blur(40px);
+  --material-sheet-border: rgba(255, 255, 255, 0.14);
+  --material-sheet-specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+  --material-sheet-shadow: 0 24px 56px rgba(0, 0, 0, 0.65), 0 6px 16px rgba(0, 0, 0, 0.42);
+  --material-sheet-scrim: rgba(0, 0, 0, 0.62);
+
+  /* Floating Glass Legacy Aliases (Mapped to Material Float) */
+  --surface-glass-bg: var(--material-float-bg);
+  --surface-glass-clear: var(--material-chrome-bg);
+  --surface-glass-border: var(--material-float-border);
+  --surface-glass-border-outer: var(--material-sheet-border);
+  --surface-glass-specular: var(--material-float-specular);
+  --surface-glass-shadow: var(--material-float-shadow);
 
   /* Borders & Separators */
   --color-border-subtle: rgba(255, 255, 255, 0.09);
   --color-border-default: #3f3f46;
   --color-border-strong: #52525b;
 
-  /* Typography / Foreground Colors */
+  /* Typography / Foreground Colors (All verified >= 4.5:1 WCAG AA on primary/secondary/tertiary) */
   --color-text-primary: #f4f4f5;
   --color-text-secondary: #a1a1aa;
-  --color-text-tertiary: #82828c;
-  --color-text-disabled: #52525b;
-  --color-text-on-accent: rgb(255, 255, 255);
+  --color-text-tertiary: #9696a0;
+  --color-text-disabled: #6e6e78;
+  --color-text-on-accent: #ffffff;
+  --color-text-inverse: #18181b;
 
-  /* Accent, Selection & Focus */
-  --color-accent-primary: #0a84ff;
-  --color-accent-primary-hover: #3399ff;
-  --color-accent-primary-active: #0070e0;
-  --color-selection-bg: rgba(10, 132, 255, 0.18);
-  --color-selection-border: rgba(10, 132, 255, 0.55);
+  /* Accent, Selection & Focus (Locked Primary Studio Blue #0066cc) */
+  --color-accent-primary: #0066cc;
+  --color-accent-primary-hover: #0077ed;
+  --color-accent-primary-active: #0055b3;
+  --color-selection-bg: rgba(0, 102, 204, 0.22);
+  --color-selection-border: rgba(0, 102, 204, 0.58);
   --color-focus-ring: #3898ff;
-  --color-focus-ring-glow: rgba(10, 132, 255, 0.4);
+  --color-focus-ring-glow: rgba(0, 102, 204, 0.4);
 
   /* Semantic Studio Swatch Tokens (For Shape & Badge Previews) */
-  --color-swatch-blue: #0a84ff;
+  --color-swatch-blue: #0066cc;
   --color-swatch-amber: #f59e0b;
   --color-swatch-emerald: #22c55e;
   --color-swatch-violet: #a855f7;
   --color-swatch-rose: #ef4444;
-  --color-knob-surface: rgb(244, 244, 245);
+  --color-knob-surface: #f4f4f5;
+  --color-checkerboard-cell: #2c2c2e;
 
   /* Semantic Status Colors */
   --color-status-success: #22c55e;
@@ -67,4 +97,5 @@
   --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.42), 0 1px 2px rgba(0, 0, 0, 0.28);
   --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.32);
   --shadow-canvas: 0 12px 32px rgba(0, 0, 0, 0.58), 0 2px 8px rgba(0, 0, 0, 0.38);
+  --shadow-knob: 0 1px 4px rgba(0, 0, 0, 0.65);
 }
