@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -7,6 +9,15 @@ import {
   searchEmojis,
   searchIconifyIcons,
 } from '../src/features/editor/services/elementsService.js';
+import {
+  calculateContrast,
+  clamp,
+  createElementId,
+  hexToRgb,
+  normalizeSvgMarkup,
+  rgbToHex,
+  roundTo,
+} from '../src/shared/lib/index.js';
 
 describe('Graphics Engine Subsystems & Infinite Scroll Gallery', () => {
   it('supports offset pagination for Iconify icons, stickers, and curated emojis', async () => {
@@ -92,5 +103,24 @@ describe('Graphics Engine Subsystems & Infinite Scroll Gallery', () => {
     expect(Number.isFinite(pt.y)).toBe(true);
 
     adapter.dispose();
+  });
+
+  it('keeps every file in features/editor/engine <= 500 lines and exposes shared/lib utilities (Agente 06)', () => {
+    const engineDir = join(process.cwd(), 'src', 'features', 'editor', 'engine');
+    const files = readdirSync(engineDir).filter((f) => f.endsWith('.ts'));
+    expect(files.length).toBeGreaterThanOrEqual(9);
+
+    for (const file of files) {
+      const content = readFileSync(join(engineDir, file), 'utf-8');
+      const lineCount = content.split(/\r?\n/).length;
+      expect(lineCount, `File ${file} has ${lineCount} lines (> 500)`).toBeLessThanOrEqual(500);
+    }
+
+    expect(clamp(150, 0, 100)).toBe(100);
+    expect(roundTo(3.14159, 2)).toBe(3.14);
+    expect(rgbToHex(...hexToRgb('#0066CC'))).toBe('#0066CC');
+    expect(calculateContrast([24, 24, 27], [251, 251, 253])).toBeGreaterThan(15);
+    expect(createElementId('shape')).toMatch(/^shape-\d+-\d+$/);
+    expect(normalizeSvgMarkup('<svg><path fill="currentColor"/></svg>')).toContain('width="512"');
   });
 });
