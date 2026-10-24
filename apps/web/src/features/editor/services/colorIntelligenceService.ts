@@ -1,8 +1,10 @@
 /**
  * @pencel/web - Color Intelligence Service
- * Provides AI-assisted palette generation (Colormind API integration + local algorithmic harmonies)
+ * Provides AI-assisted palette generation (backend proxy + local algorithmic harmonies)
  * and Pickshade-inspired tints, shades, and WCAG accessibility contrast ratios.
  */
+
+import { httpClient } from './httpClient.js';
 
 export interface ColorShadesResult {
   readonly baseHex: string;
@@ -221,8 +223,8 @@ export function getColorShadesAndTints(hexColor: string): ColorShadesResult {
 }
 
 /**
- * Requests an intelligent 5-color palette from Colormind API (http://colormind.io/api/)
- * with automatic fallback to local harmonic synthesis if offline or mixed-content blocked.
+ * Requests an intelligent 5-color palette from the `/api/v1/media/palettes` backend proxy
+ * with automatic fallback to local harmonic synthesis when offline.
  */
 export async function generateColormindPalette(
   modelOrSeed: 'default' | 'ui' | string = 'default',
@@ -235,33 +237,31 @@ export async function generateColormindPalette(
   const seedRgb = seedHex && seedHex.startsWith('#') ? hexToRgb(seedHex) : null;
   const inputParam = seedRgb ? [seedRgb, 'N', 'N', 'N', 'N'] : undefined;
 
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const result = await httpClient.post<{
+    readonly colors?: readonly string[];
+    readonly result?: ReadonlyArray<readonly number[]>;
+  }>(
+    '/api/v1/media/palettes',
+    {
+      model,
+      seedHex,
+      input: inputParam,
+    },
+    { timeoutMs: 4000 },
+  );
 
-    const res = await fetch('http://colormind.io/api/', {
-      method: 'POST',
-      body: JSON.stringify({
-        model,
-        input: inputParam,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = (await res.json()) as { result?: number[][] };
-      if (Array.isArray(data.result) && data.result.length >= 5) {
-        return data.result.slice(0, 5).map((rgb) => {
-          const r = rgb[0] ?? 0;
-          const g = rgb[1] ?? 0;
-          const b = rgb[2] ?? 0;
-          return rgbToHex(r, g, b);
-        });
-      }
+  if (result.ok) {
+    if (Array.isArray(result.data.colors) && result.data.colors.length >= 5) {
+      return result.data.colors.slice(0, 5).map((c) => c.toUpperCase());
     }
-  } catch {
-    // Graceful fallback to algorithmic color harmony
+    if (Array.isArray(result.data.result) && result.data.result.length >= 5) {
+      return result.data.result.slice(0, 5).map((rgb) => {
+        const r = rgb[0] ?? 0;
+        const g = rgb[1] ?? 0;
+        const b = rgb[2] ?? 0;
+        return rgbToHex(r, g, b);
+      });
+    }
   }
 
   // Fallback: Generate harmonic palette algorithmically
