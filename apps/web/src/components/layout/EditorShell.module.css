@@ -40,9 +40,12 @@
 }
 
 .inspectorArea {
+  composes: glass-chrome from global;
   width: var(--inspector-width);
   flex-shrink: 0;
-  background-color: var(--color-surface-primary);
-  border-left: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: var(--border-width-hairline) solid var(--material-chrome-border);
   overflow-y: auto;
 }

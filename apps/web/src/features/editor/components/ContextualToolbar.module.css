@@ -1,7 +1,6 @@
 /* ==========================================================================
    Apple Pro Studio Contextual Toolbar (Floating HUD & Canvas Bar)
-   Fidelity: macOS Sequoia Liquid Glass System
-   Principles: Dynamic tooling, specular borders, tabular steppers.
+   Material Pencel Float System
    ========================================================================== */
 
 .bar {
@@ -33,7 +32,7 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 /* --------------------------------------------------------------------------
@@ -64,7 +63,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Apple Liquid Glass Font Selector Popover
+   Material Pencel Float Font Selector Popover
    -------------------------------------------------------------------------- */
 .fontPickerContainer {
   position: relative;
@@ -78,8 +77,8 @@
   justify-content: space-between;
   gap: var(--space-2);
   height: var(--control-height-sm);
-  min-width: 130px;
-  max-width: 180px;
+  min-width: var(--size-font-trigger-min-w);
+  max-width: var(--size-font-trigger-max-w);
   padding: 0 var(--space-2);
   border: none;
   border-radius: var(--radius-sm);
@@ -134,22 +133,22 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  max-height: 290px;
+  max-height: var(--size-font-list-max-h);
 }
 
 .fontMenuCategory {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .fontCategoryHeader {
-  font-size: 10px;
+  font-size: var(--font-size-3xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   color: var(--color-text-tertiary);
-  padding: 4px var(--space-2);
-  letter-spacing: 0.05em;
+  padding: var(--space-1) var(--space-2);
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .fontMenuItem {
@@ -157,7 +156,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 6px var(--space-2);
+  padding: var(--space-1-5) var(--space-2);
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -170,13 +169,18 @@
   background-color: var(--color-surface-hover);
 }
 
+.fontMenuItem:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
 .fontMenuItemActive {
   background-color: var(--color-selection-bg);
   color: var(--color-accent-primary);
 }
 
 .fontSampleText {
-  font-size: 13.5px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -197,7 +201,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
+  width: var(--space-5-5);
   height: 100%;
   border: none;
   background: transparent;
@@ -209,12 +213,12 @@
     transform var(--duration-instant) var(--ease-spring);
 }
 
-.stepperBtn:hover {
+.stepperBtn:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
 
-.stepperBtn:active {
+.stepperBtn:active:not(:disabled) {
   transform: scale(0.92);
 }
 
@@ -223,8 +227,13 @@
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
+.stepperBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
 .sizeDisplay {
-  min-width: 32px;
+  min-width: var(--space-8);
   text-align: center;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
@@ -243,8 +252,8 @@
 }
 
 .colorSwatchButton {
-  width: 24px;
-  height: 24px;
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
   border-radius: var(--radius-sm);
   border: var(--border-width-hairline) solid var(--color-border-default);
   box-shadow: var(--shadow-xs);
@@ -291,7 +300,7 @@
 @keyframes popoverFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.96);
+    transform: translateY(calc(-1 * var(--space-1))) scale(0.96);
   }
   to {
     opacity: 1;
@@ -310,7 +319,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 4px var(--space-2);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface-secondary);
   border: none;
@@ -333,26 +342,11 @@
 }
 
 .spectrumGradientThumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 180deg at 50% 50%,
-    #ff0000 0deg,
-    #ff8000 30deg,
-    #ffff00 60deg,
-    #80ff00 90deg,
-    #00ff00 120deg,
-    #00ff80 150deg,
-    #00ffff 180deg,
-    #0080ff 210deg,
-    #0000ff 240deg,
-    #8000ff 270deg,
-    #ff00ff 300deg,
-    #ff0080 330deg,
-    #ff0000 360deg
-  );
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  width: var(--icon-size-lg);
+  height: var(--icon-size-lg);
+  border-radius: var(--radius-pill);
+  background: var(--gradient-spectrum-conic);
+  box-shadow: var(--shadow-xs);
   flex-shrink: 0;
 }
 
@@ -367,9 +361,9 @@
 .hexInputWrapper {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 0 var(--space-2);
-  height: 26px;
+  height: var(--size-swatch-lg);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface-secondary);
   border: none;
@@ -398,7 +392,7 @@
 }
 
 .popoverDivider {
-  height: 1px;
+  height: var(--border-width-hairline);
   background-color: var(--color-border-subtle);
   margin: var(--space-2) 0;
 }
@@ -406,39 +400,44 @@
 .swatchesSectionTitle {
   display: block;
   font-family: var(--font-family-ui);
-  font-size: 10px;
+  font-size: var(--font-size-3xs);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--space-2);
 }
 
 .shadesStrip {
   display: flex;
-  gap: 3px;
+  gap: var(--space-0-75);
   width: 100%;
 }
 
 .miniSwatch {
   flex: 1;
-  height: 18px;
+  height: var(--size-swatch-sm);
   border-radius: var(--radius-xs);
   border: none;
   cursor: pointer;
   transition: transform var(--duration-fast) var(--ease-spring);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-inset-subtle);
 }
 
 .miniSwatch:hover {
   transform: scale(1.18);
-  z-index: 2;
+  z-index: var(--z-raised);
+}
+
+.miniSwatch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
 .paletteGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: var(--space-1-5);
 }
 
 .paletteSwatch {
@@ -447,12 +446,17 @@
   border-radius: var(--radius-sm);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-inset-subtle);
   transition: transform var(--duration-fast) var(--ease-spring);
 }
 
 .paletteSwatch:hover {
   transform: scale(1.15);
+}
+
+.paletteSwatch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
 /* --------------------------------------------------------------------------
@@ -465,13 +469,13 @@
 }
 
 .rangeInput {
-  width: 68px;
+  width: var(--size-range-w);
   accent-color: var(--color-accent-primary);
   cursor: pointer;
 }
 
 .opacityValue {
-  min-width: 36px;
+  min-width: var(--space-9);
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
   font-variant-numeric: tabular-nums;
@@ -479,7 +483,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Text Spacing Popover (Apple Liquid Glass)
+   Text Spacing Popover (Material Pencel Float)
    -------------------------------------------------------------------------- */
 .spacingContainer {
   position: relative;
@@ -508,35 +512,40 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: var(--space-0-5);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .spacingHeaderTitle {
   font-family: var(--font-family-ui);
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-wider);
   color: var(--color-text-tertiary);
 }
 
 .spacingResetBtn {
   font-family: var(--font-family-ui);
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-accent-primary);
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 2px 4px;
+  padding: var(--space-0-5) var(--space-1);
   border-radius: var(--radius-xs);
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .spacingResetBtn:hover {
-  opacity: 0.8;
+  opacity: var(--opacity-80);
   text-decoration: underline;
+}
+
+.spacingResetBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
 .spacingRow {
@@ -565,7 +574,7 @@
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
   background-color: var(--color-surface-secondary);
-  padding: 1px 6px;
+  padding: var(--space-px) var(--space-1-5);
   border-radius: var(--radius-sm);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
 }
@@ -575,31 +584,29 @@
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
-  height: 4px;
+  height: var(--space-1);
   border-radius: var(--radius-pill);
   background: var(--color-surface-tertiary);
   outline: none;
   cursor: pointer;
-  margin: 4px 0;
+  margin: var(--space-1) 0;
   transition: background var(--duration-fast) var(--ease-out);
 }
 
 .appleRangeSlider:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 3px;
+  outline: var(--border-width-focus) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-spread);
 }
 
 .appleRangeSlider::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: var(--size-thumb-lg);
+  height: var(--size-thumb-lg);
+  border-radius: var(--radius-pill);
   background: var(--color-knob-surface);
-  border: 0.5px solid rgba(0, 0, 0, 0.15);
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.25),
-    0 0 1px rgba(0, 0, 0, 0.15);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  box-shadow: var(--shadow-knob);
   cursor: pointer;
   transition: transform var(--duration-fast) var(--ease-spring);
 }
@@ -613,13 +620,11 @@
 }
 
 .appleRangeSlider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: var(--size-thumb-lg);
+  height: var(--size-thumb-lg);
+  border-radius: var(--radius-pill);
   background: var(--color-knob-surface);
-  border: 0.5px solid rgba(0, 0, 0, 0.15);
-  box-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.25),
-    0 0 1px rgba(0, 0, 0, 0.15);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  box-shadow: var(--shadow-knob);
   cursor: pointer;
 }

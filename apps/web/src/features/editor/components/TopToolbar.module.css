@@ -1,6 +1,6 @@
 /* ==========================================================================
    Apple Pro Studio Toolbar (TopToolbar)
-   Clean Borderless Design System
+   Material Pencel Chrome System
    ========================================================================== */
 
 .bar {
@@ -10,6 +10,9 @@
   justify-content: space-between;
   height: 100%;
   padding: 0 var(--space-4);
+  border-top: none;
+  border-left: none;
+  border-right: none;
   border-bottom: var(--border-width-hairline) solid var(--material-chrome-border);
   user-select: none;
   position: relative;
@@ -33,7 +36,7 @@
   padding-right: var(--space-3);
 }
 
-/* Generic Icon Toolbar Button (Sidebar, Theme, etc.) - Clean Borderless */
+/* Generic Icon Toolbar Button (Sidebar, Theme, etc.) */
 .toolbarBtn {
   display: inline-flex;
   align-items: center;
@@ -51,12 +54,12 @@
     transform var(--duration-fast) var(--ease-spring);
 }
 
-.toolbarBtn:hover {
+.toolbarBtn:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
 }
 
-.toolbarBtn:active {
+.toolbarBtn:active:not(:disabled) {
   transform: scale(0.96);
   background-color: var(--color-surface-active);
 }
@@ -66,13 +69,18 @@
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
+.toolbarBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
 .toolbarBtnActive {
   background-color: var(--color-surface-secondary);
   color: var(--color-accent-primary);
   border: none;
 }
 
-/* macOS Segmented Undo/Redo Group - Clean Borderless */
+/* macOS Segmented Undo/Redo Group */
 .segmentedGroup {
   display: inline-flex;
   align-items: center;
@@ -80,18 +88,18 @@
   background-color: var(--color-surface-secondary);
   border: none;
   border-radius: var(--radius-sm);
-  padding: 2px;
+  padding: var(--space-0-5);
 }
 
 .segmentedBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 24px;
+  width: var(--control-height-sm);
+  height: var(--control-height-xs);
   background: transparent;
   border: none;
-  border-radius: calc(var(--radius-sm) - 2px);
+  border-radius: calc(var(--radius-sm) - var(--space-0-5));
   color: var(--color-text-primary);
   cursor: pointer;
   transition:
@@ -106,10 +114,11 @@
 
 .segmentedBtn:active:not(:disabled) {
   transform: scale(0.95);
+  background-color: var(--color-surface-active);
 }
 
 .segmentedBtn:disabled {
-  opacity: 0.35;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
@@ -119,13 +128,13 @@
 }
 
 .segmentedDivider {
-  width: 1px;
-  height: 14px;
+  width: var(--border-width-hairline);
+  height: var(--space-3-5);
   background-color: var(--color-border-subtle);
 }
 
 /* --------------------------------------------------------------------------
-   2. Center Area: Document Title & Meta (Clean Borderless)
+   2. Center Area: Document Title & Meta
    -------------------------------------------------------------------------- */
 .center {
   display: flex;
@@ -138,7 +147,7 @@
 .documentProxy {
   display: inline-flex;
   align-items: center;
-  padding: 3px var(--space-3);
+  padding: var(--space-0-75) var(--space-3);
   border-radius: var(--radius-md);
   border: none;
   background-color: transparent;
@@ -151,7 +160,7 @@
 
 .documentProxy:focus-within {
   background-color: var(--color-surface-secondary);
-  box-shadow: inset 0 0 0 1px var(--color-border-default);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-default);
 }
 
 .proxyContent {
@@ -169,10 +178,10 @@
 
 .srOnly {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--space-px);
+  height: var(--space-px);
   padding: 0;
-  margin: -1px;
+  margin: calc(-1 * var(--space-px));
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -190,8 +199,8 @@
   text-align: center;
   outline: none;
   padding: 0 var(--space-1);
-  min-width: 120px;
-  max-width: 320px;
+  min-width: var(--size-title-min-w);
+  max-width: var(--size-title-max-w);
 }
 
 .titleInput:focus-visible {
@@ -201,12 +210,12 @@
 .documentMeta {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-top: 1px;
+  gap: var(--space-1-25);
+  margin-top: var(--space-px);
 }
 
 .metaDivider {
-  font-size: 8px;
+  font-size: var(--font-size-3xs);
   color: var(--color-text-disabled);
 }
 
@@ -233,7 +242,7 @@
 .secondaryToolBtn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   height: var(--control-height-sm);
   padding: 0 var(--space-3);
   border-radius: var(--radius-sm);
@@ -246,17 +255,28 @@
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-spring);
 }
 
-.secondaryToolBtn:hover {
+.secondaryToolBtn:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
+}
+
+.secondaryToolBtn:active:not(:disabled) {
+  transform: scale(0.97);
+  background-color: var(--color-surface-active);
 }
 
 .secondaryToolBtn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.secondaryToolBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 .primaryShareBtn {
@@ -272,23 +292,21 @@
   font-family: var(--font-family-ui);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--letter-spacing-tight);
   cursor: pointer;
-  box-shadow:
-    var(--shadow-xs),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-accent-specular);
   transition:
     background-color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),
     transform var(--duration-fast) var(--ease-spring);
 }
 
-.primaryShareBtn:hover {
+.primaryShareBtn:hover:not(:disabled) {
   background-color: var(--color-accent-primary-hover);
   box-shadow: var(--shadow-sm);
 }
 
-.primaryShareBtn:active {
+.primaryShareBtn:active:not(:disabled) {
   transform: scale(0.97);
   background-color: var(--color-accent-primary-active);
 }
@@ -296,4 +314,9 @@
 .primaryShareBtn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.primaryShareBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }

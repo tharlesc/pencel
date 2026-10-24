@@ -15,7 +15,7 @@
   overflow: hidden;
 }
 
-/* 1. Filter Toolbar (Tipo ▾ & Icon Filter Chips) */
+/* 1. Filter Toolbar */
 .filterBar {
   display: flex;
   align-items: center;
@@ -26,14 +26,14 @@
 }
 
 .filterSelect {
-  height: 24px;
-  font-size: 11px;
+  height: var(--control-height-xs);
+  font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
   background-color: var(--color-surface-secondary);
   color: var(--color-text-primary);
   border: none;
   border-radius: var(--radius-xs);
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   cursor: pointer;
   outline: none;
 }
@@ -46,15 +46,15 @@
 .filterChips {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .filterChip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
   border: none;
   border-radius: var(--radius-xs);
   background: transparent;
@@ -62,12 +62,28 @@
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
 }
 
-.filterChip:hover {
+.filterChip:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
   color: var(--color-text-primary);
+}
+
+.filterChip:active:not(:disabled) {
+  background-color: var(--color-surface-active);
+  transform: scale(0.95);
+}
+
+.filterChip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.filterChip:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 .filterChipActive {
@@ -79,8 +95,8 @@
 .controlsBar {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px var(--space-3);
+  gap: var(--space-1-5);
+  padding: var(--space-2) var(--space-3);
   border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
   background-color: var(--color-surface-primary);
 }
@@ -94,13 +110,13 @@
 
 .blendSelect {
   flex: 1;
-  height: 24px;
-  font-size: 11px;
+  height: var(--control-height-xs);
+  font-size: var(--font-size-2xs);
   background-color: var(--color-surface-secondary);
   color: var(--color-text-primary);
   border: none;
   border-radius: var(--radius-xs);
-  padding: 0 6px;
+  padding: 0 var(--space-1-5);
   cursor: pointer;
   outline: none;
 }
@@ -113,26 +129,38 @@
 .lockIconsGroup {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .lockBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: var(--space-5-5);
+  height: var(--space-5-5);
   border: none;
   background: transparent;
   color: var(--color-text-tertiary);
   border-radius: var(--radius-xs);
   cursor: pointer;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
 }
 
-.lockBtn:hover {
+.lockBtn:hover:not(:disabled) {
   color: var(--color-text-primary);
   background-color: var(--color-surface-hover);
+}
+
+.lockBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.lockBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 .lockBtnActive {
@@ -168,10 +196,10 @@
 .layerRow {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 38px;
+  gap: var(--space-1-5);
+  height: var(--layer-row-height);
   padding: 0 var(--space-3);
-  border-bottom: 1px solid var(--color-surface-secondary);
+  border-bottom: var(--border-width-hairline) solid var(--color-surface-secondary);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-out);
   position: relative;
@@ -181,26 +209,31 @@
   background-color: var(--color-surface-hover);
 }
 
+.layerRow:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
 .layerRowSelected {
   background-color: var(--color-selection-bg);
   color: var(--color-text-primary);
 }
 
 .layerRowHidden {
-  opacity: 0.55;
+  opacity: var(--opacity-50);
 }
 
 .layerRowDragging {
-  opacity: 0.35;
+  opacity: var(--opacity-30);
   background-color: var(--color-surface-hover);
 }
 
 .layerRowDragOver {
-  border-top: 2px solid var(--color-accent-primary);
+  border-top: var(--border-width-focus) solid var(--color-accent-primary);
 }
 
 .layerRowIndented {
-  padding-left: 34px !important;
+  padding-left: var(--space-8) !important;
 }
 
 .groupChildrenWrapper {
@@ -212,12 +245,12 @@
 .groupChildrenWrapper::before {
   content: '';
   position: absolute;
-  left: 20px;
+  left: var(--space-5);
   top: 0;
   bottom: 0;
-  width: 1px;
+  width: var(--border-width-hairline);
   background-color: var(--color-border-subtle);
-  z-index: 1;
+  z-index: var(--z-base);
 }
 
 /* Eye Visibility Icon */
@@ -225,8 +258,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
@@ -242,6 +275,11 @@
   color: var(--color-text-primary);
 }
 
+.eyeBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
 .eyeHidden {
   color: var(--color-text-disabled);
 }
@@ -251,8 +289,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   border: none;
   background: transparent;
   color: var(--color-text-tertiary);
@@ -260,16 +298,21 @@
   flex-shrink: 0;
 }
 
+.chevronBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
 /* Layer Thumbnail Box */
 .thumbnail {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
   border-radius: var(--radius-xs);
   background-color: var(--color-surface-secondary);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-inset-subtle);
   flex-shrink: 0;
   color: var(--color-text-primary);
   overflow: hidden;
@@ -285,24 +328,16 @@
 
 .thumbnailImage {
   background-image:
-    linear-gradient(45deg, #e0e0e0 25%, transparent 25%),
-    linear-gradient(-45deg, #e0e0e0 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #e0e0e0 75%),
-    linear-gradient(-45deg, transparent 75%, #e0e0e0 75%);
-  background-size: 8px 8px;
+    linear-gradient(45deg, var(--color-checkerboard-cell) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-checkerboard-cell) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-checkerboard-cell) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-checkerboard-cell) 75%);
+  background-size: var(--size-checkerboard) var(--size-checkerboard);
   background-position:
     0 0,
-    0 4px,
-    4px -4px,
-    -4px 0px;
-}
-
-[data-theme='dark'] .thumbnailImage {
-  background-image:
-    linear-gradient(45deg, #2c2c2e 25%, transparent 25%),
-    linear-gradient(-45deg, #2c2c2e 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #2c2c2e 75%),
-    linear-gradient(-45deg, transparent 75%, #2c2c2e 75%);
+    0 var(--size-checkerboard-half),
+    var(--size-checkerboard-half) var(--size-checkerboard-neg-half),
+    var(--size-checkerboard-neg-half) 0;
 }
 
 .layerNameColumn {
@@ -313,7 +348,7 @@
 }
 
 .layerName {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   overflow: hidden;
@@ -321,30 +356,31 @@
 }
 
 .layerNameInput {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   background-color: var(--color-surface-primary);
   color: var(--color-text-primary);
-  border: 1px solid var(--color-accent-primary);
+  border: var(--border-width-hairline) solid var(--color-accent-primary);
   border-radius: var(--radius-xs);
-  padding: 1px 4px;
+  padding: var(--space-px) var(--space-1);
   width: 100%;
   outline: none;
 }
 
 .layerNameInput:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 1.5px var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--border-width-medium) var(--color-focus-ring);
 }
 
 .hoverActions {
   display: none;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-0-5);
   margin-left: auto;
 }
 
-.layerRow:hover .hoverActions {
+.layerRow:hover .hoverActions,
+.layerRow:focus-within .hoverActions {
   display: inline-flex;
 }
 
@@ -352,8 +388,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: var(--space-5-5);
+  height: var(--space-5-5);
   border: none;
   background: transparent;
   color: var(--color-text-tertiary);
@@ -366,23 +402,28 @@
   color: var(--color-text-primary);
 }
 
-/* 5. Bottom Action Bar: [Link] [fx] [Mask] [Adjustment] [Group] [New Layer] [Delete] */
+.actionBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+/* 5. Bottom Action Bar */
 .bottomBar {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 6px var(--space-2);
+  padding: var(--space-1-5) var(--space-2);
   background-color: var(--color-surface-secondary);
   border-top: var(--border-width-hairline) solid var(--color-border-subtle);
-  min-height: 38px;
+  min-height: var(--layer-row-height);
 }
 
 .bottomBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 26px;
+  width: var(--size-shape-preview);
+  height: var(--size-swatch-lg);
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
@@ -403,7 +444,12 @@
   transform: scale(0.92);
 }
 
+.bottomBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
 .bottomBtn:disabled {
-  opacity: 0.35;
+  opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
