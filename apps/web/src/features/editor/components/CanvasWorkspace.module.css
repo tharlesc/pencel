@@ -1,6 +1,5 @@
 /* ==========================================================================
    Apple Pro Studio Canvas Stage & Viewport (CanvasWorkspace)
-   Fidelity: macOS Sequoia / Sonoma Stage Experience
    Principles: Maximum deference to artwork, tactile panning, tabular HUD.
    ========================================================================== */
 
@@ -24,9 +23,11 @@
   position: relative;
   user-select: none;
   cursor: grab;
-  /* High-fidelity studio stage dot grid */
-  background-image: radial-gradient(var(--color-border-subtle) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(
+    var(--color-border-subtle) var(--border-width-hairline),
+    transparent var(--border-width-hairline)
+  );
+  background-size: var(--size-stage-grid) var(--size-stage-grid);
 }
 
 .viewportScrollGrab {
@@ -40,28 +41,25 @@
 .artboardFrame {
   position: relative;
   border-radius: var(--radius-sm);
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.16),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-artboard);
   border: var(--border-width-hairline) solid var(--surface-glass-border-outer);
   overflow: visible;
   flex-shrink: 0;
   will-change: transform;
+  pointer-events: auto;
   transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.artboardFramePanning {
+  pointer-events: none;
 }
 
 .canvasPositioner {
   pointer-events: auto;
 }
 
-:global([data-theme='dark']) .artboardFrame {
-  box-shadow:
-    0 28px 72px rgba(0, 0, 0, 0.55),
-    0 4px 18px rgba(0, 0, 0, 0.4);
-}
-
 /* --------------------------------------------------------------------------
-   3. Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
+   Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
    -------------------------------------------------------------------------- */
 .bottomBar {
   composes: glass-chrome from global;
@@ -70,6 +68,9 @@
   justify-content: space-between;
   padding: 0 var(--space-4);
   height: var(--control-height-lg);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
   border-top: var(--border-width-hairline) solid var(--material-chrome-border);
   z-index: var(--z-drawer);
   user-select: none;
@@ -86,12 +87,12 @@
   font-size: var(--font-size-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-secondary);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .statDivider {
   color: var(--color-text-disabled);
-  font-size: 10px;
+  font-size: var(--font-size-3xs);
 }
 
 .bottomCenter {
@@ -109,13 +110,14 @@
   font-family: var(--font-family-ui);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-secondary);
   padding: 0 var(--space-2);
   white-space: nowrap;
 }
 
 .zoomReadout {
-  min-width: 48px;
+  min-width: var(--space-12);
   text-align: center;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);

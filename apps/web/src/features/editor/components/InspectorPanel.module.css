@@ -1,6 +1,5 @@
 /* ==========================================================================
    Apple Pro Studio Property Inspector (InspectorPanel)
-   Fidelity: macOS Sequoia / Sonoma Studio Design System
    Principles: Millimetric numeric precision, tabular typography, high density.
    ========================================================================== */
 
@@ -12,14 +11,17 @@
 }
 
 .topHeader {
+  composes: glass-chrome from global;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   padding: 0 var(--space-4);
-  height: 46px;
-  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
-  background-color: var(--color-surface-primary);
+  height: var(--panel-header-height);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: var(--border-width-hairline) solid var(--material-chrome-border);
   flex-shrink: 0;
 }
 
@@ -30,7 +32,7 @@
   font-family: var(--font-family-ui);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--letter-spacing-tight);
   color: var(--color-text-primary);
 }
 
@@ -43,7 +45,7 @@
 .swatchGrid {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-0-5);
 }
 
 .swatchButton {
@@ -58,16 +60,27 @@
   text-align: left;
   transition:
     background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
 }
 
-.swatchButton:hover {
+.swatchButton:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
+}
+
+.swatchButton:active:not(:disabled) {
+  background-color: var(--color-surface-active);
+  transform: scale(0.99);
 }
 
 .swatchButton:focus-visible {
   outline: none;
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.swatchButton:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 .swatchActive {
@@ -76,8 +89,8 @@
 }
 
 .swatchCircle {
-  width: 18px;
-  height: 18px;
+  width: var(--size-swatch-sm);
+  height: var(--size-swatch-sm);
   border-radius: var(--radius-sm);
   border: var(--border-width-hairline) solid var(--color-border-default);
   flex-shrink: 0;
@@ -99,7 +112,7 @@
 
 .swatchHex {
   font-family: var(--font-family-mono);
-  font-size: 11px;
+  font-size: var(--font-size-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-tertiary);
 }
@@ -116,4 +129,5 @@
   align-items: center;
   justify-content: space-between;
   font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
 }

@@ -131,6 +131,24 @@
   --size-input-num-sm: 3.25rem; /* 52px */
   --size-input-num-md: 4rem; /* 64px */
   --size-input-hex: 4.5rem; /* 72px */
+  --panel-header-height: 2.875rem; /* 46px */
+  --layer-row-height: 2.375rem; /* 38px */
+  --size-stage-grid: 1.5rem; /* 24px */
+  --size-checkerboard: 0.5rem; /* 8px */
+  --size-checkerboard-half: 0.25rem; /* 4px */
+  --size-checkerboard-neg-half: -0.25rem; /* -4px */
+  --size-title-min-w: 7.5rem; /* 120px */
+  --size-title-max-w: 20rem; /* 320px */
+  --size-font-trigger-min-w: 8.125rem; /* 130px */
+  --size-font-trigger-max-w: 11.25rem; /* 180px */
+  --size-font-list-max-h: 18.125rem; /* 290px */
+  --size-giphy-max-h: 30rem; /* 480px */
+  --size-range-w: 4.25rem; /* 68px */
+  --size-rail-item-w: 3.5rem; /* 56px */
+  --size-shape-preview: 1.875rem; /* 30px */
+  --size-shape-wide: 2.375rem; /* 38px */
+  --size-sentinel-min-h: 2.75rem; /* 44px */
+  --size-palette-bar-h: 2.125rem; /* 34px */
 
   /* Border Radii & Stroke Widths (Concentric & Capsule System) */
   --radius-2xs: 0.125rem; /* 2px */
@@ -190,6 +208,22 @@
   );
   --gradient-sv-white: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0));
   --gradient-sv-black: linear-gradient(to top, #000000, rgba(0, 0, 0, 0));
+  --gradient-spectrum-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    #ff0000 0deg,
+    #ff8000 30deg,
+    #ffff00 60deg,
+    #80ff00 90deg,
+    #00ff00 120deg,
+    #00ff80 150deg,
+    #00ffff 180deg,
+    #0080ff 210deg,
+    #0000ff 240deg,
+    #8000ff 270deg,
+    #ff00ff 300deg,
+    #ff0080 330deg,
+    #ff0000 360deg
+  );
 
   /* Backdrop Blur & Vibrancy (Legacy aliases resolved to Material Pencel tiers) */
   --backdrop-blur-glass: var(--material-chrome-blur);
