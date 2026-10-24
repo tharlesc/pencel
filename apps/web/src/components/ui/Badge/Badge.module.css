@@ -8,12 +8,12 @@
   font-size: var(--font-size-2xs);
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: var(--line-height-none);
 }
 
 .dot {
-  width: 6px;
-  height: 6px;
+  width: var(--size-dot-sm);
+  height: var(--size-dot-sm);
   border-radius: var(--radius-pill);
   background-color: currentColor;
 }

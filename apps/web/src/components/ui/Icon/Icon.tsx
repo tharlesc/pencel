@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, Ref } from 'react';
 import styles from './Icon.module.css';
 import {
   ICON_REGISTRY,
@@ -21,6 +21,7 @@ export interface IconProps {
    */
   readonly label?: string;
   readonly className?: string;
+  readonly ref?: Ref<HTMLSpanElement>;
 }
 
 export function Icon({
@@ -30,6 +31,7 @@ export function Icon({
   tone = 'default',
   label,
   className,
+  ref,
 }: IconProps): ReactElement {
   const GlyphComponent = ICON_REGISTRY[name];
   const pixelSize = ICON_SIZE_PX[size];
@@ -40,6 +42,7 @@ export function Icon({
 
   return (
     <span
+      ref={ref}
       className={classes}
       role={isDecorative ? undefined : 'img'}
       aria-label={isDecorative ? undefined : label}

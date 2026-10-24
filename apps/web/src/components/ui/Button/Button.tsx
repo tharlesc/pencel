@@ -1,9 +1,16 @@
-import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 import { Icon } from '../Icon/Icon.js';
 import type { IconName } from '../Icon/iconRegistry.js';
 import styles from './Button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'toolbar';
+/**
+ * Visual hierarchy variants for `<Button />`.
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'toolbar' | 'danger';
+
+/**
+ * Compact desktop control heights for `<Button />`.
+ */
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -12,6 +19,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   readonly icon?: IconName;
   readonly active?: boolean;
   readonly children?: ReactNode;
+  readonly className?: string;
+  readonly ref?: Ref<HTMLButtonElement>;
 }
 
 export function Button({
@@ -23,6 +32,7 @@ export function Button({
   className,
   type = 'button',
   children,
+  ref,
   ...rest
 }: ButtonProps): ReactElement {
   const isIconOnly = Boolean(icon && !children);
@@ -39,6 +49,7 @@ export function Button({
 
   return (
     <button
+      ref={ref}
       type={type}
       className={classes}
       disabled={disabled}

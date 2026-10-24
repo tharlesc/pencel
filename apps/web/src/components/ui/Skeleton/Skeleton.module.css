@@ -1,0 +1,31 @@
+.skeleton {
+  background-color: var(--color-surface-tertiary);
+  animation: skeletonPulse var(--duration-normal) var(--ease-in-out) infinite alternate;
+}
+
+.variant-rect {
+  width: 100%;
+  height: var(--size-preview-h);
+  border-radius: var(--radius-md);
+}
+
+.variant-text {
+  width: 100%;
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
+}
+
+.variant-pill {
+  width: var(--size-input-num-md);
+  height: var(--control-height-xs);
+  border-radius: var(--radius-pill);
+}
+
+@keyframes skeletonPulse {
+  from {
+    opacity: var(--opacity-50);
+  }
+  to {
+    opacity: var(--opacity-90);
+  }
+}

@@ -12,7 +12,6 @@
 .dialog {
   composes: glass-sheet from global;
   width: 100%;
-  max-width: var(--size-dialog-lg);
   max-height: 85dvh;
   display: flex;
   flex-direction: column;
@@ -20,6 +19,18 @@
   overflow: hidden;
   transform-origin: center;
   animation: dialogEnter var(--duration-normal) var(--ease-out);
+}
+
+.size-sm {
+  max-width: var(--size-dialog-sm);
+}
+
+.size-md {
+  max-width: var(--size-dialog-md);
+}
+
+.size-lg {
+  max-width: var(--size-dialog-lg);
 }
 
 @keyframes dialogEnter {

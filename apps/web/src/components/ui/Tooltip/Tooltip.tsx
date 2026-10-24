@@ -1,11 +1,18 @@
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode, Ref } from 'react';
 import styles from './Tooltip.module.css';
+
+/**
+ * Anchor placements for `<Tooltip />` (Material Pencel Float layer).
+ */
+export type TooltipPlacement = 'top' | 'bottom';
 
 export interface TooltipProps {
   readonly content: string;
   readonly shortcut?: string;
-  readonly placement?: 'top' | 'bottom';
+  readonly placement?: TooltipPlacement;
   readonly children: ReactNode;
+  readonly className?: string;
+  readonly ref?: Ref<HTMLSpanElement>;
 }
 
 export function Tooltip({
@@ -13,9 +20,11 @@ export function Tooltip({
   shortcut,
   placement = 'top',
   children,
+  className,
+  ref,
 }: TooltipProps): ReactElement {
   return (
-    <span className={styles.wrapper}>
+    <span ref={ref} className={[styles.wrapper, className].filter(Boolean).join(' ')}>
       {children}
       <span
         className={[styles.bubble, placement === 'bottom' ? styles.placementBottom : '']

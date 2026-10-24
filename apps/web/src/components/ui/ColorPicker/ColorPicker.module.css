@@ -11,10 +11,15 @@
   animation: popoverFadeIn var(--duration-fast) var(--ease-out);
 }
 
+.inline {
+  width: 100%;
+  box-shadow: none;
+}
+
 @keyframes popoverFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.96);
+    transform: translateY(calc(-1 * var(--space-1))) scale(0.96);
   }
   to {
     opacity: 1;
@@ -22,44 +27,40 @@
   }
 }
 
-/* 2D Saturation/Brightness Canvas Area */
 .saturationMap {
   position: relative;
   width: 100%;
-  height: 130px;
+  height: var(--size-color-area-h);
   border-radius: var(--radius-sm);
   cursor: crosshair;
   overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .whiteGradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 100%);
+  background: var(--gradient-sv-white);
 }
 
 .blackGradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0) 100%);
+  background: var(--gradient-sv-black);
 }
 
 .mapHandle {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--color-knob-surface);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.3);
+  width: var(--size-thumb-md);
+  height: var(--size-thumb-md);
+  border-radius: var(--radius-pill);
+  border: var(--border-width-focus) solid var(--color-knob-surface);
+  box-shadow: var(--shadow-knob);
   transform: translate(-50%, -50%);
   pointer-events: none;
   transition: transform var(--duration-instant) var(--ease-spring);
 }
 
-/* Controls Row */
 .controlsRow {
   display: flex;
   align-items: center;
@@ -70,8 +71,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: var(--size-swatch-lg);
+  height: var(--size-swatch-lg);
   border-radius: var(--radius-sm);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
   background-color: var(--color-surface-secondary);
@@ -96,8 +97,8 @@
 }
 
 .pipetteBtn:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+  outline: var(--border-width-focus) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .sliderAndPreview {
@@ -110,47 +111,35 @@
 .hueTrack {
   position: relative;
   width: 100%;
-  height: 10px;
+  height: var(--space-2-5);
   border-radius: var(--radius-pill);
-  background: linear-gradient(
-    to right,
-    rgb(255, 0, 0) 0%,
-    rgb(255, 255, 0) 17%,
-    rgb(0, 255, 0) 33%,
-    rgb(0, 255, 255) 50%,
-    rgb(0, 0, 255) 67%,
-    rgb(255, 0, 255) 83%,
-    rgb(255, 0, 0) 100%
-  );
+  background: var(--gradient-hue-horizontal);
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .hueHandle {
   position: absolute;
   top: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: var(--size-thumb-lg);
+  height: var(--size-thumb-lg);
+  border-radius: var(--radius-pill);
   background: var(--color-knob-surface);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  box-shadow: var(--shadow-knob);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
 .colorPreviewCircle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
+  border-radius: var(--radius-pill);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
-    var(--shadow-xs);
+  box-shadow: var(--shadow-xs);
   flex-shrink: 0;
 }
 
-/* Values Input Row */
 .inputsRow {
   display: flex;
   align-items: center;
@@ -162,7 +151,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  height: 26px;
+  height: var(--size-swatch-lg);
   padding: 0 var(--space-2);
   background-color: var(--color-surface-secondary);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
@@ -178,7 +167,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-2xs);
   color: var(--color-text-tertiary);
-  margin-right: 2px;
+  margin-right: var(--space-0-5);
 }
 
 .hexInput {
@@ -201,15 +190,15 @@
 .rgbChips {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-0-75);
 }
 
 .rgbChip {
   display: flex;
   align-items: center;
-  gap: 2px;
-  height: 26px;
-  padding: 0 5px;
+  gap: var(--space-0-5);
+  height: var(--size-swatch-lg);
+  padding: 0 var(--space-1-25);
   background-color: var(--color-surface-secondary);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
   border-radius: var(--radius-sm);
@@ -217,7 +206,7 @@
 
 .rgbChannel {
   font-family: var(--font-family-ui);
-  font-size: 9px;
+  font-size: var(--font-size-3xs);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-tertiary);
 }
@@ -227,27 +216,58 @@
   font-size: var(--font-size-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
-  min-width: 20px;
+  min-width: var(--control-height-2xs);
   text-align: right;
 }
 
-/* Swatches Strip */
 .swatchesStrip {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1-25);
   padding-top: var(--space-1);
-  border-top: 1px solid var(--color-border-subtle);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
 }
 
 .quickSwatch {
   flex: 1;
-  height: 18px;
+  height: var(--size-swatch-sm);
   border-radius: var(--radius-xs);
   border: var(--border-width-hairline) solid var(--color-border-subtle);
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-xs);
   transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.swatchInk {
+  background-color: var(--color-surface-inverse);
+}
+
+.swatchPaper {
+  background-color: var(--color-surface-elevated);
+}
+
+.swatchBlue {
+  background-color: var(--color-swatch-blue);
+}
+
+.swatchEmerald {
+  background-color: var(--color-swatch-emerald);
+}
+
+.swatchAmber {
+  background-color: var(--color-swatch-amber);
+}
+
+.swatchRose {
+  background-color: var(--color-swatch-rose);
+}
+
+.swatchViolet {
+  background-color: var(--color-swatch-violet);
+}
+
+.swatchGold {
+  background-color: var(--color-status-warning);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -262,6 +282,6 @@
 }
 
 .quickSwatch:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 1px;
+  outline: var(--border-width-focus) solid var(--color-focus-ring);
+  outline-offset: var(--space-px);
 }

@@ -1,15 +1,33 @@
-import { useId, useMemo, useRef, useState, type ReactElement } from 'react';
+import { useId, useMemo, useRef, useState, type ReactElement, type Ref } from 'react';
 import { Icon } from '../Icon/Icon.js';
 import styles from './ColorPicker.module.css';
+
+/**
+ * Display modes for `<ColorPicker />`.
+ */
+export type ColorPickerVariant = 'popover' | 'inline';
 
 export interface ColorPickerProps {
   readonly color: string;
   readonly onChange: (hex: string) => void;
   readonly onClose?: () => void;
   readonly showTintsShades?: boolean;
+  readonly variant?: ColorPickerVariant;
+  readonly className?: string;
+  readonly ref?: Ref<HTMLDivElement>;
 }
 
-// Convert Hex to HSV
+const STUDIO_QUICK_SWATCHES = [
+  { id: 'ink', value: '#1D1D1F', className: 'swatchInk' },
+  { id: 'paper', value: '#F8FAFC', className: 'swatchPaper' },
+  { id: 'blue', value: '#0066CC', className: 'swatchBlue' },
+  { id: 'emerald', value: '#16A34A', className: 'swatchEmerald' },
+  { id: 'amber', value: '#D97706', className: 'swatchAmber' },
+  { id: 'rose', value: '#DC2626', className: 'swatchRose' },
+  { id: 'violet', value: '#6D28D9', className: 'swatchViolet' },
+  { id: 'gold', value: '#EAB308', className: 'swatchGold' },
+] as const;
+
 function hexToHsv(hex: string): { h: number; s: number; v: number } {
   let clean = hex.replace('#', '');
   if (clean.length === 3) {
@@ -46,7 +64,6 @@ function hexToHsv(hex: string): { h: number; s: number; v: number } {
   return { h, s, v };
 }
 
-// Convert HSV to Hex & RGB
 function hsvToRgb(
   h: number,
   s: number,
@@ -89,8 +106,14 @@ function hsvToRgb(
   return { r, g, b, hex };
 }
 
-export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): ReactElement {
-  const panelRef = useRef<HTMLDivElement>(null);
+export function ColorPicker({
+  color,
+  onChange,
+  onClose,
+  variant = 'popover',
+  className,
+  ref,
+}: ColorPickerProps): ReactElement {
   const spectrumBoxRef = useRef<HTMLDivElement>(null);
   const hueSliderRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +121,6 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
   const [hsv, setHsv] = useState(() => hexToHsv(color));
   const [hexInput, setHexInput] = useState(() => color.replace('#', '').toUpperCase());
 
-  // Keep internal state aligned if prop changes from outside without effect warning
   if (color !== prevColor) {
     setPrevColor(color);
     setHsv(hexToHsv(color));
@@ -108,7 +130,6 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
   const { r, g, b, hex } = useMemo(() => hsvToRgb(hsv.h, hsv.s, hsv.v), [hsv]);
   const pureHueHex = useMemo(() => hsvToRgb(hsv.h, 1, 1).hex, [hsv.h]);
 
-  // Handle Dragging in Saturation/Brightness 2D Map
   const handleMapPointer = (clientX: number, clientY: number): void => {
     const el = spectrumBoxRef.current;
     if (!el) return;
@@ -116,8 +137,8 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
     const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
 
-    const s = x / rect.width;
-    const v = 1 - y / rect.height;
+    const s = rect.width > 0 ? x / rect.width : 0;
+    const v = rect.height > 0 ? 1 - y / rect.height : 0;
 
     const nextHsv = { ...hsv, s, v };
     setHsv(nextHsv);
@@ -130,11 +151,11 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     e.preventDefault();
     handleMapPointer(e.clientX, e.clientY);
 
-    const onMove = (moveEvent: MouseEvent) => {
+    const onMove = (moveEvent: MouseEvent): void => {
       handleMapPointer(moveEvent.clientX, moveEvent.clientY);
     };
 
-    const onUp = () => {
+    const onUp = (): void => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
@@ -143,13 +164,12 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     window.addEventListener('mouseup', onUp);
   };
 
-  // Handle Hue Slider Dragging
   const handleHuePointer = (clientX: number): void => {
     const el = hueSliderRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
-    const h = Math.round((x / rect.width) * 360) % 360;
+    const h = rect.width > 0 ? Math.round((x / rect.width) * 360) % 360 : 0;
 
     const nextHsv = { ...hsv, h };
     setHsv(nextHsv);
@@ -162,11 +182,11 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     e.preventDefault();
     handleHuePointer(e.clientX);
 
-    const onMove = (moveEvent: MouseEvent) => {
+    const onMove = (moveEvent: MouseEvent): void => {
       handleHuePointer(moveEvent.clientX);
     };
 
-    const onUp = () => {
+    const onUp = (): void => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
@@ -175,7 +195,6 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     window.addEventListener('mouseup', onUp);
   };
 
-  // Hex input direct change
   const handleHexChange = (val: string): void => {
     const clean = val.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
     setHexInput(clean);
@@ -186,7 +205,6 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
     }
   };
 
-  // Eyedropper API
   const handleEyedropper = async (): Promise<void> => {
     if (typeof (window as unknown as { EyeDropper?: unknown }).EyeDropper !== 'undefined') {
       try {
@@ -209,16 +227,22 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
   };
 
   const hexInputId = useId();
+  const containerClasses = [
+    styles.pickerContainer,
+    variant === 'inline' ? styles.inline : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div
-      ref={panelRef}
-      className={styles.pickerContainer}
+      ref={ref}
+      className={containerClasses}
       onClick={(e) => e.stopPropagation()}
       role="dialog"
       aria-label="Seletor Profissional de Cores"
     >
-      {/* 1. 2D Saturation / Value Gradient Map */}
       <div
         ref={spectrumBoxRef}
         className={styles.saturationMap}
@@ -237,9 +261,8 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
         />
       </div>
 
-      {/* 2. Hue Slider & Controls Row */}
       <div className={styles.controlsRow}>
-        {onClose && (
+        {onClose ? (
           <button
             type="button"
             className={styles.pipetteBtn}
@@ -249,7 +272,7 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
           >
             <Icon name="close" size="xs" />
           </button>
-        )}
+        ) : null}
         <button
           type="button"
           className={styles.pipetteBtn}
@@ -278,7 +301,6 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
         />
       </div>
 
-      {/* 3. Hex & RGB Values with Pro Typography */}
       <div className={styles.inputsRow}>
         <div className={styles.hexFieldWrapper}>
           <span className={styles.inputPrefix}>#</span>
@@ -310,29 +332,19 @@ export function ColorPicker({ color, onChange, onClose }: ColorPickerProps): Rea
         </div>
       </div>
 
-      {/* Quick Swatches / Presets */}
       <div className={styles.swatchesStrip}>
-        {[
-          '#1D1D1F',
-          '#F8FAFC',
-          '#0066CC',
-          '#16A34A',
-          '#D97706',
-          '#DC2626',
-          '#7C3AED',
-          '#EAB308',
-        ].map((swatch) => (
+        {STUDIO_QUICK_SWATCHES.map((swatch) => (
           <button
-            key={swatch}
+            key={swatch.id}
             type="button"
-            className={styles.quickSwatch}
-            style={{ backgroundColor: swatch }}
+            className={[styles.quickSwatch, styles[swatch.className]].filter(Boolean).join(' ')}
             onClick={() => {
-              setHsv(hexToHsv(swatch));
-              setHexInput(swatch.replace('#', ''));
-              onChange(swatch);
+              setHsv(hexToHsv(swatch.value));
+              setHexInput(swatch.value.replace('#', ''));
+              onChange(swatch.value);
             }}
-            title={swatch}
+            title={swatch.value}
+            aria-label={`Selecionar cor ${swatch.value}`}
           />
         ))}
       </div>

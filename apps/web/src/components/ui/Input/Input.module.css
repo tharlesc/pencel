@@ -26,6 +26,14 @@
     box-shadow var(--duration-fast) var(--ease-out);
 }
 
+.size-sm {
+  height: var(--control-height-sm);
+}
+
+.size-md {
+  height: var(--control-height-md);
+}
+
 .inputWrapper:hover {
   background-color: var(--color-surface-hover);
   border-color: var(--color-border-default);
@@ -34,7 +42,7 @@
 .inputWrapper:focus-within {
   border-color: var(--color-focus-ring);
   background-color: var(--color-surface-primary);
-  box-shadow: 0 0 0 1.5px var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--border-width-medium) var(--color-focus-ring);
 }
 
 .prefixIcon {
@@ -79,7 +87,7 @@
   justify-content: center;
   background: transparent;
   border: none;
-  padding: 2px;
+  padding: var(--space-0-5);
   cursor: pointer;
   color: var(--color-text-tertiary);
   border-radius: var(--radius-pill);
@@ -97,8 +105,8 @@
 }
 
 .clearButton:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 1px;
+  outline: var(--border-width-focus) solid var(--color-focus-ring);
+  outline-offset: var(--space-px);
 }
 
 .suffix {
@@ -106,5 +114,6 @@
   font-size: var(--font-size-2xs);
   color: var(--color-text-tertiary);
   font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
   user-select: none;
 }

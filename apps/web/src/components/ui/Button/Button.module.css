@@ -29,7 +29,7 @@
 
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.35;
+  opacity: var(--opacity-disabled);
 }
 
 .size-sm {
@@ -71,9 +71,7 @@
 .variant-primary {
   background-color: var(--color-accent-primary);
   color: var(--color-text-on-accent);
-  box-shadow:
-    var(--shadow-xs),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-xs), var(--material-chrome-specular);
   border: none;
 }
 
@@ -105,6 +103,17 @@
 .variant-ghost:hover:not(:disabled),
 .variant-toolbar:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
+}
+
+.variant-danger {
+  background-color: var(--color-status-error-bg);
+  color: var(--color-status-error);
+  border: none;
+}
+
+.variant-danger:hover:not(:disabled) {
+  background-color: var(--color-status-error);
+  color: var(--color-text-on-accent);
 }
 
 .active {
