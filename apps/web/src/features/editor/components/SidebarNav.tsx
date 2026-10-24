@@ -123,12 +123,12 @@ export function SidebarNav({
             {activeCategory === 'elements' ? <ElementsPanel /> : null}
             {activeCategory === 'text' ? <TextPanel /> : null}
             {activeCategory === 'media' || activeCategory === 'uploads' ? (
-              <Suspense fallback={<Skeleton variant="rect" count={4} />}>
+              <Suspense fallback={<Skeleton variant="rect" />}>
                 <LazyMediaPanel />
               </Suspense>
             ) : null}
             {activeCategory === 'background' ? (
-              <Suspense fallback={<Skeleton variant="rect" count={3} />}>
+              <Suspense fallback={<Skeleton variant="rect" />}>
                 <LazyColorsPanel />
               </Suspense>
             ) : null}
