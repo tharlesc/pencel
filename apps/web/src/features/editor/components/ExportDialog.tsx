@@ -1,27 +1,32 @@
 import type { Dimensions } from '@pencel/shared-types';
 import { useState, type ReactElement } from 'react';
 import { Button, Dialog } from '../../../components/ui/index.js';
+import { useOptionalEditorEngine, useOptionalEditorSession } from '../state/EditorProvider.js';
 import styles from './ExportDialog.module.css';
 
 export interface ExportDialogProps {
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly dimensions: Dimensions;
-  readonly documentTitle: string;
-  readonly onExportImage: (format: 'png' | 'jpeg') => string;
-  readonly serializedJson: string;
+  readonly open?: boolean;
+  readonly onClose?: () => void;
+  readonly dimensions?: Dimensions;
+  readonly documentTitle?: string;
+  readonly onExportImage?: (format: 'png' | 'jpeg') => string;
+  readonly serializedJson?: string;
 }
 
 export type ExportFormat = 'png' | 'jpeg' | 'json';
 
-export function ExportDialog({
-  open,
-  onClose,
-  dimensions,
-  documentTitle,
-  onExportImage,
-  serializedJson,
-}: ExportDialogProps): ReactElement | null {
+export function ExportDialog(props: ExportDialogProps): ReactElement | null {
+  const session = useOptionalEditorSession();
+  const engine = useOptionalEditorEngine();
+
+  const open = props.open ?? session?.isExportDialogOpen ?? false;
+  const onClose = props.onClose ?? session?.closeExportDialog ?? (() => {});
+  const dimensions = props.dimensions ??
+    session?.activePage.dimensions ?? { width: 1080, height: 1080 };
+  const documentTitle = props.documentTitle ?? session?.document.title ?? 'design';
+  const onExportImage = props.onExportImage ?? engine?.exportImage ?? (() => '');
+  const serializedJson = props.serializedJson ?? session?.serializedPreview ?? '{}';
+
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
   const [isExporting, setIsExporting] = useState(false);
 

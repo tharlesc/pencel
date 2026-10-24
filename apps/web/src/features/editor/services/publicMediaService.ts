@@ -36,7 +36,7 @@ export const MEDIA_CATEGORIES = [
   'Abstrato',
 ] as const;
 
-export type MediaCategory = (typeof MEDIA_CATEGORIES)[number];
+export type MediaCategory = (typeof MEDIA_CATEGORIES)[number] | 'Fotos' | 'Fundos';
 
 const CATEGORY_SEARCH_MAP: Record<string, string> = {
   Todos: '',

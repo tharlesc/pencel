@@ -1,49 +1,62 @@
 import type { ReactElement } from 'react';
+import { useTheme } from '../../../app/providers/ThemeProvider.js';
 import { BrandLogo, Icon, Tooltip } from '../../../components/ui/index.js';
+import { useOptionalEditorEngine, useOptionalEditorSession } from '../state/EditorProvider.js';
 import styles from './TopToolbar.module.css';
 
 export interface TopToolbarProps {
-  readonly documentTitle: string;
-  readonly onTitleChange: (title: string) => void;
-  readonly canUndo: boolean;
-  readonly canRedo: boolean;
-  readonly onUndo: () => void;
-  readonly onRedo: () => void;
-  readonly theme: 'light' | 'dark';
-  readonly onToggleTheme: () => void;
-  readonly onOpenSchemaDialog: () => void;
-  readonly onOpenExportDialog: () => void;
+  readonly documentTitle?: string;
+  readonly onTitleChange?: (title: string) => void;
+  readonly canUndo?: boolean;
+  readonly canRedo?: boolean;
+  readonly onUndo?: () => void;
+  readonly onRedo?: () => void;
+  readonly theme?: 'light' | 'dark';
+  readonly onToggleTheme?: () => void;
+  readonly onOpenSchemaDialog?: () => void;
+  readonly onOpenExportDialog?: () => void;
   readonly isSidebarOpen?: boolean;
   readonly onToggleSidebar?: () => void;
   readonly presetId?: string;
   readonly dimensions?: { width: number; height: number };
 }
 
-export function TopToolbar({
-  documentTitle,
-  onTitleChange,
-  canUndo,
-  canRedo,
-  onUndo,
-  onRedo,
-  theme,
-  onToggleTheme,
-  onOpenSchemaDialog,
-  onOpenExportDialog,
-  isSidebarOpen = true,
-  onToggleSidebar,
-  presetId,
-  dimensions,
-}: TopToolbarProps): ReactElement {
+export function TopToolbar(props: TopToolbarProps): ReactElement {
+  const themeCtx = useTheme();
+  const session = useOptionalEditorSession();
+  const engine = useOptionalEditorEngine();
+
+  const documentTitle = props.documentTitle ?? session?.document.title ?? 'Sem Título';
+  const onTitleChange = props.onTitleChange ?? session?.setDocumentTitle ?? (() => {});
+  const canUndo = props.canUndo ?? engine?.canUndo ?? false;
+  const canRedo = props.canRedo ?? engine?.canRedo ?? false;
+  const onUndo =
+    props.onUndo ??
+    (() => {
+      void engine?.undo();
+    });
+  const onRedo =
+    props.onRedo ??
+    (() => {
+      void engine?.redo();
+    });
+  const theme = props.theme ?? themeCtx.theme;
+  const onToggleTheme = props.onToggleTheme ?? themeCtx.toggleTheme;
+  const onOpenSchemaDialog = props.onOpenSchemaDialog ?? session?.openSchemaDialog ?? (() => {});
+  const onOpenExportDialog = props.onOpenExportDialog ?? session?.openExportDialog ?? (() => {});
+  const isSidebarOpen = props.isSidebarOpen ?? session?.isDrawerOpen ?? true;
+  const onToggleSidebar = props.onToggleSidebar ?? session?.toggleDrawer;
+  const presetId = props.presetId ?? session?.document.presetId;
+  const dimensions = props.dimensions ?? session?.activePage.dimensions;
+
   return (
     <header className={styles.bar}>
-      {/* 1. Leading Area: Brand Lockup + Sidebar Toggle + History Segment */}
       <div className={styles.leading}>
         <div className={styles.brandLockup}>
           <BrandLogo variant="lockup" size="sm" label="pencel" />
         </div>
 
-        {onToggleSidebar && (
+        {onToggleSidebar ? (
           <Tooltip
             content={isSidebarOpen ? 'Ocultar Painel Lateral' : 'Mostrar Painel Lateral'}
             shortcut="⌘S"
@@ -60,7 +73,7 @@ export function TopToolbar({
               <Icon name="panelLeft" size="sm" />
             </button>
           </Tooltip>
-        )}
+        ) : null}
 
         <div className={styles.segmentedGroup} role="group" aria-label="Histórico de alterações">
           <Tooltip content="Desfazer" shortcut="⌘Z" placement="bottom">
@@ -89,7 +102,6 @@ export function TopToolbar({
         </div>
       </div>
 
-      {/* 2. Center Area: Document Title & Status (No Document Icon & No Border) */}
       <div className={styles.center}>
         <div className={styles.documentProxy}>
           <div className={styles.proxyContent}>
@@ -106,23 +118,22 @@ export function TopToolbar({
             </label>
 
             <div className={styles.documentMeta}>
-              {presetId && <span className={styles.metaPreset}>{presetId}</span>}
-              {presetId && dimensions && (
+              {presetId ? <span className={styles.metaPreset}>{presetId}</span> : null}
+              {presetId && dimensions ? (
                 <span className={styles.metaDivider} aria-hidden="true">
                   •
                 </span>
-              )}
-              {dimensions && (
+              ) : null}
+              {dimensions ? (
                 <span className={styles.metaDimensions}>
                   {dimensions.width} × {dimensions.height}
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Trailing Area: Action Tools + Theme Switcher + Primary Share Button */}
       <div className={styles.trailing}>
         <Tooltip content="Inspecionar Modelo JSON do Documento" placement="bottom">
           <button
