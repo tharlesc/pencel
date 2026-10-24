@@ -82,7 +82,7 @@
   padding: 2px;
   cursor: pointer;
   color: var(--color-text-tertiary);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-pill);
   transition:
     color var(--duration-fast) var(--ease-out),
     transform var(--duration-instant) var(--ease-spring);

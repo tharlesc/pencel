@@ -47,7 +47,7 @@
   overflow: visible;
   flex-shrink: 0;
   will-change: transform;
-  transition: box-shadow var(--duration-fast) var(--ease-apple);
+  transition: box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .canvasPositioner {
@@ -64,17 +64,14 @@
    3. Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
    -------------------------------------------------------------------------- */
 .bottomBar {
+  composes: glass-chrome from global;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-4);
-  height: 38px;
-  background-color: var(--surface-glass-bg);
-  backdrop-filter: var(--backdrop-blur-glass);
-  -webkit-backdrop-filter: var(--backdrop-blur-glass);
-  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
-  box-shadow: var(--surface-glass-specular);
-  z-index: 10;
+  height: var(--control-height-lg);
+  border-top: var(--border-width-hairline) solid var(--material-chrome-border);
+  z-index: var(--z-drawer);
   user-select: none;
 }
 
