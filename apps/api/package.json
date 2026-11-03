@@ -15,12 +15,13 @@
   "dependencies": {
     "@pencel/editor-core": "0.1.0",
     "@pencel/shared-types": "0.1.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
     "cors": "^2.8.6",
     "express": "^5.3.0"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
     "@types/supertest": "^7.2.1",
     "supertest": "^7.3.1",
     "tsx": "^4.23.15"
