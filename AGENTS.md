@@ -1,110 +1,110 @@
-# AGENTS.md — Regras Permanentes do Projeto Pencel
+# AGENTS.md — Permanent Pencel Repository Rules
 
-Este documento estabelece as diretrizes arquiteturais, técnicas, de design e de governança obrigatórias para qualquer agente ou desenvolvedor que atue neste repositório.
+This document establishes the mandatory architectural, technical, design, and governance rules for any agent or software engineer working in this repository.
 
 ---
 
-## 1. Stack Tecnológica Oficial
+## 1. Official Technology Stack
 
-- **Gerenciamento de Monorepositório:** npm Workspaces (`apps/*`, `packages/*`).
+- **Monorepo Management:** npm Workspaces (`apps/*`, `packages/*`).
 - **Frontend (`@pencel/web`):** React 19, TypeScript 5, Vite 8, CSS Modules + CSS Custom Properties (`@pencel/design-tokens`).
-- **Motor Gráfico Isolado:** Fabric.js (`fabric`) encapsulado em `apps/web/src/features/editor/engine/`, desacoplado do modelo de domínio puro em `@pencel/editor-core`.
+- **Isolated Graphic Engine:** Fabric.js (`fabric`) encapsulated within `apps/web/src/features/editor/engine/`, decoupled from the pure domain model in `@pencel/editor-core`.
 - **Backend (`@pencel/api`):** Node.js (>= 22.19 / 24.11+), Express 5, TypeScript.
-- **Iconografia:** `lucide-react` (Licença ISC), acessada exclusivamente pela camada de abstração `<Icon />` (`apps/web/src/components/ui/Icon/`).
-- **Qualidade e Testes:** Vitest, Testing Library, Supertest, ESLint 9 (Flat Config) e Prettier.
-- **Proibição de sistemas concorrentes de estilização:** Não adicione Tailwind CSS, styled-components, Emotion ou outras bibliotecas de CSS-in-JS sem um ADR formal aprovado.
+- **Iconography:** `lucide-react` (ISC License), accessed exclusively through the `<Icon />` abstraction layer (`apps/web/src/components/ui/Icon/`).
+- **Quality and Testing:** Vitest, Testing Library, Supertest, ESLint 9 (Flat Config), and Prettier.
+- **Prohibition of Competing Styling Systems:** Do not introduce Tailwind CSS, styled-components, Emotion, or other CSS-in-JS libraries without a formally approved ADR.
 
 ---
 
-## 2. Estrutura da Aplicação e Limites de Pacotes
+## 2. Monorepo Structure and Package Boundaries
 
-- `apps/web/`: Interface gráfica React do editor.
-- `apps/api/`: Servidor HTTP Express independente (capaz de iniciar sem banco de dados ou serviços externos na fase inicial).
-- `packages/design-tokens/`: Tokens CSS globais (`tokens.css`, `theme-light.css`, `theme-dark.css`).
-- `packages/editor-core/`: Modelo conceitual de documento, elementos, comandos, histórico e serialização em TypeScript puro (sem dependência de React, DOM ou Fabric.js).
-- `packages/shared-types/`: Contratos e tipos compartilhados entre frontend, backend e core.
+- `apps/web/`: Graphic editor React interface.
+- `apps/api/`: Standalone Express HTTP server (capable of starting without a database or external services in its initial phase).
+- `packages/design-tokens/`: Global CSS tokens (`tokens.css`, `theme-light.css`, `theme-dark.css`).
+- `packages/editor-core/`: Conceptual document model, elements, commands, history, and serialization in pure TypeScript (zero dependencies on React, DOM, or Fabric.js).
+- `packages/shared-types/`: Shared contracts and TypeScript types across frontend, backend, and core.
 
-**Direção estrita de dependências (dependências circulares são proibidas):**
+**Strict Dependency Direction (Circular dependencies are strictly forbidden):**
 
-- `shared-types` → nenhuma dependência interna.
-- `editor-core` → depende apenas de `shared-types`.
-- `design-tokens` → nenhuma dependência de código.
-- `web` → pode importar `design-tokens`, `editor-core` e `shared-types`.
-- `api` → pode importar `shared-types` e `editor-core`.
-
----
-
-## 3. Convenções de Nomes
-
-- **Componentes React e Arquivos de Componente:** `PascalCase` (ex.: `TopToolbar.tsx`, `TopToolbar.module.css`).
-- **Hooks customizados:** `camelCase` iniciando com `use` (ex.: `useCanvasEngine.ts`, `useTheme.ts`).
-- **Utilitários, modelos e módulos de domínio:** `camelCase` (ex.: `documentFactory.ts`, `iconRegistry.ts`).
-- **Constantes globais e variáveis de ambiente:** `UPPER_SNAKE_CASE`.
-- **Tokens CSS:** `kebab-case` com prefixo semântico (`--color-*`, `--space-*`, `--font-*`, `--radius-*`, `--shadow-*`).
+- `shared-types` → zero internal dependencies.
+- `editor-core` → depends only on `shared-types`.
+- `design-tokens` → zero code dependencies.
+- `web` → may import `design-tokens`, `editor-core`, and `shared-types`.
+- `api` → may import `shared-types` and `editor-core`.
 
 ---
 
-## 4. Regras de Tipagem (TypeScript)
+## 3. Naming Conventions
 
-- Compilação estrita obrigatória (`strict: true`, `noUncheckedIndexedAccess: true`).
-- O uso de `any` é proibido; utilize `unknown` com refinamento explícito (_type guards_) em fronteiras externas.
-- Não suprima erros com `@ts-ignore`.
-- Todas as propriedades de componentes e retornos de funções públicas de pacotes devem possuir tipagem explícita.
-
----
-
-## 5. Organização dos Componentes e Estado
-
-- Componentes reutilizáveis genéricos residem em `apps/web/src/components/ui/`.
-- Estruturas de página residem em `apps/web/src/components/layout/`.
-- Lógica e componentes específicos do editor residem em `apps/web/src/features/editor/`.
-- Não concentre lógica de negócio em `App.tsx`.
-- Separe claramente: (1) Modelo do Documento, (2) Estado da Interface, (3) Estado de Seleção, (4) Representação no Canvas (`Fabric.js`) e (5) Formato de Persistência.
+- **React Components and Component Files:** `PascalCase` (e.g., `TopToolbar.tsx`, `TopToolbar.module.css`).
+- **Custom Hooks:** `camelCase` starting with `use` (e.g., `useCanvasEngine.ts`, `useTheme.ts`).
+- **Utilities, Domain Models, and Helper Modules:** `camelCase` (e.g., `documentFactory.ts`, `iconRegistry.ts`).
+- **Global Constants and Environment Variables:** `UPPER_SNAKE_CASE`.
+- **CSS Tokens:** `kebab-case` with semantic prefixes (`--color-*`, `--space-*`, `--font-*`, `--radius-*`, `--shadow-*`).
 
 ---
 
-## 6. Princípios do Design System (Apple-Inspired)
+## 4. TypeScript Typing Rules
 
-- Todas as cores, espaçamentos, fontes, bordas e sombras devem vir de `@pencel/design-tokens`.
-- Mantenha paridade total entre o tema claro (`[data-theme="light"]`) e o tema escuro (`[data-theme="dark"]`).
-- Priorize a deferência ao conteúdo: barras e painéis neutros para destacar o palco do canvas.
-- Aplique `font-variant-numeric: tabular-nums` em todos os campos e indicadores numéricos.
-- Garanta acessibilidade desde a base: contraste mínimo WCAG AA, navegação completa por teclado, `:focus-visible` nítido, `aria-label` em controles somente com ícone e suporte a `prefers-reduced-motion`.
-
----
-
-## 7. Regras de Licenciamento e Propriedade Intelectual
-
-- **Proibido embutir ativos restritos da Apple:** Não incorpore arquivos de fonte (`SF Pro`, `SF Mono`, `New York`), arquivos ou vetores do `SF Symbols`, ou templates de UI Kits da Apple ao pacote web.
-- **Proibido copiar ativos de terceiros:** Não copie código-fonte, marcas, logotipos, gradientes proprietários ou templates do Canva ou de outras ferramentas comerciais.
-- Toda biblioteca de ícones, fontes ou mídia adicionada deve possuir licença aberta compatível com distribuição web (MIT, ISC, Apache-2.0, OFL).
+- Mandatory strict compilation (`strict: true`, `noUncheckedIndexedAccess: true`).
+- The use of `any` is forbidden; use `unknown` with explicit type guards at external boundaries.
+- Never suppress errors with `@ts-ignore`.
+- All component props and public package function return types must have explicit typing.
 
 ---
 
-## 8. Política de Segurança e Governança de Ambiente
+## 5. Component and State Organization
 
-- Nunca crie credenciais fictícias que se passem por segredos reais nem exponha chaves ou tokens no código-fonte.
-- Mantenha apenas modelos seguros em `.env.example`.
-- **Proibição de alterações destrutivas:** Não exclua arquivos importantes, não sobrescreva configurações sem análise, não altere a política global de execução do PowerShell e não instale pacotes globais sem necessidade e autorização explícita do usuário.
-- No Windows/PowerShell, utilize `npm.cmd` e `npx.cmd` quando necessário para evitar bloqueios de política de scripts `.ps1`.
-
----
-
-## 9. Procedimento para Adicionar Dependências
-
-Antes de instalar qualquer nova dependência (`docs/architecture/dependency-policy.md`):
-
-1. Verifique se a capacidade já está disponível na plataforma web ou nas dependências existentes.
-2. Confirme manutenção ativa, tipagem TypeScript e compatibilidade com React 19 / Node 24.
-3. Verifique se a licença é permissiva.
-4. Avalie o impacto no tamanho do bundle.
-5. Registre um ADR em `docs/architecture/decisions/` quando a dependência tiver impacto arquitetural.
+- Generic reusable components reside in `apps/web/src/components/ui/`.
+- Page and shell layouts reside in `apps/web/src/components/layout/`.
+- Editor-specific domain logic and components reside in `apps/web/src/features/editor/`.
+- Do not concentrate business logic in `App.tsx`.
+- Strictly separate: (1) Document Model, (2) UI State, (3) Selection State, (4) Canvas Representation (`Fabric.js`), and (5) Persistence Format.
 
 ---
 
-## 10. Requisitos Mínimos de Testes, Decisões e Honestidade Técnica
+## 6. Design System Principles (Apple-Inspired)
 
-- Toda alteração deve passar por `npm.cmd run typecheck`, `npm.cmd run lint`, `npm.cmd run format:check`, `npm.cmd run test` e `npm.cmd run build`.
-- **Obrigação de registrar decisões arquiteturais:** Decisões técnicas relevantes devem ser documentadas em `docs/architecture/decisions/` (formato ADR).
-- **Proibição de funcionalidades fictícias:** Nunca implemente botões ou fluxos enganosos apenas para aparentar que recursos futuros (como desfazer/refazer completo, exportação avançada ou banco de dados) já estão prontos.
-- **Transparência sobre testes e estado:** Nunca declare que um comando, build ou teste funcionou sem tê-lo executado e verificado seu resultado real.
+- All colors, spacing, typography, borders, and shadows must originate from `@pencel/design-tokens`.
+- Maintain complete parity between Light Theme (`[data-theme="light"]`) and Dark Theme (`[data-theme="dark"]`).
+- Prioritize deference to content: neutral chrome, toolbars, and inspectors that let the canvas stage stand out.
+- Apply `font-variant-numeric: tabular-nums` to all numeric displays, inputs, and coordinates.
+- Ensure baseline accessibility: WCAG AA contrast ratio, full keyboard navigability, clear `:focus-visible` styling, explicit `aria-label` on icon-only controls, and `prefers-reduced-motion` compliance.
+
+---
+
+## 7. Licensing and Intellectual Property Rules
+
+- **Prohibition of Proprietary Apple Assets:** Do not bundle proprietary Apple font files (`SF Pro`, `SF Mono`, `New York`), Apple UI kits, or Apple SF Symbols binary vectors into the web application.
+- **Prohibition of Copying Commercial Assets:** Do not duplicate source code, trademarks, proprietary brand gradients, or templates from Canva, Adobe, or other commercial tools.
+- Every icon library, font, or external media asset introduced must have an open-source license compatible with web distribution (MIT, ISC, Apache-2.0, OFL).
+
+---
+
+## 8. Security and Environment Governance
+
+- Never commit fictitious credentials masquerading as real secrets or hardcode sensitive API keys in source code.
+- Provide safe reference templates in `.env.example`.
+- **Prohibition of Destructive Changes:** Do not delete critical files, overwrite configurations without prior analysis, alter global PowerShell execution policies, or install global packages without explicit user approval.
+- On Windows / PowerShell, use `npm.cmd` and `npx.cmd` when necessary to prevent `.ps1` execution policy restrictions.
+
+---
+
+## 9. Dependency Management Protocol
+
+Before introducing any new dependency ([`docs/architecture/dependency-policy.md`](./docs/architecture/dependency-policy.md)):
+
+1. Confirm the required capability is not already available in the web platform or existing dependencies.
+2. Verify active maintenance, native TypeScript typings, and full compatibility with React 19 and Node 24.
+3. Verify that the license is permissive.
+4. Measure and evaluate the impact on production bundle size.
+5. Record an Architecture Decision Record (ADR) in `docs/architecture/decisions/` whenever introducing a significant architectural dependency.
+
+---
+
+## 10. Minimum Quality Gates, ADRs, and Technical Integrity
+
+- Every modification must pass `npm.cmd run typecheck`, `npm.cmd run lint`, `npm.cmd run format:check`, `npm.cmd run test`, and `npm.cmd run build`.
+- **Obligation to Record Architectural Decisions:** Document all significant decisions in `docs/architecture/decisions/` (ADR format).
+- **Prohibition of Mock/Fictitious Features:** Never implement deceptive UI flows or non-functional placeholder buttons just to pretend future capabilities (such as full undo/redo, advanced export, or databases) are complete.
+- **Absolute Transparency on State and Tests:** Never claim a command, test, or build passed without having actually executed it and inspected its genuine output.

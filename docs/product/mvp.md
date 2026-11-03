@@ -1,25 +1,28 @@
-# Escopo de Evolução e MVP (`mvp.md`)
+# Scope of Evolution and MVP Roadmap (`mvp.md`)
 
-Este documento distingue claramente o que faz parte desta **Etapa 1 (Fundação Técnica)** e o que será construído progressivamente nas próximas etapas rumo ao MVP completo.
-
----
-
-## 1. Entregue na Etapa 1 — Fundação Técnica (Atual)
-
-- Monorepositório npm Workspaces configurado e validado (`apps/web`, `apps/api`, `packages/design-tokens`, `packages/editor-core`, `packages/shared-types`).
-- Pesquisa documentada das fontes oficiais da Apple e definição de licenciamento seguro de fontes e ícones.
-- 8 Skills do Antigravity (`.agents/skills/*/SKILL.md`) e regras permanentes (`AGENTS.md`).
-- Design System inicial com tokens semânticos, temas Claro e Escuro e componentes base (`Icon`, `Button`, `Input`, `Tabs`, `Panel`, `Toolbar`, `Badge`, `Tooltip`, `Dialog`).
-- Interface estrutural do editor com Barra Superior, Navegação Lateral, Área Central do Canvas (com adaptador inicial `Fabric.js` isolado e ciclo seguro de mount/cleanup) e Painel Inspetor de Propriedades.
-- Núcleo conceitual `@pencel/editor-core` com tipos de documento, página, elementos, presets e serialização JSON versionada.
-- API Express mínima com validação de ambiente, rota `/api/v1/health` e tratamento de erros.
-- Suíte de testes automatizados (Vitest), lint (ESLint), formatação (Prettier) e pipeline de CI (GitHub Actions).
+This document defines the delivered features and the progressive development roadmap toward the full production-grade MVP.
 
 ---
 
-## 2. Planejado para as Próximas Etapas (Não Simulado na Etapa 1)
+## 1. Core Architecture and Delivered Features
 
-- **Etapa 2 — Manipulação Interativa no Canvas:** Criação, seleção, movimentação, redimensionamento e rotação bidirecional de formas e textos sincronizados com `@pencel/editor-core`.
-- **Etapa 3 — Histórico Completo e Comandos:** Pilha funcional de `Undo/Redo`, duplicação, exclusão, ordenação de camadas (`z-index`) e atalhos de teclado.
-- **Etapa 4 — Tipografia e Ativos de Imagem:** Edição rica de texto no canvas, upload local seguro de imagens e catálogo inicial de composições próprias.
-- **Etapa 5 — Exportação e Persistência:** Exportação real para PNG/JPG/SVG/JSON e integração opcional com PostgreSQL na API para salvamento de projetos.
+- Modular npm Workspaces monorepo (`apps/web`, `apps/api`, `packages/design-tokens`, `packages/editor-core`, `packages/shared-types`).
+- Apple HIG research and 100% open-source, web-compliant asset licensing governance.
+- 8 specialized operational agent skills (`.agents/skills/*/SKILL.md`) and permanent repository rules (`AGENTS.md`).
+- Multi-theme Design System with semantic CSS tokens, complete Light/Dark parity, and Apple-inspired glass materials.
+- High-performance Studio interface: Top Control Bar, Collapsible Side Navigation, Infinite Canvas Stage (with isolated Fabric.js engine adapter and clean lifecycle management), and Property Inspector.
+- Pure TypeScript `@pencel/editor-core` domain models: documents, artboard pages, graphic elements (text, vector shapes, images, paths), preset catalogs, and schema-versioned JSON serialization.
+- Autonomous AI Layout Generator with multi-provider Bring Your Own Key (BYOK) support (Google Gemini, Anthropic Claude, OpenAI, DeepSeek).
+- Camera Raw photo adjustments (non-destructive brightness, contrast, saturation, hue, blur, noise, pixelate).
+- In-browser and API-assisted background removal.
+- Standalone Express 5 API with environment validation, health check `/api/v1/health`, rate limiting, defensive security headers, and media proxy endpoints.
+- Full automated test suite (Vitest), linter (ESLint 9), formatter (Prettier), and automated CI quality gate (GitHub Actions).
+
+---
+
+## 2. Progressive Product Roadmap
+
+- **Milestone 1 — Real-time Vector Enhancements:** Advanced Bézier curve editing, pen tool refinements, boolean shape operations (union, subtract, intersect).
+- **Milestone 2 — Advanced Typography & OpenType:** Web-safe font pairings, tracking/kerning, variable font axes, and curved text paths.
+- **Milestone 3 — Production Cloud Persistence & Collaboration:** Optional database sync (PostgreSQL/Supabase), collaborative sessions via WebSockets / CRDTs, and cloud asset storage (S3/R2).
+- **Milestone 4 — High-Resolution Vector Export:** Multi-format export engine supporting high-DPI rasterization (1x, 2x, 3x PNG/JPEG), vector SVG, and print-ready CMYK PDF.

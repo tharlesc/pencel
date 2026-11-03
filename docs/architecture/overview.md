@@ -1,26 +1,26 @@
-# Visão Geral da Arquitetura — Pencel
+# Architecture Overview — Pencel
 
-O **Pencel** é estruturado como um monorepositório modular baseado em **npm Workspaces**, projetado para suportar a evolução contínua de um editor gráfico web profissional sem acoplamento prematuro entre interface, motor de renderização e serviços de backend.
+**Pencel** is structured as a modular monorepo powered by **npm Workspaces**, engineered to support the continuous evolution of a professional web graphics editor without premature coupling between UI presentation, canvas rendering, and backend services.
 
 ---
 
-## 1. Diagrama de Arquitetura e Fronteiras de Pacotes
+## 1. High-Level Architecture Diagram and Package Boundaries
 
 ```mermaid
 flowchart TD
-    subgraph Apps["Aplicações (apps/)"]
+    subgraph Apps["Applications (apps/)"]
         WEB["@pencel/web\n(React 19 + Vite + CSS Modules)"]
         API["@pencel/api\n(Node.js + Express 5)"]
     end
 
-    subgraph Engine["Camada de Adaptação Gráfica (apps/web/src/features/editor/engine/)"]
-        FABRIC["FabricCanvasAdapter\n(Fabric.js 6)"]
+    subgraph Engine["Graphics Engine Adapter (apps/web/src/features/editor/engine/)"]
+        FABRIC["FabricCanvasAdapter\n(Fabric.js 7)"]
     end
 
-    subgraph Packages["Pacotes Compartilhados (packages/)"]
-        TOKENS["@pencel/design-tokens\n(CSS Variables + Light/Dark Themes)"]
-        CORE["@pencel/editor-core\n(Modelo de Documento, Comandos, Serialização)"]
-        TYPES["@pencel/shared-types\n(Contratos e Tipos Base)"]
+    subgraph Packages["Shared Packages (packages/)"]
+        TOKENS["@pencel/design-tokens\n(CSS Custom Properties + Light/Dark Themes)"]
+        CORE["@pencel/editor-core\n(Document Model, Commands, Math & Serialization)"]
+        TYPES["@pencel/shared-types\n(Shared Types & API Contracts)"]
     end
 
     WEB --> TOKENS
@@ -35,37 +35,39 @@ flowchart TD
 
 ---
 
-## 2. Responsabilidades de Cada Workspace
+## 2. Workspace Responsibilities and Boundaries
 
 ### 2.1 `@pencel/shared-types` (`packages/shared-types`)
 
-- **Papel:** Fonte única da verdade para contratos de dados transversais (identificadores, presets de dimensões, payloads de saúde da API, metadados de projeto).
-- **Restrições:** Zero dependências de outros pacotes do workspace ou de bibliotecas de UI/DOM.
+- **Role:** Single source of truth for cross-cutting data contracts (IDs, dimension presets, API health payloads, project metadata, format definitions).
+- **Constraints:** Zero dependencies on other workspace packages or external UI/DOM libraries.
 
 ### 2.2 `@pencel/editor-core` (`packages/editor-core`)
 
-- **Papel:** Modelagem conceitual pura do domínio do editor gráfico:
-  - `document/`: Criação e manipulação imutável de documentos (`DesignDocument`), páginas (`DesignPage`) e elementos (`GraphicElement`: texto, forma, imagem).
-  - `commands/`: Contratos de comando para operações determinísticas.
-  - `history/`: Estrutura base de pilha de estados (preparada para futuro `undo/redo`).
-  - `serialization/`: Esquema de serialização/desserialização JSON versionado com validação segura.
-- **Restrições:** Proibido importar `react`, `react-dom`, `fabric` ou APIs exclusivas do navegador. Deve compilar e rodar testes unitários em ambiente Node puro.
+- **Role:** Pure domain logic and conceptual modeling for the graphics editor:
+  - `document/`: Immutable creation and manipulation of documents (`DesignDocument`), artboard pages (`DesignPage`), and elements (`GraphicElement`: text, shapes, images, paths).
+  - `commands/`: Deterministic command contracts and execution pipelines.
+  - `history/`: State snapshot stack for bidirectional `undo/redo`.
+  - `math/`: Pure coordinate space transformations, ruler calculations, snapping algorithms, and guides.
+  - `serialization/`: Versioned JSON envelope serialization and schema validation.
+- **Constraints:** Forbidden from importing `react`, `react-dom`, `fabric`, or browser-only DOM globals. Must compile and run unit tests in a pure Node environment.
 
 ### 2.3 `@pencel/design-tokens` (`packages/design-tokens`)
 
-- **Papel:** Centralizar todas as variáveis CSS semânticas de cores, tipografia, espaçamento, dimensões de layout, bordas, sombras e transições, além dos temas claro e escuro.
-- **Restrições:** Contém apenas folhas de estilo CSS puras e metadados de pacote.
+- **Role:** Centralized repository of all semantic CSS custom properties for colors, typography, spacing, layout metrics, border radii, shadows, and transitions, alongside complete Light and Dark theme palettes.
+- **Constraints:** Contains only pure CSS style files and package metadata.
 
 ### 2.4 `@pencel/web` (`apps/web`)
 
-- **Papel:** Aplicação cliente SPA em React + TypeScript + Vite.
-- **Organização interna:**
-  - `components/ui/`: Componentes base do design system (`Button`, `Icon`, `Input`, `Tabs`, `Panel`, `Toolbar`, `Badge`, `Tooltip`, `Dialog`).
-  - `components/layout/`: Shell estrutural de 4 zonas inspirado em aplicativos criativos de desktop da Apple.
-  - `features/editor/`: Estado da sessão de edição, hooks, componentes de palco/inspetor e o adaptador isolado para `Fabric.js` (`features/editor/engine/`).
-  - `features/projects/`, `features/assets/`, `features/export/`: Módulos estruturados para expansão progressiva.
+- **Role:** High-performance SPA client application built with React 19, TypeScript, and Vite.
+- **Internal Organization:**
+  - `components/ui/`: Reusable design system primitives (`Button`, `Icon`, `Input`, `Tabs`, `Panel`, `Toolbar`, `Badge`, `Tooltip`, `Dialog`).
+  - `components/layout/`: 4-zone structural shell inspired by desktop creative suites.
+  - `features/editor/`: Session state, custom hooks, canvas stage, property inspectors, and the isolated `Fabric.js` engine adapter (`features/editor/engine/`).
+  - `features/ai/`: Autonomous AI generation engine with BYOK multi-provider support.
+  - `features/image/`: Camera Raw adjustments, background removal, and media library.
 
 ### 2.5 `@pencel/api` (`apps/api`)
 
-- **Papel:** Servidor HTTP em Node.js + Express + TypeScript, com validação de configuração de ambiente, tratamento centralizado de erros e módulo de verificação de saúde (`/api/v1/health`).
-- **Independência operacional:** Executa de forma totalmente autônoma sem exigir banco de dados ativo ou credenciais externas nesta fundação, mantendo pontos claros de extensão para persistência futura em PostgreSQL.
+- **Role:** Node.js + Express 5 + TypeScript HTTP service providing environment validation, security headers, rate limiting, health probes (`/api/v1/health`), server-side AI proxying, and media proxies for external visual catalogs (Unsplash, Pexels, GIPHY).
+- **Operational Independence:** Operates completely standalone without requiring an external database, while maintaining clear extension points for future cloud persistence.

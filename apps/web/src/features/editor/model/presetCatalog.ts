@@ -15,50 +15,50 @@ export interface VisualTemplate {
 export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
   {
     id: 'flash-sale',
-    name: 'Super Promoção 50% OFF',
-    category: 'Vendas & E-commerce',
-    description: 'Design de alto impacto com badge chamativo, tipografia bold e botão de ação.',
+    name: 'Flash Sale 50% OFF',
+    category: 'Sales & E-commerce',
+    description: 'High-impact design with attention badge, bold typography, and action button.',
     previewBg: '#111113',
     previewAccent: '#FF3B30',
     badgeText: '50% OFF',
-    headlineText: 'SUPER PROMOÇÃO',
+    headlineText: 'FLASH SALE',
   },
   {
     id: 'quote-post',
-    name: 'Citação Inspiradora',
-    category: 'Redes Sociais & Frases',
-    description: 'Estilo editorial minimalista com aspas marcantes e tipografia balanceada.',
+    name: 'Inspiring Quote',
+    category: 'Social Media & Quotes',
+    description: 'Minimalist editorial style with prominent quotation marks and balanced typography.',
     previewBg: '#F5F5F7',
     previewAccent: '#0071E3',
-    badgeText: 'INSPIRAÇÃO',
-    headlineText: 'Design é como funciona.',
+    badgeText: 'INSPIRATION',
+    headlineText: 'Design is how it works.',
   },
   {
     id: 'product-launch',
-    name: 'Lançamento de Produto',
-    category: 'Marketing & Lançamento',
-    description: 'Layout sofisticado com card elevado, tag de novidade e botão de descoberta.',
+    name: 'Product Launch',
+    category: 'Marketing & Launches',
+    description: 'Sophisticated layout with elevated card, novelty badge, and discovery button.',
     previewBg: '#0E0E10',
     previewAccent: '#30D158',
-    badgeText: 'NOVIDADE',
-    headlineText: 'NOVA COLEÇÃO',
+    badgeText: 'NEW RELEASE',
+    headlineText: 'NEW COLLECTION',
   },
   {
     id: 'event-webinar',
-    name: 'Workshop / Live Especial',
-    category: 'Eventos & Aulas',
-    description: 'Composição profissional com data, horário e elementos gráficos para anúncios.',
+    name: 'Live Workshop & Webinar',
+    category: 'Events & Education',
+    description: 'Professional composition with date, time, and promotional graphic elements.',
     previewBg: '#192841',
     previewAccent: '#0A84FF',
-    badgeText: 'AO VIVO',
-    headlineText: 'Workshop de Design',
+    badgeText: 'LIVE',
+    headlineText: 'Design Masterclass',
   },
   {
     id: 'open-design-hero',
-    name: 'Hero Tech SaaS (Open Design)',
+    name: 'Tech SaaS Hero (Open Design)',
     category: 'Web & UI Design',
     description:
-      'Header moderno em glassmorphism com tipografia limpa, badge de versão e call-to-action futurista.',
+      'Modern glassmorphic header with clean typography, version badge, and futuristic call-to-action.',
     previewBg: '#090A0F',
     previewAccent: '#0071E3',
     badgeText: 'OPEN DESIGN',
@@ -66,10 +66,10 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
   },
   {
     id: 'open-design-carousel',
-    name: 'Carrossel Editorial (Open Design)',
-    category: 'Redes Sociais & Carrossel',
+    name: 'Editorial Carousel (Open Design)',
+    category: 'Social Media & Carousels',
     description:
-      'Composição editorial contínua para Instagram com paginação elegante e contraste suíço.',
+      'Seamless multi-slide editorial composition for social feeds with Swiss contrast.',
     previewBg: '#1C1C1E',
     previewAccent: '#FF9F0A',
     badgeText: '01 / 05',
@@ -77,10 +77,10 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
   },
   {
     id: 'open-design-poster',
-    name: 'Pôster Tipográfico Suíço (Open Design)',
-    category: 'Design Gráfico & Arte',
+    name: 'Swiss Typographic Poster (Open Design)',
+    category: 'Graphic Design & Posters',
     description:
-      'Estilo tipográfico internacional de alta precisão com grid geométrico e foco em ritmo visual.',
+      'International typographic style with geometric grid and strict visual rhythm.',
     previewBg: '#F2F2F7',
     previewAccent: '#FF3B30',
     badgeText: 'SWISS STYLE',
@@ -88,10 +88,10 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
   },
   {
     id: 'open-design-bento',
-    name: 'Card Bento Métricas (Open Design)',
-    category: 'Marketing & Apresentação',
+    name: 'Bento Metrics Card (Open Design)',
+    category: 'Marketing & Presentation',
     description:
-      'Grid no estilo Apple Bento Box destacando métricas de crescimento e badges de performance.',
+      'Apple-inspired Bento Box grid highlighting key growth metrics and performance badges.',
     previewBg: '#121316',
     previewAccent: '#30D158',
     badgeText: 'METRICS',
@@ -111,8 +111,8 @@ export interface StockPhoto {
 export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   {
     id: 'photo-workspace',
-    name: 'Workspace Minimalista',
-    category: 'Negócios',
+    name: 'Minimalist Workspace',
+    category: 'Business',
     url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=320&q=75',
@@ -120,8 +120,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-laptop',
-    name: 'Setup Criativo',
-    category: 'Tecnologia',
+    name: 'Creative Setup',
+    category: 'Technology',
     url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=320&q=75',
@@ -129,7 +129,7 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-coffee',
-    name: 'Café & Inspiração',
+    name: 'Coffee & Inspiration',
     category: 'Lifestyle',
     url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
@@ -138,8 +138,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-architecture',
-    name: 'Arquitetura Moderna',
-    category: 'Arquitetura',
+    name: 'Modern Architecture',
+    category: 'Architecture',
     url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=320&q=75',
@@ -147,8 +147,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-nature',
-    name: 'Paisagem Serenidade',
-    category: 'Natureza',
+    name: 'Serene Landscape',
+    category: 'Nature',
     url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=320&q=75',
@@ -156,8 +156,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-portrait',
-    name: 'Retrato Expressivo',
-    category: 'Pessoas',
+    name: 'Expressive Portrait',
+    category: 'People',
     url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=320&q=75',
@@ -165,8 +165,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-code',
-    name: 'Código & Engenharia',
-    category: 'Tecnologia',
+    name: 'Code & Engineering',
+    category: 'Technology',
     url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=320&q=75',
@@ -174,8 +174,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-mountain',
-    name: 'Montanhas & Horizonte',
-    category: 'Natureza',
+    name: 'Mountains & Horizon',
+    category: 'Nature',
     url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=320&q=75',
@@ -183,8 +183,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-urban',
-    name: 'Metrópole Noturna',
-    category: 'Arquitetura',
+    name: 'Night Metropolis',
+    category: 'Architecture',
     url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=320&q=75',
@@ -192,8 +192,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-art',
-    name: 'Pintura Abstrata',
-    category: 'Abstrato',
+    name: 'Abstract Canvas',
+    category: 'Abstract',
     url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=320&q=75',
@@ -201,8 +201,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-team',
-    name: 'Colaboração & Equipe',
-    category: 'Negócios',
+    name: 'Team Collaboration',
+    category: 'Business',
     url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=320&q=75',
@@ -210,8 +210,8 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
   },
   {
     id: 'photo-plant',
-    name: 'Design Botânico',
-    category: 'Natureza',
+    name: 'Botanical Harmony',
+    category: 'Nature',
     url: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1200&q=85',
     thumbUrl:
       'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=320&q=75',
@@ -220,18 +220,18 @@ export const CURATED_STOCK_PHOTOS: readonly StockPhoto[] = [
 ];
 
 export const CANVA_PALETTE_SWATCHES = [
-  { label: 'Branco Estúdio', value: '#FBFBFD' },
-  { label: 'Alabastro Suave', value: '#F4F4F6' },
-  { label: 'Grafite Escuro', value: '#1D1D1F' },
-  { label: 'Carvão Profundo', value: '#121214' },
-  { label: 'Azul Estúdio', value: '#0066CC' },
-  { label: 'Azul Sistema', value: '#0A84FF' },
-  { label: 'Violeta Editorial', value: '#7C3AED' },
-  { label: 'Coral Vibrante', value: '#DC2626' },
-  { label: 'Âmbar Solar', value: '#D97706' },
-  { label: 'Verde Esmeralda', value: '#16A34A' },
-  { label: 'Rosa Carmim', value: '#E11D48' },
-  { label: 'Terracota', value: '#EA580C' },
+  { label: 'Studio White', value: '#FBFBFD' },
+  { label: 'Soft Alabaster', value: '#F4F4F6' },
+  { label: 'Dark Graphite', value: '#1D1D1F' },
+  { label: 'Deep Charcoal', value: '#121214' },
+  { label: 'Studio Blue', value: '#0066CC' },
+  { label: 'System Blue', value: '#0A84FF' },
+  { label: 'Editorial Violet', value: '#7C3AED' },
+  { label: 'Vibrant Coral', value: '#DC2626' },
+  { label: 'Solar Amber', value: '#D97706' },
+  { label: 'Emerald Green', value: '#16A34A' },
+  { label: 'Carmine Rose', value: '#E11D48' },
+  { label: 'Terracotta', value: '#EA580C' },
 ] as const;
 
 export const STUDIO_BACKGROUND_SWATCHES = CANVA_PALETTE_SWATCHES;

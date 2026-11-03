@@ -21,7 +21,7 @@ export function createEmptyDocument(options: CreateDocumentOptions = {}): Design
 
   const initialPage: DesignPage = {
     id: pageId,
-    name: 'Página 1',
+    name: 'Page 1',
     dimensions: {
       width: preset.dimensions.width,
       height: preset.dimensions.height,
@@ -32,7 +32,7 @@ export function createEmptyDocument(options: CreateDocumentOptions = {}): Design
 
   return {
     id: options.id ?? 'doc-initial',
-    title: options.title ?? `${preset.name} sem título`,
+    title: options.title ?? `${preset.name} Untitled`,
     presetId,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -135,7 +135,7 @@ export function addPageToDocument(
 
   const newPage: DesignPage = {
     id: newPageId,
-    name: options?.name ?? `Página ${pageNumber}`,
+    name: options?.name ?? `Page ${pageNumber}`,
     dimensions: options?.dimensions ?? {
       width: active.dimensions.width,
       height: active.dimensions.height,
@@ -168,7 +168,7 @@ export function duplicateActivePage(
   const duplicatedPage: DesignPage = {
     ...active,
     id: newPageId,
-    name: `${active.name} (Cópia)`,
+    name: `${active.name} (Copy)`,
     elements: active.elements.map((el) => ({
       ...el,
       id: `el-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,

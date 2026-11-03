@@ -1,21 +1,21 @@
-# Configuração do Ambiente de Desenvolvimento (`environment-setup.md`)
+# Development Environment Setup (`environment-setup.md`)
 
-Este guia descreve os requisitos e procedimentos para preparar o ambiente de desenvolvimento do **Pencel**, com instruções específicas para **Windows e PowerShell**.
-
----
-
-## 1. Requisitos de Sistema
-
-- **Sistema Operacional:** Windows 10/11, macOS ou Linux.
-- **Node.js:** `v22.19.0+` ou `v24.11.0+` (verificado no ambiente atual: `v24.21.0`).
-- **npm:** `v10+` ou `v11+` (verificado no ambiente atual: `11.19.0`).
-- **Git:** `2.40+` (verificado no ambiente atual: `2.55.0.windows.5`).
+This guide details the system prerequisites and procedures to prepare your local development environment for **Pencel**, including platform-specific recommendations for **Windows and PowerShell**.
 
 ---
 
-## 2. Particularidade do Windows PowerShell (`npm.cmd` e `npx.cmd`)
+## 1. System Prerequisites
 
-Em ambientes Windows onde a política de execução do PowerShell (`ExecutionPolicy`) restringe a execução de wrappers `.ps1` (`npm.ps1`, `npx.ps1`), **não altere a política global do sistema**. Utilize sempre os executáveis de comando nativos `.cmd`:
+- **Operating System:** Windows 10/11, macOS, or Linux.
+- **Node.js:** `v22.19.0+` or `v24.11.0+` LTS (validated with `v24.21.0`).
+- **npm:** `v10+` or `v11+` (validated with `11.19.0`).
+- **Git:** `2.40+`.
+
+---
+
+## 2. Windows PowerShell Conventions (`npm.cmd` and `npx.cmd`)
+
+On Windows systems where the PowerShell script execution policy restricts `.ps1` wrapper execution, **do not alter global system execution policies**. Instead, invoke the native Windows command shims `.cmd` directly:
 
 ```powershell
 node -v
@@ -23,7 +23,7 @@ npm.cmd -v
 git --version
 ```
 
-Para instalar as dependências na raiz do monorepositório:
+To install all workspace dependencies from the repository root:
 
 ```powershell
 npm.cmd install
@@ -31,29 +31,29 @@ npm.cmd install
 
 ---
 
-## 3. Variáveis de Ambiente da API (`apps/api`)
+## 3. Environment Variables Configuration
 
-A API funciona imediatamente com valores padrão seguros de desenvolvimento sem exigir banco de dados ou serviços externos. Caso deseje personalizar a porta ou o ambiente local:
+The backend API functions out-of-the-box with secure local defaults, requiring zero external services or databases:
 
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 ```
 
-Variáveis suportadas em `apps/api/.env.example`:
+Key environment configurations supported in `apps/api/.env.example`:
 
-- `PORT=4000`
-- `HOST=127.0.0.1`
-- `NODE_ENV=development`
-- `CORS_ORIGIN=http://localhost:5173`
+- `PORT=4000`: Local API port.
+- `HOST=127.0.0.1`: Local binding host.
+- `NODE_ENV=development`: Node execution environment.
+- `CORS_ORIGIN=http://localhost:5173`: Allowed origin for the frontend client.
 
 ---
 
-## 4. Integração com Antigravity e REA
+## 4. Google Antigravity & REA Integration
 
-1. **Skills e Regras do Projeto:** Localizadas em `.agents/skills/*/SKILL.md`, `.agents/rules/project-governance.md` e `AGENTS.md` na raiz. O Antigravity as descobre automaticamente ao abrir o workspace.
-2. **Verificação do REA (`rea-agents`):**
-   Para inspecionar o estado de configuração do REA no Antigravity sem modificar arquivos:
+1. **Repository Skills & Governance:** Operational skills are located in `.agents/skills/*/SKILL.md`, rules in `.agents/rules/project-governance.md`, and permanent repository rules in `AGENTS.md`. Antigravity automatically discovers and loads these upon opening the workspace.
+2. **REA Health Verification (`rea-agents`):**
+   To inspect the REA integration status for Antigravity without altering files:
    ```powershell
    npx.cmd --yes rea-agents@latest doctor --client antigravity --skill --json
    ```
-   _(Nota: Após executar `rea setup` pela primeira vez, reinicie o Antigravity para que o servidor MCP registrado em `~/.gemini/config/mcp_config.json` fique ativo como ferramenta na sessão)._
+   _(Note: After running `rea setup` for the first time, restart your Antigravity session so the MCP server registered in `~/.gemini/config/mcp_config.json` is loaded as an active tool)._

@@ -1,8 +1,8 @@
-# Governança de Arquitetura e Qualidade (.agents/rules)
+# Architecture and Quality Governance (.agents/rules)
 
-Esta regra reforça as invariantes operacionais do repositório Pencel:
+This rule reinforces the core operational invariants of the Pencel repository:
 
-1. **Verificação Obrigatória no Workspace:** Sempre execute `npm.cmd run typecheck`, `npm.cmd run lint` e `npm.cmd run test` após alterações de código.
-2. **Isolamento do Motor Gráfico:** O pacote `@pencel/editor-core` deve permanecer agnóstico de framework; toda interação com `fabric` deve ficar restrita a `apps/web/src/features/editor/engine/`.
-3. **Abstração de Iconografia:** Nenhum componente fora de `apps/web/src/components/ui/Icon/` pode importar diretamente `lucide-react`.
-4. **Tokens Semânticos:** É proibido usar cores hexadecimais avulsas nos arquivos `.module.css` de componentes; utilize sempre as variáveis de `@pencel/design-tokens`.
+1. **Mandatory Workspace Validation:** Always run `npm.cmd run typecheck`, `npm.cmd run lint`, and `npm.cmd run test` after any code modification.
+2. **Graphic Engine Isolation:** The `@pencel/editor-core` package must remain framework-agnostic and DOM-free; all interaction with `fabric` is strictly confined to `apps/web/src/features/editor/engine/`.
+3. **Iconography Abstraction:** No component outside `apps/web/src/components/ui/Icon/` is permitted to import directly from `lucide-react`.
+4. **Semantic Tokens:** Direct raw hex colors in component `.module.css` files are forbidden; always utilize CSS Custom Properties defined in `@pencel/design-tokens`.

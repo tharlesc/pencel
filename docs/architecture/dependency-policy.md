@@ -1,36 +1,37 @@
-# Política de Dependências e Segurança (`dependency-policy.md`)
+# Dependency and Security Policy (`dependency-policy.md`)
 
-Toda biblioteca externa adicionada ao monorepositório **Pencel** representa um custo de manutenção, superfície de segurança e impacto no tamanho do pacote. Esta política define os critérios obrigatórios para avaliação e instalação de pacotes.
-
----
-
-## 1. Critérios Obrigatórios Antes de Adicionar uma Dependência
-
-1. **Necessidade Real:** Verifique primeiro se a funcionalidade pode ser resolvida com APIs nativas da plataforma (Web APIs, CSS moderno, `node:*`) ou com dependências já presentes no workspace.
-2. **Responsabilidade Única:** É proibido manter duas bibliotecas que disputem a mesma responsabilidade (por exemplo, duas bibliotecas de ícones, dois sistemas de estilização ou dois clientes HTTP).
-3. **Compatibilidade Técnica:** O pacote deve suportar TypeScript nativamente (ou possuir `@types/*` mantidos), ser compatível com Node.js 24 LTS e React 19, e suportar ESM / _tree-shaking_.
-4. **Licenciamento Compatível com Distribuição Web:**
-   - **Permitidas:** `MIT`, `ISC`, `BSD-2-Clause`, `BSD-3-Clause`, `Apache-2.0`, `OFL-1.1`.
-   - **Proibidas sem revisão jurídica:** `GPL`, `AGPL`, `SSPL`, licenças proprietárias restritas a plataformas específicas (como ativos do Apple SDK/SF Symbols) ou pacotes sem licença declarada.
-5. **Segurança:**
-   - Não instale pacotes com scripts de pós-instalação opacos que baixem binários desconhecidos.
-   - Execute `npm.cmd audit` periodicamente e mantenha o `package-lock.json` versionado.
+Every external library introduced into the **Pencel** monorepo incurs maintenance overhead, expands the security attack surface, and impacts client bundle size. This policy defines the mandatory protocol for evaluating and adding dependencies.
 
 ---
 
-## 2. Dependências Aprovadas na Fundação Inicial
+## 1. Mandatory Evaluation Criteria
 
-| Pacote                             | Escopo              | Licença    | Finalidade                                                                              |
-| :--------------------------------- | :------------------ | :--------- | :-------------------------------------------------------------------------------------- |
-| `react` / `react-dom`              | `@pencel/web`       | MIT        | Biblioteca declarativa de interface de usuário.                                         |
-| `fabric`                           | `@pencel/web`       | MIT        | Motor gráfico interativo HTML5 Canvas (isolado em `features/editor/engine/`).           |
-| `lucide-react`                     | `@pencel/web`       | ISC        | Biblioteca de ícones vetoriais consumida exclusivamente via abstração `<Icon />`.       |
-| `express`                          | `@pencel/api`       | MIT        | Servidor HTTP minimalista para a API REST.                                              |
-| `cors`                             | `@pencel/api`       | MIT        | Configuração controlada de Cross-Origin Resource Sharing entre `web` e `api`.           |
-| `typescript`                       | Raiz (Dev)          | Apache-2.0 | Verificação estática de tipos em todo o monorepositório.                                |
-| `vite` / `@vitejs/plugin-react`    | `@pencel/web` (Dev) | MIT        | Servidor de desenvolvimento rápido e empacotador de produção.                           |
-| `vitest`                           | Raiz (Dev)          | MIT        | Executor de testes unitários e de integração compatível com Vite e TypeScript.          |
-| `@testing-library/react` / `jsdom` | `@pencel/web` (Dev) | MIT        | Testes de componentes React focados em acessibilidade e comportamento.                  |
-| `supertest`                        | `@pencel/api` (Dev) | MIT        | Testes de integração HTTP da API Express sem necessidade de abrir portas de rede reais. |
-| `eslint` / `typescript-eslint`     | Raiz (Dev)          | MIT        | Análise estática de código e aplicação de regras arquiteturais.                         |
-| `prettier`                         | Raiz (Dev)          | MIT        | Formatação padronizada de código.                                                       |
+1. **Demonstrated Need:** Verify first whether the capability can be implemented using modern web platform primitives (Web APIs, modern CSS, `node:*`) or existing workspace utilities.
+2. **Single Responsibility:** Never introduce competing libraries for the same domain (e.g., competing icon sets, multiple CSS styling runtimes, or redundant HTTP clients).
+3. **Technical Compatibility:** Packages must natively support TypeScript (or maintained `@types/*`), remain compatible with Node.js 24 LTS and React 19, and support modern ECMAScript Modules (ESM) with tree-shaking.
+4. **Permissive Web Licensing:**
+   - **Approved:** `MIT`, `ISC`, `BSD-2-Clause`, `BSD-3-Clause`, `Apache-2.0`, `OFL-1.1`.
+   - **Prohibited without explicit legal review:** `GPL`, `AGPL`, `SSPL`, proprietary platform-restricted licenses (such as raw Apple SDK or SF Symbols assets), and packages lacking explicit licenses.
+5. **Security and Integrity:**
+   - Never install packages with opaque post-install scripts downloading unverified remote binaries.
+   - Run `npm audit` regularly and keep `package-lock.json` committed.
+
+---
+
+## 2. Approved Core Dependencies
+
+| Package                            | Scope               | License    | Purpose                                                                     |
+| :--------------------------------- | :------------------ | :--------- | :-------------------------------------------------------------------------- |
+| `react` / `react-dom`              | `@pencel/web`       | MIT        | Declarative user interface runtime.                                         |
+| `fabric`                           | `@pencel/web`       | MIT        | HTML5 Canvas rendering engine (encapsulated in `features/editor/engine/`).  |
+| `lucide-react`                     | `@pencel/web`       | ISC        | Open-source vector icon set accessed solely through `<Icon />` abstraction. |
+| `@huggingface/transformers`        | `@pencel/web`       | Apache-2.0 | In-browser client-side background removal machine learning models.          |
+| `express`                          | `@pencel/api`       | MIT        | Minimalist HTTP server framework.                                           |
+| `cors`                             | `@pencel/api`       | MIT        | Defensive Cross-Origin Resource Sharing control between web client and API. |
+| `typescript`                       | Root (Dev)          | Apache-2.0 | Monorepo-wide static type checking and compilation.                         |
+| `vite` / `@vitejs/plugin-react`    | `@pencel/web` (Dev) | MIT        | Next-generation frontend build tooling and local development server.        |
+| `vitest`                           | Root (Dev)          | MIT        | High-performance unit and integration test runner.                          |
+| `@testing-library/react` / `jsdom` | `@pencel/web` (Dev) | MIT        | Accessible component testing suite.                                         |
+| `supertest`                        | `@pencel/api` (Dev) | MIT        | Fast API integration testing.                                               |
+| `eslint` / `typescript-eslint`     | Root (Dev)          | MIT        | Static linting and code hygiene.                                            |
+| `prettier`                         | Root (Dev)          | MIT        | Deterministic, automated code formatting.                                   |

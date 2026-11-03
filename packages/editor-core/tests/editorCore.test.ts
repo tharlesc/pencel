@@ -80,7 +80,7 @@ describe('@pencel/editor-core domain foundation', () => {
 
     const duplicated = duplicateActivePage(withRenamed);
     expect(duplicated.pages).toHaveLength(3);
-    expect(getActivePage(duplicated).name).toBe('Capa Principal (Cópia)');
+    expect(getActivePage(duplicated).name).toBe('Capa Principal (Copy)');
 
     const switchedBack = setActivePageInDocument(duplicated, doc.pages[0]!.id);
     expect(switchedBack.activePageId).toBe(doc.pages[0]!.id);

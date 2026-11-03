@@ -1,78 +1,80 @@
-# Estrutura de Pastas do Monorepositório
+# Monorepo Directory Structure (`folder-structure.md`)
 
-Este documento descreve a finalidade de cada diretório principal do projeto **Pencel**.
+This document outlines the organization and purpose of each primary directory in the **Pencel** monorepo.
 
 ```text
 pencel/
 ├── apps/
-│   ├── web/                      # Aplicação frontend (React + TypeScript + Vite)
-│   │   ├── public/               # Ativos estáticos públicos (favicon SVG próprio)
+│   ├── web/                      # Frontend client application (React 19 + TypeScript + Vite)
+│   │   ├── public/               # Public static assets (custom brand SVGs, favicons, manifests)
 │   │   ├── src/
-│   │   │   ├── app/              # Inicialização da app, providers (Theme) e rotas/shell
-│   │   │   ├── assets/           # Ativos estáticos importados pelo bundler
+│   │   │   ├── app/              # Application bootstrap, providers (Theme, I18n), and shell
+│   │   │   ├── assets/           # Bundler-imported static graphic assets
 │   │   │   ├── components/
-│   │   │   │   ├── ui/           # Componentes primitivos do Design System (Icon, Button, etc.)
-│   │   │   │   └── layout/       # Estrutura de layout do editor (TopToolbar, Sidebar, Inspector)
+│   │   │   │   ├── ui/           # Design System primitives (Icon, Button, Input, Modal, etc.)
+│   │   │   │   └── layout/       # Structural shell layout (TopToolbar, Sidebar, Inspector)
 │   │   │   ├── features/
-│   │   │   │   ├── editor/       # Domínio de edição no cliente
-│   │   │   │   │   ├── components/ # CanvasStage, PropertyInspector, PresetSelector
-│   │   │   │   │   ├── engine/     # Adaptador isolado do Fabric.js (FabricCanvasAdapter)
-│   │   │   │   │   ├── hooks/      # useCanvasEngine, useEditorSession
-│   │   │   │   │   ├── model/      # Presets e mapeadores locais de visualização
-│   │   │   │   │   ├── state/      # Estado de UI e seleção do editor
-│   │   │   │   │   ├── types/      # Tipos específicos da camada visual do editor
-│   │   │   │   │   └── utils/      # Utilitários de zoom, geometria de viewport e formatação
-│   │   │   │   ├── projects/     # Módulo reservado para gerenciamento de projetos
-│   │   │   │   ├── assets/       # Módulo reservado para biblioteca de mídia/ativos
-│   │   │   │   └── export/       # Módulo reservado para pipeline de exportação
-│   │   │   └── styles/           # Estilos globais e reset que importam @pencel/design-tokens
-│   │   └── tests/                # Testes de componentes e integração do frontend (Vitest)
+│   │   │   │   ├── editor/       # Core client editing domain
+│   │   │   │   │   ├── components/ # CanvasStage, PropertyInspector, PresetSelector, Toolbars
+│   │   │   │   │   ├── engine/     # Isolated Fabric.js canvas adapter (FabricCanvasAdapter)
+│   │   │   │   │   ├── hooks/      # useCanvasEngine, useEditorSession, useRulers
+│   │   │   │   │   ├── model/      # Local view models, stock photo catalogs, swatches
+│   │   │   │   │   ├── state/      # Reactive UI and element selection state
+│   │   │   │   │   ├── types/      # Visual editor types and interfaces
+│   │   │   │   │   └── utils/      # Viewport geometry, zoom transforms, color math
+│   │   │   │   ├── ai/           # Autonomous AI art & layout generator with BYOK integration
+│   │   │   │   ├── image/        # Camera Raw image adjustments and background removal
+│   │   │   │   ├── projects/     # Future project lifecycle and workspace management
+│   │   │   │   └── export/       # Multi-format raster & vector export pipeline
+│   │   │   ├── shared/           # Cross-feature utilities, i18n dictionaries, HTTP client
+│   │   │   └── styles/           # Global styles and resets importing @pencel/design-tokens
+│   │   └── tests/                # Frontend integration & component tests (Vitest + JSDOM)
 │   │
-│   └── api/                      # Aplicação backend (Node.js + Express + TypeScript)
+│   └── api/                      # Backend HTTP service (Node.js + Express 5 + TypeScript)
 │       ├── src/
-│       │   ├── config/           # Leitura e validação de variáveis de ambiente
-│       │   ├── middleware/       # Tratamento centralizado de erros e rotas não encontradas
+│       │   ├── config/           # Environment variable parsing and defensive validation
+│       │   ├── middleware/       # Security headers, rate limiting, and centralized error handling
 │       │   ├── modules/
-│       │   │   └── health/       # Rota e controlador de saúde (/api/v1/health)
-│       │   ├── app.ts            # Instância Express configurada (exportada para testes)
-│       │   └── server.ts         # Ponto de entrada HTTP (listen e graceful shutdown)
-│       └── tests/                # Testes automatizados da API com Vitest + Supertest
+│       │   │   ├── health/       # Health check controller (/api/v1/health)
+│       │   │   ├── ai/           # AI layout generation proxy
+│       │   │   ├── image/        # Background removal processing route
+│       │   │   └── media/        # Curated stock media proxies (Unsplash, Pexels, GIPHY)
+│       │   ├── app.ts            # Configured Express application instance (exported for tests)
+│       │   └── server.ts         # Server entry point (HTTP listen and graceful shutdown)
+│       └── tests/                # Automated API integration tests (Vitest + Supertest)
 │
 ├── packages/
-│   ├── design-tokens/            # Variáveis CSS semânticas e temas (Light & Dark)
+│   ├── design-tokens/            # Semantic CSS custom properties and themes (Light & Dark)
 │   │   └── src/
-│   │       ├── tokens.css        # Escalas de espaçamento, tipografia, raios, sombras e motion
-│   │       ├── theme-light.css   # Cores semânticas do tema claro
-│   │       ├── theme-dark.css    # Cores semânticas do tema escuro
-│   │       └── index.css         # Ponto de entrada agregado do pacote
+│   │       ├── tokens.css        # Spacing scales, typography, radii, elevation shadows, motion
+│   │       ├── theme-light.css   # Semantic Light Theme color definitions
+│   │       ├── theme-dark.css    # Semantic Dark Theme color definitions
+│   │       └── index.css         # Aggregated package entry point
 │   │
-│   ├── editor-core/              # Núcleo agnóstico do editor gráfico (TypeScript puro)
+│   ├── editor-core/              # Pure domain logic for graphics editing (Pure TypeScript)
 │   │   ├── src/
-│   │   │   ├── document/         # Modelo de DesignDocument, DesignPage, GraphicElement
-│   │   │   ├── commands/         # Contratos de comando de edição
-│   │   │   ├── history/          # Estrutura conceitual de histórico de sessão
-│   │   │   ├── serialization/    # Serialização e validação JSON do documento
-│   │   │   └── index.ts          # API pública do pacote
-│   │   └── tests/                # Testes unitários do domínio gráfico
+│   │   │   ├── document/         # Models for DesignDocument, DesignPage, GraphicElement, Presets
+│   │   │   ├── commands/         # Immutable editing command definitions
+│   │   │   ├── history/          # Bidirectional undo/redo history snapshots
+│   │   │   ├── math/             # Pure coordinate transformations, rulers, guides, snapping
+│   │   │   ├── serialization/    # Schema-versioned JSON serialization and validation
+│   │   │   └── index.ts          # Public package API
+│   │   └── tests/                # Pure domain unit tests
 │   │
-│   └── shared-types/             # Contratos TypeScript compartilhados entre todos os pacotes
+│   └── shared-types/             # TypeScript contracts shared across all workspaces
 │       └── src/
 │           └── index.ts
 │
-├── .agents/                      # Customizações do Google Antigravity
-│   ├── rules/                    # Regras contextuais do workspace
-│   └── skills/                   # 8 skills especializadas do projeto (SKILL.md)
+├── .agents/                      # Google Antigravity agent customizations
+│   ├── rules/                    # Contextual governance rules
+│   └── skills/                   # Operational project skills (SKILL.md)
 │
-├── docs/                         # Documentação técnica e de produto
-│   ├── apple-design/             # Pesquisa oficial do Apple HIG, recursos e decisões
-│   ├── architecture/             # Arquitetura, estrutura, políticas e ADRs (decisions/)
-│   ├── development/              # Configuração de ambiente, comandos, testes e troubleshooting
-│   └── product/                  # Visão do produto e definição do MVP
+├── docs/                         # Engineering and product documentation
+│   ├── apple-design/             # Apple HIG research, design guidelines, and licensing
+│   ├── architecture/             # Architecture overviews, policies, and ADRs (decisions/)
+│   ├── development/              # Environment setup, CLI commands, testing, troubleshooting
+│   └── product/                  # Vision statement, scope, and MVP roadmap
 │
-├── scripts/                      # Scripts utilitários de verificação do workspace
-└── .github/workflows/ci.yml      # Pipeline de Integração Contínua (GitHub Actions)
+├── scripts/                      # Developer workflow orchestration scripts
+└── .github/workflows/ci.yml      # Continuous Integration quality gate (GitHub Actions)
 ```
-
-## Justificativa de Ajustes Estruturais
-
-1. Os módulos `projects/`, `assets/` e `export/` no frontend foram posicionados dentro de `apps/web/src/features/` (junto a `features/editor/`) para manter todos os domínios funcionais sob a mesma camada `features/`, evitando duplicidade com `apps/web/src/assets/` (que armazena ativos estáticos de build).

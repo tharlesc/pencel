@@ -1,34 +1,36 @@
-# Estratégia de Testes e Qualidade (`testing.md`)
+# Testing & Quality Strategy (`testing.md`)
 
-O **Pencel** utiliza **Vitest** como executor unificado de testes em todos os pacotes do monorepositório.
-
----
-
-## 1. Camadas de Teste Implementadas na Fundação
-
-### 1.1 Testes de Domínio (`packages/editor-core/tests/`)
-
-- Executados em ambiente Node puro.
-- Validam criação de documentos a partir de presets, adição/atualização de páginas, criação de elementos (`TextElement`, `ShapeElement`, `ImageElement`), histórico conceitual e serialização/desserialização segura com rejeição de schemas inválidos.
-
-### 1.2 Testes de Integração da API (`apps/api/tests/`)
-
-- Executados com `Vitest` + `Supertest` contra a instância Express (`app.ts`) sem necessidade de abrir sockets de rede externos.
-- Validam a rota `/api/v1/health`, o formato do payload de saúde, cabeçalhos e o middleware de rota não encontrada (`404`).
-
-### 1.3 Testes de Componentes e Interface (`apps/web/tests/`)
-
-- Executados em ambiente `jsdom` com `@testing-library/react` e `@testing-library/jest-dom`.
-- Validam a camada de abstração de ícones (`<Icon />` com atributos `aria-label` e `aria-hidden`), a renderização da estrutura principal do editor, a alternância de tema Claro/Escuro e a seleção de formatos de documento.
+**Pencel** uses **Vitest** as its unified test runner across all workspaces in the monorepo.
 
 ---
 
-## 2. Expansão Futura Planejada (Etapas Seguintes)
+## 1. Testing Layers
 
-Quando as ferramentas interativas completas de manipulação no canvas forem implementadas, poderão ser adicionados:
+### 1.1 Pure Domain Tests (`packages/editor-core/tests/`)
 
-- Testes de interação de usuário com `@testing-library/user-event`:
-  ```powershell
-  npm.cmd install --save-dev @testing-library/user-event --workspace=@pencel/web
-  ```
-- Testes End-to-End (E2E) de navegador real com Playwright (não instalado nesta etapa inicial para evitar download de binários pesados de navegadores sem necessidade).
+- Run in a pure Node.js environment without DOM overhead.
+- Validate document creation from presets, artboard additions and modifications, geometric coordinate transformations, snapping algorithms, and schema-versioned JSON serialization/deserialization.
+
+### 1.2 API Integration Tests (`apps/api/tests/`)
+
+- Run using `Vitest` + `Supertest` against the Express application instance (`app.ts`).
+- Validate `/api/v1/health`, error handling, rate limiting middleware, security headers, image background removal endpoints, and media proxy routes.
+
+### 1.3 Component and UI Integration Tests (`apps/web/tests/`)
+
+- Run in `jsdom` with `@testing-library/react` and `@testing-library/jest-dom`.
+- Validate the `<Icon />` abstraction layer (ensuring appropriate `aria-label` and `aria-hidden` attributes), structural editor shell rendering, Light/Dark theme toggling, preset catalog selection, and modal lifecycles.
+
+---
+
+## 2. Running Test Suites
+
+```powershell
+# Run all tests across the monorepo
+npm.cmd run test
+
+# Run tests in a specific package
+npm.cmd run test --workspace=@pencel/editor-core
+npm.cmd run test --workspace=@pencel/api
+npm.cmd run test --workspace=@pencel/web
+```

@@ -1,30 +1,39 @@
-# Solução de Problemas Comuns (`troubleshooting.md`)
+# Troubleshooting Guide (`troubleshooting.md`)
 
 ---
 
-## 1. Erro de Execução de Scripts no PowerShell (`npm.ps1 cannot be loaded`)
+## 1. PowerShell Script Execution Error (`npm.ps1 cannot be loaded`)
 
-- **Causa:** Política de execução restritiva do Windows PowerShell para arquivos `.ps1`.
-- **Solução (sem alterar configurações globais do Windows):** Utilize `npm.cmd` e `npx.cmd` em todos os comandos:
+- **Cause:** Restrictive PowerShell execution policies on Windows regarding unverified `.ps1` script wrappers.
+- **Remedy (without altering global Windows security settings):** Invoke the native `.cmd` command shims:
   ```powershell
   npm.cmd install
   npm.cmd run build
   ```
 
-## 2. Erro de Resolução de Tipos entre Pacotes do Workspace (`Cannot find module '@pencel/...'`)
+---
 
-- **Causa:** Os pacotes internos (`@pencel/shared-types`, `@pencel/editor-core`) ainda não foram compilados ou o `npm.cmd install` na raiz não criou os links simbólicos do workspace.
-- **Solução:**
+## 2. Workspace Package Resolution Error (`Cannot find module '@pencel/...'`)
+
+- **Cause:** Internal shared packages (`@pencel/shared-types`, `@pencel/editor-core`) have not yet been built or npm workspace symlinks are stale.
+- **Remedy:**
   ```powershell
   npm.cmd install
   npm.cmd run build
   ```
 
-## 3. Ferramentas do REA Não Aparecem na Sessão Atual do Antigravity
+---
 
-- **Causa:** O comando `npx.cmd rea-agents@latest setup --client antigravity` atualiza `~/.gemini/config/mcp_config.json` e instala a skill em `~/.gemini/config/skills/reverse-engineer-anything`, mas o cliente Antigravity carrega servidores MCP na inicialização.
-- **Solução:** Reinicie o Antigravity após concluir a configuração inicial do REA.
+## 3. REA Tools Do Not Appear in Active Antigravity Session
 
-## 4. Porta `4000` ou `5173` Já Está em Uso
+- **Cause:** Running `npx.cmd rea-agents@latest setup --client antigravity` updates `~/.gemini/config/mcp_config.json`, but MCP servers are registered during client startup.
+- **Remedy:** Restart your Antigravity session after running setup so new MCP endpoints are activated.
 
-- **Solução:** Defina uma porta alternativa ao iniciar a API (`$env:PORT=4001; npm.cmd run dev:api`) ou passe `--port` ao Vite.
+---
+
+## 4. Port `4000` or `5173` Already in Use
+
+- **Remedy:** Configure an alternative port via environment variables or CLI flags:
+  ```powershell
+  $env:PORT=4001; npm.cmd run dev:api
+  ```
