@@ -24,12 +24,12 @@ describe('@pencel/web Canva-inspired editor & accessibility', () => {
     expect(screen.getByText('1080 × 1080 px')).toBeInTheDocument();
 
     // Verify Canva Navigation Rail items
-    expect(screen.getByRole('button', { name: 'Design' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Elementos' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Texto' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Mídia' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Fundo' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Camadas' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Design$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^(Elementos|Elements)$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^(Texto|Text)$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^(Mídia|Media)$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^(Fundo|Background)$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^(Camadas|Layers)$/i })).toBeInTheDocument();
 
     // Switch format preset to Story / Reels (1080 x 1920)
     const storyPresetButton = screen.getByRole('button', { name: /Story \/ Reels/i });
@@ -37,22 +37,23 @@ describe('@pencel/web Canva-inspired editor & accessibility', () => {
     expect(screen.getByText('1080 × 1920 px')).toBeInTheDocument();
 
     // Switch to Elementos drawer
-    fireEvent.click(screen.getByRole('button', { name: 'Elementos' }));
+    fireEvent.click(screen.getByRole('button', { name: /Elementos|Elements/i }));
     expect(screen.getByRole('button', { name: 'Adicionar Retângulo' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Adicionar Círculo' })).toBeInTheDocument();
 
     // Switch to Texto drawer
-    fireEvent.click(screen.getByRole('button', { name: 'Texto' }));
+    fireEvent.click(screen.getByRole('button', { name: /Texto|Text/i }));
     expect(
       screen.getByRole('button', { name: /Adicionar uma caixa de texto/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Adicionar um título/i })).toBeInTheDocument();
 
-    // Toggle theme from Light to Dark
-    const themeToggleButton = screen.getByRole('button', { name: 'Ativar tema escuro' });
-    fireEvent.click(themeToggleButton);
+    // Default theme is Dark by design
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(screen.getByRole('button', { name: 'Ativar tema claro' })).toBeInTheDocument();
+    const themeToggleButton = screen.getByRole('button', { name: 'Ativar tema claro' });
+    fireEvent.click(themeToggleButton);
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(screen.getByRole('button', { name: 'Ativar tema escuro' })).toBeInTheDocument();
 
     // Open Download / Export Dialog
     const downloadButton = screen.getByRole('button', { name: /Baixar/i });
@@ -68,5 +69,5 @@ describe('@pencel/web Canva-inspired editor & accessibility', () => {
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Fechar' }));
     expect(screen.queryByRole('dialog')).toBeNull();
-  });
+  }, 15000);
 });

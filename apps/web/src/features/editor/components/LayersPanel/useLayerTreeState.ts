@@ -24,6 +24,7 @@ export interface UseLayerTreeStateOptions {
   readonly onSelectMultipleLayers?: (names: readonly string[]) => void;
   readonly onRenameLayer: (oldName: string, newName: string) => void;
   readonly onReorderLayerToIndex?: (name: string, targetVisualIndex: number) => void;
+  readonly onAssignLayerToGroup?: (layerName: string, groupName: string | null) => void;
 }
 
 export interface UseLayerTreeStateReturn {
@@ -57,6 +58,7 @@ export interface UseLayerTreeStateReturn {
   readonly handleDragStart: (e: DragEvent<HTMLDivElement>, name: string) => void;
   readonly handleDragOver: (e: DragEvent<HTMLDivElement>, name: string) => void;
   readonly handleDrop: (e: DragEvent<HTMLDivElement>, targetName: string) => void;
+  readonly handleDropOnRoot: (e: DragEvent<HTMLDivElement>) => void;
   readonly handleDragEnd: () => void;
 }
 
@@ -67,6 +69,7 @@ export function useLayerTreeState({
   onSelectMultipleLayers,
   onRenameLayer,
   onReorderLayerToIndex,
+  onAssignLayerToGroup,
 }: UseLayerTreeStateOptions): UseLayerTreeStateReturn {
   const [filterType, setFilterType] = useState<'all' | 'image' | 'text' | 'shape'>('all');
   const [editingLayerName, setEditingLayerName] = useState<string | null>(null);
@@ -202,9 +205,32 @@ export function useLayerTreeState({
     e.preventDefault();
     const sourceName = draggedName || e.dataTransfer?.getData('text/plain');
     if (sourceName && sourceName !== targetName) {
-      const targetIndex = displayedLayers.findIndex((l) => l.name === targetName);
-      if (targetIndex !== -1 && onReorderLayerToIndex) {
-        onReorderLayerToIndex(sourceName, targetIndex);
+      const sourceLayer = layers.find((l) => l.name === sourceName);
+      const targetLayer = layers.find((l) => l.name === targetName);
+      if (targetLayer?.isGroup && onAssignLayerToGroup) {
+        onAssignLayerToGroup(sourceName, targetLayer.name);
+      } else if (targetLayer?.groupName && onAssignLayerToGroup) {
+        onAssignLayerToGroup(sourceName, targetLayer.groupName);
+      } else if (sourceLayer?.groupName && onAssignLayerToGroup) {
+        onAssignLayerToGroup(sourceName, null);
+      } else {
+        const targetIndex = displayedLayers.findIndex((l) => l.name === targetName);
+        if (targetIndex !== -1 && onReorderLayerToIndex) {
+          onReorderLayerToIndex(sourceName, targetIndex);
+        }
+      }
+    }
+    setDraggedName(null);
+    setDragOverName(null);
+  };
+
+  const handleDropOnRoot = (e: DragEvent<HTMLDivElement>): void => {
+    e.preventDefault();
+    const sourceName = draggedName || e.dataTransfer?.getData('text/plain');
+    if (sourceName) {
+      const sourceLayer = layers.find((l) => l.name === sourceName);
+      if (sourceLayer?.groupName && onAssignLayerToGroup) {
+        onAssignLayerToGroup(sourceName, null);
       }
     }
     setDraggedName(null);
@@ -240,6 +266,7 @@ export function useLayerTreeState({
     handleDragStart,
     handleDragOver,
     handleDrop,
+    handleDropOnRoot,
     handleDragEnd,
   };
 }

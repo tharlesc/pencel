@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build --workspace=@pencel/shared-types && npm run build --workspace=@pencel/editor-core && npm run build --workspace=@pencel/web",
+  "outputDirectory": "apps/web/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -18,6 +18,8 @@ import {
   Rect as FabricRect,
   Textbox as FabricTextbox,
   Triangle as FabricTriangle,
+  Point,
+  util,
   type Canvas as FabricCanvas,
   type FabricObject,
 } from 'fabric';
@@ -238,59 +240,63 @@ export function performBooleanOperationOnCanvas(
   operation: BooleanPathOperation,
   onComplete: () => void,
 ): void {
-  let candidates: FabricObject[] = [];
   const active = fabricCanvas.getActiveObject();
-
-  if (active && active.type === 'activeselection') {
-    candidates = [...(active as ActiveSelection).getObjects()];
-    fabricCanvas.discardActiveObject();
-  } else {
-    const allShapes = fabricCanvas
-      .getObjects()
-      .filter((o) => !o.get('isGroup') && !o.type.toLowerCase().includes('text'));
-    if (active && allShapes.includes(active)) {
-      const others = allShapes.filter((o) => o !== active);
-      const partner = others[others.length - 1];
-      if (partner) {
-        candidates = [partner, active];
-      }
-    } else if (allShapes.length >= 2) {
-      candidates = allShapes.slice(-2);
-    }
+  if (!active || active.type !== 'activeselection') {
+    return;
   }
+
+  const candidates: FabricObject[] = [...(active as ActiveSelection).getObjects()];
+  fabricCanvas.discardActiveObject();
 
   if (candidates.length < 2) return;
   const objA = candidates[0]!;
   const objB = candidates[1]!;
 
   const toWorldPolygon = (obj: FabricObject): Point2D[] => {
-    const b = obj.getBoundingRect();
+    const matrix = obj.calcTransformMatrix();
     const t = obj.type.toLowerCase();
+
+    if (t === 'polygon' && 'points' in obj && Array.isArray((obj as FabricPolygon).points)) {
+      const poly = obj as FabricPolygon;
+      const offsetX = poly.pathOffset?.x ?? 0;
+      const offsetY = poly.pathOffset?.y ?? 0;
+      return poly.points.map((pt) => {
+        const local = new Point(pt.x - offsetX, pt.y - offsetY);
+        const transformed = util.transformPoint(local, matrix);
+        return { x: transformed.x, y: transformed.y };
+      });
+    }
+
+    if (t === 'triangle') {
+      const w = obj.width ?? 100;
+      const h = obj.height ?? 100;
+      const localPts = [new Point(0, -h / 2), new Point(w / 2, h / 2), new Point(-w / 2, h / 2)];
+      return localPts.map((lp) => {
+        const transformed = util.transformPoint(lp, matrix);
+        return { x: transformed.x, y: transformed.y };
+      });
+    }
+
     if (t === 'circle' || t === 'ellipse') {
-      const cx = b.left + b.width / 2;
-      const cy = b.top + b.height / 2;
-      const rx = b.width / 2;
-      const ry = b.height / 2;
+      const rx = (obj.width ?? 100) / 2;
+      const ry = (obj.height ?? 100) / 2;
       const pts: Point2D[] = [];
-      for (let i = 0; i < 24; i++) {
-        const theta = (2 * Math.PI * i) / 24;
-        pts.push({ x: cx + Math.cos(theta) * rx, y: cy + Math.sin(theta) * ry });
+      for (let i = 0; i < 32; i++) {
+        const theta = (2 * Math.PI * i) / 32;
+        const local = new Point(Math.cos(theta) * rx, Math.sin(theta) * ry);
+        const transformed = util.transformPoint(local, matrix);
+        pts.push({ x: transformed.x, y: transformed.y });
       }
       return pts;
     }
-    if (t === 'triangle') {
-      return [
-        { x: b.left + b.width / 2, y: b.top },
-        { x: b.left + b.width, y: b.top + b.height },
-        { x: b.left, y: b.top + b.height },
-      ];
-    }
-    return [
-      { x: b.left, y: b.top },
-      { x: b.left + b.width, y: b.top },
-      { x: b.left + b.width, y: b.top + b.height },
-      { x: b.left, y: b.top + b.height },
-    ];
+
+    const w = (obj.width ?? 100) / 2;
+    const h = (obj.height ?? 100) / 2;
+    const corners = [new Point(-w, -h), new Point(w, -h), new Point(w, h), new Point(-w, h)];
+    return corners.map((c) => {
+      const transformed = util.transformPoint(c, matrix);
+      return { x: transformed.x, y: transformed.y };
+    });
   };
 
   const ringA = toWorldPolygon(objA);
@@ -321,14 +327,7 @@ export function performBooleanOperationOnCanvas(
   const stroke = typeof objA.stroke === 'string' ? objA.stroke : 'transparent';
   const strokeWidth = typeof objA.strokeWidth === 'number' ? objA.strokeWidth : 0;
 
-  const minX = Math.min(...[...ringA, ...ringB].map((p) => p.x));
-  const minY = Math.min(...[...ringA, ...ringB].map((p) => p.y));
-
   const booleanPath = new FabricPath(svgPathData, {
-    originX: 'left',
-    originY: 'top',
-    left: Math.round(minX),
-    top: Math.round(minY),
     fill,
     stroke,
     strokeWidth,
@@ -355,7 +354,25 @@ export function updateSelectedObjectProperties(
   if (props.fill !== undefined) active.set('fill', props.fill);
   if (props.stroke !== undefined) active.set('stroke', props.stroke);
   if (props.strokeWidth !== undefined) active.set('strokeWidth', props.strokeWidth);
+  if (props.strokeDashArray !== undefined)
+    active.set('strokeDashArray', props.strokeDashArray ? [...props.strokeDashArray] : null);
+  if (props.strokeLineCap !== undefined) active.set('strokeLineCap', props.strokeLineCap);
+  if (props.strokeLineJoin !== undefined) active.set('strokeLineJoin', props.strokeLineJoin);
   if (props.opacity !== undefined) active.set('opacity', props.opacity);
+  if (props.blendMode !== undefined) {
+    active.set('globalCompositeOperation', props.blendMode);
+    active.dirty = true;
+    if (
+      'getObjects' in active &&
+      typeof (active as { getObjects?: () => unknown[] }).getObjects === 'function'
+    ) {
+      const children = (active as { getObjects: () => FabricObject[] }).getObjects();
+      children.forEach((child) => {
+        child.set('globalCompositeOperation', props.blendMode);
+        child.dirty = true;
+      });
+    }
+  }
 
   const textObj = active as FabricTextbox;
   if (active.type.toLowerCase().includes('text')) {
@@ -394,4 +411,20 @@ export async function duplicateActiveObject(
   } catch (err) {
     console.warn('Could not duplicate selected object:', err);
   }
+}
+
+export function deleteSelectedObjects(fabricCanvas: FabricCanvas, onCleared: () => void): void {
+  const active = fabricCanvas.getActiveObjects();
+  if (!active || active.length === 0) return;
+  active.forEach((obj) => fabricCanvas.remove(obj));
+  fabricCanvas.discardActiveObject();
+  fabricCanvas.requestRenderAll();
+  onCleared();
+}
+
+export function clearCanvasObjects(fabricCanvas: FabricCanvas, onCleared: () => void): void {
+  [...fabricCanvas.getObjects()].forEach((o) => fabricCanvas.remove(o));
+  fabricCanvas.discardActiveObject();
+  fabricCanvas.requestRenderAll();
+  onCleared();
 }

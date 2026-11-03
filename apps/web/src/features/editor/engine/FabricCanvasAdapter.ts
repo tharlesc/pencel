@@ -1,5 +1,4 @@
 import type { BooleanPathOperation, Point2D } from '@pencel/editor-core';
-import type { Dimensions } from '@pencel/shared-types';
 import type { Canvas as FabricCanvas } from 'fabric';
 import {
   extractSelectedProperties,
@@ -12,13 +11,22 @@ import {
   type SelectedObjectType,
 } from './adapterTypes.js';
 import * as alignDraw from './alignmentAndDrawingEngine.js';
-import { CanvasHistoryState, exportCanvasDataUrl } from './historyAndPageEngine.js';
+import {
+  applyCameraRawToActiveImage,
+  getActiveImageCameraRaw,
+  type CameraRawAdjustments,
+} from './cameraRawEngine.js';
+import { CanvasLayerFacade } from './canvasLayerFacade.js';
+import * as histPage from './historyAndPageEngine.js';
 import * as imgTpl from './imageAndTemplateEngine.js';
-import * as layerGroup from './layerAndGroupEngine.js';
+import * as penEngine from './penToolEngine.js';
 import * as shapeText from './shapeAndTextEngine.js';
 import * as subjectMask from './subjectAndMaskEngine.js';
 import * as viewport from './viewportAndGuidesEngine.js';
+import { applyGeneratedLayoutToCanvas } from './generatedLayoutEngine.js';
+import type { GeneratedLayoutDto } from '../services/aiLayoutService.js';
 
+export type EditorToolMode = 'select' | 'directSelect' | 'pen' | 'brush' | 'eraser';
 export type {
   CanvasAdapterConfig,
   CanvasEventCallbacks,
@@ -33,26 +41,28 @@ export type {
 export class FabricCanvasAdapter {
   private fabricCanvas: FabricCanvas | null = null;
   private isMounted = false;
-  private currentScale = 1;
-  private pageDimensions: Dimensions = { width: 1080, height: 1080 };
-  private backgroundColor = '#FBFBFD';
-  private readonly bleedMargin = 800;
-  private clipToArtboard = true;
+  private readonly viewport = new viewport.ViewportManager();
   private callbacks: CanvasEventCallbacks | null = null;
   private managedObjectUrls = new Set<string>();
-  private readonly history = new CanvasHistoryState();
-  private currentDrawingTool: 'none' | 'brush' | 'eraser' = 'none';
-  private brushColor = '#1D1D1F';
-  private brushWidth = 4;
-  private pageStates = new Map<string, string>();
-  private activePageId = 'page-1';
+  private readonly history = new histPage.CanvasHistoryManager();
+  private readonly drawingMgr = new alignDraw.DrawingToolManager();
+  private readonly vectorCtrl = new penEngine.VectorInteractiveController();
+  private readonly pages = new histPage.CanvasPageStore();
 
   private readonly onSelUpdate = (): void => this.handleSelectionUpdate();
   private readonly onSelClear = (): void => this.handleSelectionCleared();
   private readonly onCommit = (): void => this.commitChange();
   private readonly onCommitSel = (): void => this.commitChangeWithSelection();
-  private readonly onSaveHist = (): void => this.history.save(this.fabricCanvas);
-  private readonly onCanvasChg = (): void => this.callbacks?.onCanvasChange();
+
+  public readonly layers = new CanvasLayerFacade({
+    getCanvas: () => this.fabricCanvas,
+    getDimensions: () => this.viewport.pageDimensions,
+    onCommit: this.onCommit,
+    onCommitSel: this.onCommitSel,
+    onSelClear: this.onSelClear,
+    onSelUpdate: this.onSelUpdate,
+    onCanvasChange: () => this.callbacks?.onCanvasChange(),
+  });
 
   public mount(
     canvasElement: HTMLCanvasElement,
@@ -61,67 +71,82 @@ export class FabricCanvasAdapter {
   ): boolean {
     if (this.isMounted) this.dispose();
     this.callbacks = callbacks ?? null;
-    this.pageDimensions = config.dimensions;
-    this.currentScale = config.displayScale;
-    this.backgroundColor = config.backgroundColor;
+    this.viewport.pageDimensions = config.dimensions;
+    this.viewport.currentScale = config.displayScale;
+    this.viewport.backgroundColor = config.backgroundColor;
 
-    const canvas = viewport.createConfiguredFabricCanvas(canvasElement, config, this.bleedMargin, {
-      getPageDimensions: () => this.pageDimensions,
-      getDrawingTool: () => this.currentDrawingTool,
-      isHistoryLocked: () => this.history.locked,
-      onSelectionUpdate: this.onSelUpdate,
-      onSelectionCleared: this.onSelClear,
-      onSaveHistory: this.onSaveHist,
-      onCanvasChange: this.onCanvasChg,
-      onAfterRender: () => {
-        if (this.fabricCanvas) {
-          viewport.renderArtboardClipAndPasteboardControls(
-            this.fabricCanvas,
-            this.pageDimensions,
-            this.currentScale,
-            this.bleedMargin,
-            this.clipToArtboard,
-          );
-        }
+    const canvas = viewport.createConfiguredFabricCanvas(
+      canvasElement,
+      config,
+      this.viewport.bleedMargin,
+      {
+        getPageDimensions: () => this.viewport.pageDimensions,
+        getDrawingTool: () => this.drawingMgr.tool,
+        isHistoryLocked: () => this.history.isLocked(),
+        onSelectionUpdate: () => this.handleSelectionUpdate(),
+        onSelectionCleared: () => this.handleSelectionCleared(),
+        onSaveHistory: () => this.history.save(this.fabricCanvas),
+        onCanvasChange: () => this.callbacks?.onCanvasChange(),
+        onBeforeRender: () => {
+          if (this.fabricCanvas) {
+            viewport.renderArtboardBackground(
+              this.fabricCanvas,
+              this.viewport.pageDimensions,
+              this.viewport.backgroundColor,
+            );
+          }
+        },
+        onAfterRender: () => {
+          if (this.fabricCanvas) {
+            viewport.renderArtboardClipAndPasteboardControls(
+              this.fabricCanvas,
+              this.viewport.pageDimensions,
+              this.viewport.currentScale,
+              this.viewport.bleedMargin,
+              this.viewport.clipToArtboard,
+            );
+            const ctx = this.fabricCanvas.getContext();
+            this.vectorCtrl.renderOverlay(ctx, this.fabricCanvas);
+          }
+        },
       },
-    });
+    );
 
-    if (!canvas) {
-      this.isMounted = false;
-      return false;
-    }
-
+    if (!canvas) return (this.isMounted = false);
     this.fabricCanvas = canvas;
+    canvas.on('mouse:down', (opt) => {
+      if (this.vectorCtrl.toolMode === 'pen') canvas.discardActiveObject();
+      const pt = (opt as { scenePoint?: Point2D }).scenePoint ?? canvas.getScenePoint(opt.e);
+      this.vectorCtrl.handleMouseDown(canvas, pt, (isClosed) => this.finishPenPath(isClosed));
+    });
+    canvas.on('mouse:move', (opt) => {
+      const pt = (opt as { scenePoint?: Point2D }).scenePoint ?? canvas.getScenePoint(opt.e);
+      this.vectorCtrl.handleMouseMove(canvas, pt);
+    });
+    canvas.on('mouse:up', () => this.vectorCtrl.handleMouseUp(canvas, this.onCommit));
+    canvas.on('mouse:dblclick', () => {
+      this.vectorCtrl.handleDoubleClick(canvas, (isClosed) => this.finishPenPath(isClosed));
+    });
     this.isMounted = true;
     this.history.save(this.fabricCanvas);
     return true;
   }
 
   public isClipToArtboard(): boolean {
-    return this.clipToArtboard;
+    return this.viewport.clipToArtboard;
   }
 
   public setClipToArtboard(enabled: boolean): void {
-    this.clipToArtboard = enabled;
+    this.viewport.clipToArtboard = enabled;
     this.fabricCanvas?.requestRenderAll();
   }
 
   public screenPointToArtboard(clientX: number, clientY: number): Point2D {
-    return viewport.computeScreenPointToArtboard(
-      this.fabricCanvas,
-      this.currentScale,
-      this.bleedMargin,
-      clientX,
-      clientY,
-    );
+    return this.viewport.screenPointToArtboard(this.fabricCanvas, clientX, clientY);
   }
 
   public syncViewport(config: CanvasAdapterConfig): void {
-    if (!this.fabricCanvas || !this.isMounted) return;
-    this.pageDimensions = config.dimensions;
-    this.currentScale = config.displayScale;
-    this.backgroundColor = config.backgroundColor;
-    viewport.syncCanvasViewport(this.fabricCanvas, config, this.bleedMargin);
+    if (this.fabricCanvas && this.isMounted) this.viewport.sync(this.fabricCanvas, config);
   }
 
   public discardActiveObject(): void {
@@ -153,51 +178,78 @@ export class FabricCanvasAdapter {
   }
 
   public addText(options: AddTextOptions): void {
-    if (!this.fabricCanvas) return;
-    shapeText.addTextToCanvas(this.fabricCanvas, this.pageDimensions, options, this.onSelUpdate);
+    if (this.fabricCanvas)
+      shapeText.addTextToCanvas(
+        this.fabricCanvas,
+        this.viewport.pageDimensions,
+        options,
+        this.onSelUpdate,
+      );
   }
 
   public addShape(options: AddShapeOptions): void {
-    if (!this.fabricCanvas) return;
-    shapeText.addShapeToCanvas(this.fabricCanvas, this.pageDimensions, options, this.onSelUpdate);
+    if (this.fabricCanvas)
+      shapeText.addShapeToCanvas(
+        this.fabricCanvas,
+        this.viewport.pageDimensions,
+        options,
+        this.onSelUpdate,
+      );
   }
 
-  public async addImageFromUrl(url: string, altText = 'Imagem'): Promise<void> {
-    if (!this.fabricCanvas || !url) return;
-    await imgTpl.addImageFromUrlToCanvas(
-      this.fabricCanvas,
-      this.pageDimensions,
-      this.managedObjectUrls,
-      url,
-      altText,
-      this.onSelUpdate,
-    );
+  public addImage(url: string, altText = 'Imagem', fallbackUrl?: string): Promise<void> {
+    return this.addImageFromUrl(url, altText, fallbackUrl);
+  }
+
+  public async addImageFromUrl(
+    url: string,
+    altText = 'Imagem',
+    fallbackUrl?: string,
+  ): Promise<void> {
+    if (this.fabricCanvas && url) {
+      await imgTpl.addImageFromUrlToCanvas(
+        this.fabricCanvas,
+        this.viewport.pageDimensions,
+        this.managedObjectUrls,
+        url,
+        altText,
+        this.onCommitSel,
+        fallbackUrl,
+      );
+    }
   }
 
   public applyTemplate(templateId: string): void {
-    if (!this.fabricCanvas) return;
-    imgTpl.applyCuratedTemplateToCanvas(
-      this.fabricCanvas,
-      this.pageDimensions,
-      templateId,
-      () => this.clearObjects(),
-      this.onCommit,
-    );
+    if (this.fabricCanvas) {
+      imgTpl.applyCuratedTemplateToCanvas(
+        this.fabricCanvas,
+        this.viewport.pageDimensions,
+        templateId,
+        () => this.clearObjects(),
+        this.onCommit,
+      );
+    }
+  }
+
+  public applyGeneratedLayout(layout: GeneratedLayoutDto): void {
+    if (this.fabricCanvas) {
+      applyGeneratedLayoutToCanvas(
+        this.fabricCanvas,
+        this.viewport.pageDimensions,
+        layout,
+        () => this.clearObjects(),
+        this.onCommit,
+      );
+    }
   }
 
   public updateSelectedProperties(props: Partial<SelectedObjectProperties>): void {
-    if (!this.fabricCanvas) return;
-    shapeText.updateSelectedObjectProperties(this.fabricCanvas, props, this.onCommitSel);
+    if (this.fabricCanvas)
+      shapeText.updateSelectedObjectProperties(this.fabricCanvas, props, this.onCommitSel);
   }
 
   public deleteSelected(): void {
-    if (!this.fabricCanvas) return;
-    const active = this.fabricCanvas.getActiveObjects();
-    if (!active || active.length === 0) return;
-    active.forEach((obj) => this.fabricCanvas?.remove(obj));
-    this.fabricCanvas.discardActiveObject();
-    this.fabricCanvas.requestRenderAll();
-    this.handleSelectionCleared();
+    if (this.fabricCanvas) shapeText.deleteSelectedObjects(this.fabricCanvas, this.onSelClear);
   }
 
   public async duplicateSelected(): Promise<void> {
@@ -215,123 +267,146 @@ export class FabricCanvasAdapter {
     return subjectMask.selectSubjectOnCanvas(
       this.fabricCanvas,
       mode,
-      this.onSaveHist,
+      () => this.history.save(this.fabricCanvas),
       this.onSelUpdate,
     );
   }
 
   public bringForward(): void {
-    const active = this.fabricCanvas?.getActiveObject();
-    if (this.fabricCanvas && active) {
-      this.fabricCanvas.bringObjectForward(active);
-      this.fabricCanvas.requestRenderAll();
-      this.callbacks?.onCanvasChange();
-    }
+    this.layers.bringForward();
   }
 
   public sendBackward(): void {
-    const active = this.fabricCanvas?.getActiveObject();
-    if (this.fabricCanvas && active) {
-      this.fabricCanvas.sendObjectBackwards(active);
-      this.fabricCanvas.requestRenderAll();
-      this.callbacks?.onCanvasChange();
-    }
+    this.layers.sendBackward();
   }
 
   public clearObjects(): void {
-    if (!this.fabricCanvas) return;
-    [...this.fabricCanvas.getObjects()].forEach((o) => this.fabricCanvas?.remove(o));
-    this.fabricCanvas.discardActiveObject();
-    this.fabricCanvas.requestRenderAll();
-    this.handleSelectionCleared();
+    if (this.fabricCanvas) shapeText.clearCanvasObjects(this.fabricCanvas, this.onSelClear);
   }
 
   public getLayers(): readonly LayerItem[] {
-    return this.fabricCanvas ? layerGroup.getCanvasLayers(this.fabricCanvas) : [];
+    return this.layers.getLayers();
   }
 
   public toggleLayerMask(
     layerName?: string,
     shape: 'circle' | 'rounded' | 'ellipse' = 'circle',
   ): void {
-    if (!this.fabricCanvas) return;
-    subjectMask.toggleLayerMaskOnCanvas(this.fabricCanvas, layerName, shape, this.onCommitSel);
+    if (this.fabricCanvas)
+      subjectMask.toggleLayerMaskOnCanvas(this.fabricCanvas, layerName, shape, this.onCommitSel);
   }
 
   public invertLayerMask(layerName?: string): void {
-    if (!this.fabricCanvas) return;
-    subjectMask.invertLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
+    if (this.fabricCanvas)
+      subjectMask.invertLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
   }
 
   public removeLayerMask(layerName?: string): void {
-    if (!this.fabricCanvas) return;
-    subjectMask.removeLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
+    if (this.fabricCanvas)
+      subjectMask.removeLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
   }
 
   public applyCropToSelected(mode: '1:1' | '4:3' | '16:9' | 'inset' | 'reset' = 'inset'): void {
+    if (this.fabricCanvas)
+      subjectMask.applyCropToSelectedOnCanvas(
+        this.fabricCanvas,
+        mode,
+        () => this.removeLayerMask(),
+        this.onCommitSel,
+      );
+  }
+
+  public performBooleanOperation(operation: BooleanPathOperation): void {
+    if (this.fabricCanvas)
+      shapeText.performBooleanOperationOnCanvas(this.fabricCanvas, operation, this.onCommitSel);
+  }
+
+  public selectObjectByName(name: string): void {
+    this.layers.selectByName(name);
+  }
+  public selectObjectsByNames(names: readonly string[]): void {
+    this.layers.selectByNames(names);
+  }
+  public getDrawingTool(): 'none' | 'brush' | 'eraser' {
+    return this.drawingMgr.tool;
+  }
+  public getToolMode(): EditorToolMode {
+    return this.vectorCtrl.toolMode;
+  }
+
+  public setToolMode(mode: EditorToolMode): void {
+    this.vectorCtrl.toolMode = mode;
     if (!this.fabricCanvas) return;
-    subjectMask.applyCropToSelectedOnCanvas(
+    if (mode === 'brush' || mode === 'eraser') {
+      this.discardActiveObject();
+      this.fabricCanvas.selection = false;
+      this.fabricCanvas.skipTargetFind = true;
+      this.setDrawingMode(true, mode);
+    } else {
+      this.setDrawingMode(false);
+      this.fabricCanvas.selection = mode === 'select';
+      this.fabricCanvas.skipTargetFind = mode === 'pen';
+      this.fabricCanvas.defaultCursor = mode === 'pen' ? 'crosshair' : 'default';
+      if (mode === 'pen') {
+        this.vectorCtrl.penState = penEngine.createInitialPenState();
+        this.discardActiveObject();
+      }
+      this.fabricCanvas.requestRenderAll();
+    }
+  }
+
+  public finishPenPath(isClosed = true): void {
+    if (!this.fabricCanvas) return;
+    penEngine.commitPenPathToCanvas(
       this.fabricCanvas,
-      mode,
-      () => this.removeLayerMask(),
+      this.vectorCtrl.penState,
+      isClosed,
+      { stroke: this.drawingMgr.color, strokeWidth: this.drawingMgr.width },
       this.onCommitSel,
     );
   }
 
-  public performBooleanOperation(operation: BooleanPathOperation): void {
-    if (!this.fabricCanvas) return;
-    shapeText.performBooleanOperationOnCanvas(this.fabricCanvas, operation, this.onCommitSel);
+  public getBrushColor(): string {
+    return this.drawingMgr.color;
   }
-
-  public selectObjectByName(name: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.selectObjectByNameOnCanvas(
-      this.fabricCanvas,
-      name,
-      this.onSelUpdate,
-      this.onCanvasChg,
-    );
+  public getBrushWidth(): number {
+    return this.drawingMgr.width;
   }
-
-  public selectObjectsByNames(names: readonly string[]): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.selectObjectsByNamesOnCanvas(
-      this.fabricCanvas,
-      names,
-      this.onSelUpdate,
-      this.onSelClear,
-      this.onCanvasChg,
-    );
+  public getBrushHardness(): number {
+    return this.drawingMgr.hardness;
   }
-
-  public getDrawingTool(): 'none' | 'brush' | 'eraser' {
-    return this.currentDrawingTool;
+  public getBrushSoftness(): number {
+    return this.drawingMgr.softness;
+  }
+  public getBrushSmoothness(): number {
+    return this.drawingMgr.smoothness;
   }
 
   public setDrawingMode(
     enabled: boolean,
     mode: 'brush' | 'eraser' = 'brush',
-    options?: { color?: string; width?: number },
+    options?: {
+      color?: string;
+      width?: number;
+      smoothness?: number;
+      hardness?: number;
+      softness?: number;
+    },
   ): void {
-    if (!this.fabricCanvas) return;
-    if (options?.color) this.brushColor = options.color;
-    if (options?.width) this.brushWidth = options.width;
-    this.currentDrawingTool = alignDraw.configureDrawingBrush(
-      this.fabricCanvas,
-      enabled,
-      mode,
-      this.brushColor,
-      this.brushWidth,
-    );
+    if (this.fabricCanvas) this.drawingMgr.setMode(this.fabricCanvas, enabled, mode, options);
   }
 
-  public alignSelected(alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'): void {
+  public alignSelected(
+    alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom',
+    target?: 'artboard' | 'selection',
+  ): void {
     if (!this.fabricCanvas) return;
     alignDraw.alignSelectedObjects(
       this.fabricCanvas,
-      this.pageDimensions,
+      this.viewport.pageDimensions,
       alignment,
       this.onCommitSel,
+      target,
     );
   }
 
@@ -341,142 +416,61 @@ export class FabricCanvasAdapter {
   }
 
   public switchPage(newPageId: string, initialConfig?: CanvasAdapterConfig): void {
-    if (!this.fabricCanvas || this.activePageId === newPageId) return;
-    try {
-      this.pageStates.set(this.activePageId, JSON.stringify(this.fabricCanvas.toJSON()));
-    } catch {
-      // Ignore JSON serialization in tests
-    }
-    this.activePageId = newPageId;
-    const savedState = this.pageStates.get(newPageId);
-    if (savedState) {
-      void this.loadJsonState(savedState);
-    } else {
-      this.clearObjects();
-      if (initialConfig) this.syncViewport(initialConfig);
-    }
-  }
-
-  public removePageState(pageId: string): void {
-    this.pageStates.delete(pageId);
-  }
-
-  public duplicatePageState(sourcePageId: string, targetPageId: string): void {
-    const state = this.pageStates.get(sourcePageId);
-    if (state) this.pageStates.set(targetPageId, state);
-  }
-
-  public toggleLayerVisibility(name: string): void {
     if (!this.fabricCanvas) return;
-    layerGroup.toggleLayerVisibilityOnCanvas(
+    this.pages.switchPage(
       this.fabricCanvas,
-      name,
-      this.onSelClear,
-      this.onCommit,
+      newPageId,
+      initialConfig,
+      (j: string) => this.loadJsonState(j),
+      () => this.clearObjects(),
+      (c: CanvasAdapterConfig) => this.syncViewport(c),
     );
   }
 
-  public toggleLayerLock(name: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.toggleLayerLockOnCanvas(this.fabricCanvas, name, this.onCommit);
+  public removePageState(id: string): void {
+    this.pages.removePage(id);
   }
-
-  public setLayerOpacity(name: string, opacity: number): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.setLayerOpacityOnCanvas(this.fabricCanvas, name, opacity, this.onCommit);
+  public duplicatePageState(src: string, dst: string): void {
+    this.pages.duplicatePage(src, dst);
   }
-
-  public setLayerBlendMode(name: string, blendMode: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.setLayerBlendModeOnCanvas(this.fabricCanvas, name, blendMode, this.onCommit);
-  }
-
-  public renameLayer(oldName: string, newName: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.renameLayerOnCanvas(this.fabricCanvas, oldName, newName, this.onCommit);
-  }
-
-  public reorderLayer(name: string, direction: 'up' | 'down'): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.reorderLayerOnCanvas(this.fabricCanvas, name, direction, this.onCommit);
-  }
-
-  public reorderLayerToIndex(name: string, targetVisualIndex: number): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.reorderLayerToIndexOnCanvas(
-      this.fabricCanvas,
-      name,
-      targetVisualIndex,
-      this.onCommit,
-    );
-  }
-
-  public createGroup(name?: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.createGroupOnCanvas(this.fabricCanvas, this.pageDimensions, name, this.onCommitSel);
-  }
-
-  public ungroupSelected(): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.ungroupSelectedOnCanvas(this.fabricCanvas, this.onCommitSel);
-  }
-
-  public addCleanLayer(name?: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.addCleanLayerToCanvas(
-      this.fabricCanvas,
-      this.pageDimensions,
-      name,
-      this.onCommitSel,
-    );
-  }
-
-  public deleteLayerByName(name: string): void {
-    if (!this.fabricCanvas) return;
-    layerGroup.deleteLayerByNameOnCanvas(this.fabricCanvas, name, this.onSelClear, this.onCommit);
-  }
-
   public canUndo(): boolean {
     return this.history.canUndo();
   }
-
   public canRedo(): boolean {
     return this.history.canRedo();
   }
-
   public async undo(): Promise<void> {
-    if (!this.canUndo() || !this.fabricCanvas) return;
-    this.history.index -= 1;
-    const targetState = this.history.stack[this.history.index];
-    if (targetState) await this.loadJsonState(targetState);
+    if (this.fabricCanvas) await this.history.undo(this.fabricCanvas, this.onCommitSel);
   }
-
   public async redo(): Promise<void> {
-    if (!this.canRedo() || !this.fabricCanvas) return;
-    this.history.index += 1;
-    const targetState = this.history.stack[this.history.index];
-    if (targetState) await this.loadJsonState(targetState);
+    if (this.fabricCanvas) await this.history.redo(this.fabricCanvas, this.onCommitSel);
+  }
+  public applyCameraRaw(adjustments: CameraRawAdjustments): void {
+    if (this.fabricCanvas)
+      applyCameraRawToActiveImage(this.fabricCanvas, adjustments, this.onCommit);
+  }
+  public getCameraRaw(): CameraRawAdjustments | null {
+    return this.fabricCanvas ? getActiveImageCameraRaw(this.fabricCanvas) : null;
   }
 
-  private async loadJsonState(json: string): Promise<void> {
-    if (!this.fabricCanvas) return;
-    await this.history.loadState(this.fabricCanvas, json, () => {
-      this.handleSelectionUpdate();
-      this.callbacks?.onCanvasChange();
-    });
+  public async loadJsonState(json: string): Promise<void> {
+    if (this.fabricCanvas) await this.history.loadJson(this.fabricCanvas, json, this.onCommitSel);
   }
 
-  public exportDataUrl(format: 'png' | 'jpeg' = 'png', quality = 0.95): string {
-    if (!this.fabricCanvas) return '';
-    return exportCanvasDataUrl(
-      this.fabricCanvas,
-      this.pageDimensions,
-      this.backgroundColor,
-      this.currentScale,
-      this.bleedMargin,
-      format,
-      quality,
-    );
+  public exportDataUrl(
+    format: 'png' | 'jpeg' = 'png',
+    quality = 0.95,
+    maxDimension?: number,
+  ): string {
+    return this.viewport.exportDataUrl(this.fabricCanvas, format, quality, maxDimension);
+  }
+
+  public exportSvg(): string {
+    return this.viewport.exportSvg(this.fabricCanvas);
+  }
+
+  public getFabricCanvas(): FabricCanvas | null {
+    return this.fabricCanvas;
   }
 
   public dispose(): void {
@@ -488,7 +482,7 @@ export class FabricCanvasAdapter {
       try {
         URL.revokeObjectURL(u);
       } catch {
-        // Ignored in test environments
+        /* Ignored */
       }
     });
     this.managedObjectUrls.clear();

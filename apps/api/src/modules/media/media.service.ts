@@ -189,42 +189,6 @@ export async function trackUnsplashDownloadOnServer(
   }
 }
 
-export async function fetchStickersFromGiphy(
-  params: MediaStickersQuery,
-  env: ApiEnvConfig,
-): Promise<unknown> {
-  if (!env.giphyApiKey) {
-    return { items: [], fallback: true };
-  }
-
-  const query = (params.query ?? '').trim();
-  const limit = Math.max(1, Math.min(50, params.limit ?? 24));
-  const offset = Math.max(0, params.offset ?? 0);
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 5000);
-  try {
-    const endpoint = query
-      ? `https://api.giphy.com/v1/gifs/search?api_key=${encodeURIComponent(
-          env.giphyApiKey,
-        )}&q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&rating=g&lang=pt`
-      : `https://api.giphy.com/v1/gifs/trending?api_key=${encodeURIComponent(
-          env.giphyApiKey,
-        )}&limit=${limit}&offset=${offset}&rating=g`;
-
-    const res = await fetch(endpoint, {
-      headers: { Accept: 'application/json' },
-      signal: controller.signal,
-    });
-    if (!res.ok) return { items: [], fallback: true };
-    return await res.json();
-  } catch {
-    return { items: [], fallback: true };
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 export function synthesizeHarmonicPalette(seedHex?: string): {
   readonly colors: readonly string[];
   readonly result: ReadonlyArray<readonly [number, number, number]>;
@@ -245,4 +209,121 @@ export function synthesizeHarmonicPalette(seedHex?: string): {
 
   const colors = rgbTriples.map(([r, g, b]) => rgbToHex(r, g, b));
   return { colors, result: rgbTriples };
+}
+
+let cachedGoogleFonts: { timestamp: number; data: unknown } | null = null;
+
+interface ServerGiphyCacheEntry {
+  readonly timestamp: number;
+  readonly data: unknown;
+}
+
+const GIPHY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour server-side cache per query/offset
+const serverGiphyCache = new Map<string, ServerGiphyCacheEntry>();
+
+export async function fetchStickersFromGiphy(
+  params: MediaStickersQuery,
+  env: ApiEnvConfig,
+): Promise<unknown> {
+  if (!env.giphyApiKey) {
+    return { items: [], fallback: true };
+  }
+
+  const query = (params.query ?? '').trim().toLowerCase();
+  const limit = Math.max(1, Math.min(50, params.limit ?? 24));
+  const offset = Math.max(0, params.offset ?? 0);
+  const cacheKey = `${query || '__trending__'}_lim${limit}_off${offset}`;
+
+  const cached = serverGiphyCache.get(cacheKey);
+  const now = Date.now();
+  if (cached && now - cached.timestamp < GIPHY_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    const endpoint = query
+      ? `https://api.giphy.com/v1/stickers/search?api_key=${encodeURIComponent(
+          env.giphyApiKey,
+        )}&q=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}&rating=g&lang=pt`
+      : `https://api.giphy.com/v1/stickers/trending?api_key=${encodeURIComponent(
+          env.giphyApiKey,
+        )}&limit=${limit}&offset=${offset}&rating=g`;
+
+    const res = await fetch(endpoint, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      // If we encounter 429 Rate Limit or network failure, return cached data if available
+      if (cached) {
+        return cached.data;
+      }
+      return { items: [], fallback: true };
+    }
+    const data = await res.json();
+    serverGiphyCache.set(cacheKey, { timestamp: now, data });
+
+    // Evict oldest if cache exceeds 300 entries
+    if (serverGiphyCache.size > 300) {
+      const oldestKey = serverGiphyCache.keys().next().value;
+      if (oldestKey) serverGiphyCache.delete(oldestKey);
+    }
+
+    return data;
+  } catch {
+    if (cached) {
+      return cached.data;
+    }
+    return { items: [], fallback: true };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+const GOOGLE_FONTS_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export interface GoogleFontsQuery {
+  readonly sort?: string;
+  readonly category?: string;
+}
+
+export async function fetchGoogleFontsCatalog(
+  params: GoogleFontsQuery,
+  env: ApiEnvConfig,
+): Promise<unknown> {
+  const sort = (params.sort ?? 'popularity').toLowerCase();
+  const now = Date.now();
+  if (cachedGoogleFonts && now - cachedGoogleFonts.timestamp < GOOGLE_FONTS_CACHE_TTL_MS) {
+    return cachedGoogleFonts.data;
+  }
+
+  if (!env.googleFontsApiKey) {
+    return { items: [], fallback: true };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const endpoint = `https://www.googleapis.com/webfonts/v1/webfonts?key=${encodeURIComponent(
+      env.googleFontsApiKey,
+    )}&sort=${encodeURIComponent(sort)}`;
+
+    const res = await fetch(endpoint, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      if (cachedGoogleFonts) return cachedGoogleFonts.data;
+      return { items: [], fallback: true };
+    }
+    const data = await res.json();
+    cachedGoogleFonts = { timestamp: now, data };
+    return data;
+  } catch {
+    if (cachedGoogleFonts) return cachedGoogleFonts.data;
+    return { items: [], fallback: true };
+  } finally {
+    clearTimeout(timer);
+  }
 }

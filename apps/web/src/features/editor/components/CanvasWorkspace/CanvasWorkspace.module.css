@@ -1,0 +1,192 @@
+/* ==========================================================================
+   Apple Pro Studio Canvas Stage & Viewport (CanvasWorkspace)
+   Principles: Maximum deference to artwork, tactile panning, tabular HUD.
+   ========================================================================== */
+
+.stageContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg-canvas-stage);
+}
+
+.viewportScroll {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+  background-image: radial-gradient(
+    var(--color-border-subtle) var(--border-width-hairline),
+    transparent var(--border-width-hairline)
+  );
+  background-size: var(--size-stage-grid) var(--size-stage-grid);
+}
+
+.viewportScrollGrab {
+  cursor: grab !important;
+}
+
+.viewportScrollPanning {
+  cursor: grabbing !important;
+}
+
+.viewportScrollDrawing,
+.viewportScrollDrawing canvas {
+  cursor: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Brush & Drawing Interactive Cursor Indicator (Apple HIG / Studio Precision)
+   -------------------------------------------------------------------------- */
+.brushCursorIndicator {
+  position: fixed;
+  pointer-events: none;
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width-hairline) solid var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  background-color: var(--color-surface-overlay-subtle);
+  will-change: left, top, width, height;
+}
+
+.brushHardnessCore {
+  position: absolute;
+  border-radius: var(--radius-pill);
+  border: var(--border-width-hairline) dashed var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  pointer-events: none;
+}
+
+.brushCursorCenterDot {
+  position: absolute;
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  pointer-events: none;
+}
+
+.artboardFrame {
+  position: relative;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-artboard);
+  border: var(--border-width-hairline) solid var(--surface-glass-border-outer);
+  overflow: visible;
+  flex-shrink: 0;
+  will-change: transform, width, height;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  pointer-events: auto;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.artboardFramePanning {
+  pointer-events: none;
+}
+
+.canvasPositioner {
+  position: absolute;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
+   -------------------------------------------------------------------------- */
+.bottomBar {
+  composes: glass-chrome from global;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  height: var(--control-height-lg);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: var(--border-width-hairline) solid var(--material-chrome-border);
+  z-index: var(--z-drawer);
+  user-select: none;
+}
+
+.bottomLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  z-index: var(--z-base);
+}
+
+.statTag {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.statDivider {
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-3xs);
+}
+
+.bottomCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  z-index: var(--z-raised);
+  pointer-events: auto;
+}
+
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  z-index: var(--z-base);
+}
+
+.pageIndicator {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  padding: calc(var(--space-1) * 0.75) var(--space-2);
+  white-space: nowrap;
+  background: transparent;
+  border: var(--border-width-hairline) solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--motion-duration-fast) var(--motion-easing-apple);
+}
+
+.pageIndicator:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-subtle);
+}
+
+.zoomReadout {
+  min-width: var(--space-12);
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  user-select: none;
+}

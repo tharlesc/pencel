@@ -159,11 +159,23 @@ async function executeSingleRequest<T, B = unknown>(
     const status = response.status ?? (response.ok ? 200 : 500);
 
     if (!response.ok) {
+      let errorMessage = `HTTP ${status}`;
+      try {
+        const errorJson = (await response.json()) as { error?: string; message?: string };
+        if (typeof errorJson?.error === 'string' && errorJson.error.trim()) {
+          errorMessage = errorJson.error.trim();
+        } else if (typeof errorJson?.message === 'string' && errorJson.message.trim()) {
+          errorMessage = errorJson.message.trim();
+        }
+      } catch {
+        // Response was not JSON, retain default status message
+      }
+
       return {
         ok: false,
         error: {
           code: 'HTTP_ERROR',
-          message: `HTTP ${status}`,
+          message: errorMessage,
           status,
           url: resolvedUrl,
         },

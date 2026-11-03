@@ -1,0 +1,88 @@
+/* ==========================================================================
+   Bottom Canvas HUD Bar (Zoom, Dimensions & Stats)
+   ========================================================================== */
+.bottomBar {
+  composes: glass-chrome from global;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  height: var(--control-height-lg);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  border-top: var(--border-width-hairline) solid var(--material-chrome-border);
+  z-index: var(--z-drawer);
+  user-select: none;
+}
+
+.bottomLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  z-index: var(--z-base);
+}
+
+.statTag {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.statDivider {
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-3xs);
+}
+
+.bottomCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  z-index: var(--z-raised);
+  pointer-events: auto;
+}
+
+.bottomRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  z-index: var(--z-base);
+}
+
+.pageIndicator {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  padding: calc(var(--space-1) * 0.75) var(--space-2);
+  white-space: nowrap;
+  background: transparent;
+  border: var(--border-width-hairline) solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--motion-duration-fast) var(--motion-easing-apple);
+}
+
+.pageIndicator:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-subtle);
+}
+
+.zoomReadout {
+  min-width: var(--space-12);
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  user-select: none;
+}

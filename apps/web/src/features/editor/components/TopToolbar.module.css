@@ -147,7 +147,8 @@
 .documentProxy {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-0-75) var(--space-3);
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   border: none;
   background-color: transparent;
@@ -165,14 +166,15 @@
 
 .proxyContent {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-width: 0;
 }
 
 .titleLabel {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
 }
 
@@ -198,33 +200,14 @@
   color: var(--color-text-primary);
   text-align: center;
   outline: none;
-  padding: 0 var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
   min-width: var(--size-title-min-w);
   max-width: var(--size-title-max-w);
+  width: 100%;
 }
 
 .titleInput:focus-visible {
   outline: none;
-}
-
-.documentMeta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1-25);
-  margin-top: var(--space-px);
-}
-
-.metaDivider {
-  font-size: var(--font-size-3xs);
-  color: var(--color-text-disabled);
-}
-
-.metaPreset,
-.metaDimensions {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-2xs);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-tertiary);
 }
 
 /* --------------------------------------------------------------------------

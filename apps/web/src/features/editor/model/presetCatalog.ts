@@ -53,6 +53,50 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
     badgeText: 'AO VIVO',
     headlineText: 'Workshop de Design',
   },
+  {
+    id: 'open-design-hero',
+    name: 'Hero Tech SaaS (Open Design)',
+    category: 'Web & UI Design',
+    description:
+      'Header moderno em glassmorphism com tipografia limpa, badge de versão e call-to-action futurista.',
+    previewBg: '#090A0F',
+    previewAccent: '#0071E3',
+    badgeText: 'OPEN DESIGN',
+    headlineText: 'NEXT GEN CLOUD',
+  },
+  {
+    id: 'open-design-carousel',
+    name: 'Carrossel Editorial (Open Design)',
+    category: 'Redes Sociais & Carrossel',
+    description:
+      'Composição editorial contínua para Instagram com paginação elegante e contraste suíço.',
+    previewBg: '#1C1C1E',
+    previewAccent: '#FF9F0A',
+    badgeText: '01 / 05',
+    headlineText: 'THE FUTURE OF CRAFT',
+  },
+  {
+    id: 'open-design-poster',
+    name: 'Pôster Tipográfico Suíço (Open Design)',
+    category: 'Design Gráfico & Arte',
+    description:
+      'Estilo tipográfico internacional de alta precisão com grid geométrico e foco em ritmo visual.',
+    previewBg: '#F2F2F7',
+    previewAccent: '#FF3B30',
+    badgeText: 'SWISS STYLE',
+    headlineText: 'BAUHAUS & PROPORTION',
+  },
+  {
+    id: 'open-design-bento',
+    name: 'Card Bento Métricas (Open Design)',
+    category: 'Marketing & Apresentação',
+    description:
+      'Grid no estilo Apple Bento Box destacando métricas de crescimento e badges de performance.',
+    previewBg: '#121316',
+    previewAccent: '#30D158',
+    badgeText: 'METRICS',
+    headlineText: '+240% GROWTH',
+  },
 ];
 
 export interface StockPhoto {

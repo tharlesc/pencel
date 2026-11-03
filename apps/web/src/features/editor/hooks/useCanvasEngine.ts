@@ -1,12 +1,15 @@
 import type { BooleanPathOperation, ShapeVariant } from '@pencel/editor-core';
 import type { Dimensions } from '@pencel/shared-types';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import type { CameraRawAdjustments } from '../engine/cameraRawEngine.js';
 import {
   FabricCanvasAdapter,
+  type EditorToolMode,
   type LayerItem,
   type SelectedObjectProperties,
 } from '../engine/FabricCanvasAdapter.js';
 import type { EngineLifecycleState } from '../types/editorUi.types.js';
+import type { GeneratedLayoutDto } from '../services/aiLayoutService.js';
 
 export interface UseCanvasEngineParams {
   readonly dimensions: Dimensions;
@@ -37,8 +40,10 @@ export interface UseCanvasEngineResult {
     stroke?: string;
     strokeWidth?: number;
   }) => void;
-  readonly addImage: (url: string) => Promise<void>;
+  readonly addImage: (url: string, fallbackUrl?: string) => Promise<void>;
+  readonly addImageFromUrl: (url: string, altText?: string, fallbackUrl?: string) => Promise<void>;
   readonly applyTemplate: (templateId: string) => void;
+  readonly applyGeneratedLayout: (layout: GeneratedLayoutDto) => void;
   readonly updateSelectedProperties: (props: Partial<SelectedObjectProperties>) => void;
   readonly deleteSelected: () => void;
   readonly duplicateSelected: () => void;
@@ -47,7 +52,9 @@ export interface UseCanvasEngineResult {
   readonly clearCanvas: () => void;
   readonly undo: () => Promise<void>;
   readonly redo: () => Promise<void>;
-  readonly exportImage: (format: 'png' | 'jpeg') => string;
+  readonly exportImage: (format: 'png' | 'jpeg', quality?: number, maxDimension?: number) => string;
+  readonly exportSvg: () => string;
+  readonly loadDesignJson: (jsonStr: string) => Promise<boolean>;
   readonly selectObjectByName: (name: string) => void;
   readonly selectObjectsByNames: (names: readonly string[]) => void;
   readonly toggleLayerVisibility: (name: string) => void;
@@ -58,20 +65,39 @@ export interface UseCanvasEngineResult {
   readonly reorderLayer: (name: string, direction: 'up' | 'down') => void;
   readonly reorderLayerToIndex: (name: string, targetVisualIndex: number) => void;
   readonly createGroup: (name?: string) => void;
+  readonly ungroupSelected: () => void;
+  readonly assignLayerToGroup: (layerName: string, groupName: string | null) => void;
   readonly addCleanLayer: (name?: string) => void;
   readonly deleteLayerByName: (name: string) => void;
   readonly selectSubject: (
     mode?: 'select' | 'removeBg',
   ) => Promise<{ success: boolean; message: string }>;
   readonly deselectAll: () => void;
+  readonly toolMode: EditorToolMode;
+  readonly drawingTool: 'none' | 'brush' | 'eraser';
+  readonly getToolMode: () => EditorToolMode;
+  readonly setToolMode: (mode: EditorToolMode) => void;
+  readonly finishPenPath: (isClosed?: boolean) => void;
   readonly getDrawingTool: () => 'none' | 'brush' | 'eraser';
+  readonly getBrushWidth: () => number;
+  readonly getBrushHardness: () => number;
+  readonly getBrushSoftness: () => number;
+  readonly getBrushSmoothness: () => number;
+  readonly getBrushColor: () => string;
   readonly setDrawingMode: (
     enabled: boolean,
     mode?: 'brush' | 'eraser',
-    options?: { color?: string; width?: number },
+    options?: {
+      color?: string;
+      width?: number;
+      smoothness?: number;
+      hardness?: number;
+      softness?: number;
+    },
   ) => void;
   readonly alignSelected: (
     alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom',
+    target?: 'artboard' | 'selection',
   ) => void;
   readonly distributeSelected: (direction: 'horizontal' | 'vertical') => void;
   readonly switchPage: (
@@ -85,6 +111,8 @@ export interface UseCanvasEngineResult {
   readonly performBooleanOperation: (operation: BooleanPathOperation) => void;
   readonly isClipToArtboard: () => boolean;
   readonly setClipToArtboard: (enabled: boolean) => void;
+  readonly applyCameraRaw: (adjustments: CameraRawAdjustments) => void;
+  readonly getCameraRaw: () => CameraRawAdjustments | null;
 }
 
 export function useCanvasEngine({
@@ -99,6 +127,12 @@ export function useCanvasEngine({
   const [engineState, setEngineState] = useState<EngineLifecycleState>('initializing');
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [drawingTool, setDrawingTool] = useState<'none' | 'brush' | 'eraser'>('none');
+  const [toolMode, setToolModeState] = useState<EditorToolMode>('select');
+  const [brushWidth, setBrushWidthState] = useState<number>(8);
+  const [brushHardness, setBrushHardnessState] = useState<number>(100);
+  const [brushSmoothness, setBrushSmoothnessState] = useState<number>(50);
+  const [brushColor, setBrushColorState] = useState<string>('#1D1D1F');
 
   const callbacksRef = useRef({ onSelectionChange, onLayersChange });
   useEffect(() => {
@@ -128,7 +162,7 @@ export function useCanvasEngine({
         backgroundColor,
       },
       {
-        onSelectionChange: (props) => {
+        onSelectionChange: (props: SelectedObjectProperties | null) => {
           callbacksRef.current.onSelectionChange(props);
           syncHistoryState();
         },
@@ -194,7 +228,7 @@ export function useCanvasEngine({
         syncHistoryState();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
         e.preventDefault();
-        adapterRef.current?.createGroup();
+        adapterRef.current?.layers.createGroup();
         syncHistoryState();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
         // Copy active
@@ -202,15 +236,6 @@ export function useCanvasEngine({
         // Paste active (duplicate)
         e.preventDefault();
         void adapterRef.current?.duplicateSelected().then(syncHistoryState);
-      } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'v') {
-        // Photoshop V shortcut: Select tool
-        adapterRef.current?.setDrawingMode(false);
-      } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'b') {
-        // Photoshop B shortcut: Brush tool
-        adapterRef.current?.setDrawingMode(true, 'brush');
-      } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'e') {
-        // Photoshop E shortcut: Eraser tool
-        adapterRef.current?.setDrawingMode(true, 'eraser');
       } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'i') {
         // Photoshop I shortcut: Eyedropper / Pipette
         if (typeof (window as unknown as { EyeDropper?: unknown }).EyeDropper !== 'undefined') {
@@ -266,8 +291,8 @@ export function useCanvasEngine({
   );
 
   const addImage = useCallback(
-    async (url: string) => {
-      await adapterRef.current?.addImageFromUrl(url);
+    async (url: string, fallbackUrl?: string) => {
+      await adapterRef.current?.addImageFromUrl(url, 'Imagem', fallbackUrl);
       syncHistoryState();
     },
     [syncHistoryState],
@@ -276,6 +301,14 @@ export function useCanvasEngine({
   const applyTemplate = useCallback(
     (templateId: string) => {
       adapterRef.current?.applyTemplate(templateId);
+      syncHistoryState();
+    },
+    [syncHistoryState],
+  );
+
+  const applyGeneratedLayout = useCallback(
+    (layout: GeneratedLayoutDto) => {
+      adapterRef.current?.applyGeneratedLayout(layout);
       syncHistoryState();
     },
     [syncHistoryState],
@@ -323,8 +356,37 @@ export function useCanvasEngine({
     syncHistoryState();
   }, [syncHistoryState]);
 
-  const exportImage = useCallback((format: 'png' | 'jpeg') => {
-    return adapterRef.current?.exportDataUrl(format) || '';
+  const exportImage = useCallback(
+    (format: 'png' | 'jpeg', quality = 0.95, maxDimension?: number) => {
+      return adapterRef.current?.exportDataUrl(format, quality, maxDimension) || '';
+    },
+    [],
+  );
+
+  const exportSvg = useCallback(() => {
+    return adapterRef.current?.exportSvg() ?? '';
+  }, []);
+
+  const loadDesignJson = useCallback(async (jsonStr: string) => {
+    if (!adapterRef.current) return false;
+    await adapterRef.current.loadJsonState(jsonStr);
+    return true;
+  }, []);
+
+  const addImageFromUrl = useCallback(
+    async (url: string, altText?: string, fallbackUrl?: string) => {
+      await adapterRef.current?.addImageFromUrl(url, altText, fallbackUrl);
+      syncHistoryState();
+    },
+    [syncHistoryState],
+  );
+
+  const assignLayerToGroup = useCallback((layerName: string, groupName: string | null) => {
+    adapterRef.current?.layers.assignToGroup(layerName, groupName);
+  }, []);
+
+  const ungroupSelected = useCallback(() => {
+    adapterRef.current?.layers.ungroupSelected();
   }, []);
 
   const selectObjectByName = useCallback((name: string) => {
@@ -335,20 +397,56 @@ export function useCanvasEngine({
     adapterRef.current?.selectObjectsByNames(names);
   }, []);
 
+  const setToolMode = useCallback((mode: EditorToolMode) => {
+    setToolModeState(mode);
+    if (mode === 'brush' || mode === 'eraser') {
+      setDrawingTool(mode);
+    } else {
+      setDrawingTool('none');
+    }
+    adapterRef.current?.setToolMode(mode);
+  }, []);
+
+  const getToolMode = useCallback(() => toolMode, [toolMode]);
+
+  const finishPenPath = useCallback((isClosed = true) => {
+    adapterRef.current?.finishPenPath(isClosed);
+  }, []);
+
   const setDrawingMode = useCallback(
     (
       enabled: boolean,
       mode: 'brush' | 'eraser' = 'brush',
-      options?: { color?: string; width?: number },
+      options?: {
+        color?: string;
+        width?: number;
+        smoothness?: number;
+        hardness?: number;
+        softness?: number;
+      },
     ) => {
+      const nextTool = enabled ? mode : 'none';
+      setDrawingTool(nextTool);
+      setToolModeState((prev) => {
+        if (enabled) return mode;
+        return prev === 'brush' || prev === 'eraser' ? 'select' : prev;
+      });
+      if (options?.width) setBrushWidthState(options.width);
+      if (options?.color) setBrushColorState(options.color);
+      if (options?.softness !== undefined) setBrushHardnessState(100 - options.softness);
+      if (options?.hardness !== undefined) setBrushHardnessState(options.hardness);
+      if (options?.smoothness !== undefined) setBrushSmoothnessState(options.smoothness);
       adapterRef.current?.setDrawingMode(enabled, mode, options);
     },
     [],
   );
 
   const alignSelected = useCallback(
-    (alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => {
-      adapterRef.current?.alignSelected(alignment);
+    (
+      alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom',
+      target?: 'artboard' | 'selection',
+    ) => {
+      adapterRef.current?.alignSelected(alignment, target);
       syncHistoryState();
     },
     [syncHistoryState],
@@ -374,43 +472,43 @@ export function useCanvasEngine({
   );
 
   const toggleLayerVisibility = useCallback((name: string) => {
-    adapterRef.current?.toggleLayerVisibility(name);
+    adapterRef.current?.layers.toggleVisibility(name);
   }, []);
 
   const toggleLayerLock = useCallback((name: string) => {
-    adapterRef.current?.toggleLayerLock(name);
+    adapterRef.current?.layers.toggleLock(name);
   }, []);
 
   const setLayerOpacity = useCallback((name: string, opacity: number) => {
-    adapterRef.current?.setLayerOpacity(name, opacity);
+    adapterRef.current?.layers.setOpacity(name, opacity);
   }, []);
 
   const setLayerBlendMode = useCallback((name: string, blendMode: string) => {
-    adapterRef.current?.setLayerBlendMode(name, blendMode);
+    adapterRef.current?.layers.setBlendMode(name, blendMode);
   }, []);
 
   const renameLayer = useCallback((oldName: string, newName: string) => {
-    adapterRef.current?.renameLayer(oldName, newName);
+    adapterRef.current?.layers.rename(oldName, newName);
   }, []);
 
   const reorderLayer = useCallback((name: string, direction: 'up' | 'down') => {
-    adapterRef.current?.reorderLayer(name, direction);
+    adapterRef.current?.layers.reorder(name, direction);
   }, []);
 
   const reorderLayerToIndex = useCallback((name: string, targetVisualIndex: number) => {
-    adapterRef.current?.reorderLayerToIndex(name, targetVisualIndex);
+    adapterRef.current?.layers.reorderToIndex(name, targetVisualIndex);
   }, []);
 
   const createGroup = useCallback((name?: string) => {
-    adapterRef.current?.createGroup(name);
+    adapterRef.current?.layers.createGroup(name);
   }, []);
 
   const addCleanLayer = useCallback((name?: string) => {
-    adapterRef.current?.addCleanLayer(name);
+    adapterRef.current?.layers.addCleanLayer(name);
   }, []);
 
   const deleteLayerByName = useCallback((name: string) => {
-    adapterRef.current?.deleteLayerByName(name);
+    adapterRef.current?.layers.deleteByName(name);
   }, []);
 
   const toggleLayerMask = useCallback(
@@ -471,7 +569,35 @@ export function useCanvasEngine({
   }, []);
 
   const getDrawingTool = useCallback(() => {
-    return adapterRef.current?.getDrawingTool() ?? 'none';
+    return drawingTool;
+  }, [drawingTool]);
+
+  const getBrushWidth = useCallback(() => {
+    return brushWidth;
+  }, [brushWidth]);
+
+  const getBrushHardness = useCallback(() => {
+    return brushHardness;
+  }, [brushHardness]);
+
+  const getBrushSoftness = useCallback(() => {
+    return 100 - brushHardness;
+  }, [brushHardness]);
+
+  const getBrushSmoothness = useCallback(() => {
+    return brushSmoothness;
+  }, [brushSmoothness]);
+
+  const getBrushColor = useCallback(() => {
+    return brushColor;
+  }, [brushColor]);
+
+  const applyCameraRaw = useCallback((adjustments: CameraRawAdjustments) => {
+    adapterRef.current?.applyCameraRaw(adjustments);
+  }, []);
+
+  const getCameraRaw = useCallback(() => {
+    return adapterRef.current?.getCameraRaw() ?? null;
   }, []);
 
   const getAdapter = useCallback(() => adapterRef.current, []);
@@ -482,10 +608,14 @@ export function useCanvasEngine({
     getAdapter,
     canUndo,
     canRedo,
+    applyCameraRaw,
+    getCameraRaw,
     addText,
     addShape,
     addImage,
+    addImageFromUrl,
     applyTemplate,
+    applyGeneratedLayout,
     updateSelectedProperties,
     deleteSelected,
     duplicateSelected,
@@ -495,6 +625,8 @@ export function useCanvasEngine({
     undo,
     redo,
     exportImage,
+    exportSvg,
+    loadDesignJson,
     selectObjectByName,
     selectObjectsByNames,
     toggleLayerVisibility,
@@ -505,11 +637,23 @@ export function useCanvasEngine({
     reorderLayer,
     reorderLayerToIndex,
     createGroup,
+    ungroupSelected,
+    assignLayerToGroup,
     addCleanLayer,
     deleteLayerByName,
     selectSubject,
     deselectAll,
+    toolMode,
+    drawingTool,
+    getToolMode,
+    setToolMode,
+    finishPenPath,
     getDrawingTool,
+    getBrushWidth,
+    getBrushHardness,
+    getBrushSoftness,
+    getBrushSmoothness,
+    getBrushColor,
     setDrawingMode,
     alignSelected,
     distributeSelected,

@@ -1,0 +1,51 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg-app);
+}
+
+.topBarArea {
+  height: var(--topbar-height);
+  flex-shrink: 0;
+  background-color: transparent;
+  z-index: var(--z-header);
+}
+
+.bodyArea {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebarArea {
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.workspaceArea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: var(--color-bg-canvas-stage);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.inspectorArea {
+  composes: glass-chrome from global;
+  width: var(--inspector-width);
+  flex-shrink: 0;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: var(--border-width-hairline) solid var(--material-chrome-border);
+  overflow-y: auto;
+}

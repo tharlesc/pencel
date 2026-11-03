@@ -7,11 +7,27 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:4000',
+        changeOrigin: true,
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@huggingface/transformers'],
   },
   build: {
+    target: 'es2022',
     rollupOptions: {
       output: {
         manualChunks(id: string): string | undefined {
+          if (
+            id.includes('node_modules/@huggingface/transformers') ||
+            id.includes('node_modules/onnxruntime-web')
+          ) {
+            return 'vendor-ai';
+          }
           if (id.includes('node_modules/fabric')) {
             return 'vendor-fabric';
           }
@@ -30,5 +46,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setupTests.ts'],
     globals: false,
+    testTimeout: 15000,
   },
 });

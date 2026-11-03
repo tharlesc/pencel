@@ -1,11 +1,14 @@
 import type { ReactElement } from 'react';
-import { EditorShell } from '../../components/layout/EditorShell.js';
+import { EditorShell } from '../../components/layout/index.js';
 import { Dialog } from '../../components/ui/index.js';
-import { CanvasWorkspace } from '../../features/editor/components/CanvasWorkspace.js';
-import { ExportDialog } from '../../features/editor/components/ExportDialog.js';
-import styles from '../../features/editor/components/ExportDialog.module.css';
-import { SidebarNav } from '../../features/editor/components/SidebarNav.js';
-import { TopToolbar } from '../../features/editor/components/TopToolbar.js';
+import {
+  CanvasWorkspace,
+  ExportDialog,
+  NewDocumentModal,
+  SidebarNav,
+  TopToolbar,
+} from '../../features/editor/components/index.js';
+import styles from '../../features/editor/components/ExportDialog/ExportDialog.module.css';
 import {
   EditorProvider,
   useEditorSessionContext,
@@ -37,6 +40,7 @@ export function EditorRoute(): ReactElement {
       />
       <ExportDialog />
       <SchemaPreviewDialog />
+      <NewDocumentModal />
     </EditorProvider>
   );
 }

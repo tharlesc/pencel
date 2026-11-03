@@ -8,7 +8,7 @@ import {
   type PublicPhotoItem,
 } from '../services/publicMediaService.js';
 
-export function useMediaPanel(onAddImage: (url: string) => void) {
+export function useMediaPanel(onAddImage: (url: string, fallbackUrl?: string) => void) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const scrollSentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -131,7 +131,7 @@ export function useMediaPanel(onAddImage: (url: string) => void) {
     if (photo.downloadLocation) {
       void trackUnsplashDownload(photo.downloadLocation);
     }
-    onAddImage(photo.fullUrl);
+    onAddImage(photo.fullUrl || photo.thumbUrl, photo.thumbUrl);
   };
 
   return {

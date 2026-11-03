@@ -1,11 +1,11 @@
 import type { Dimensions } from '@pencel/shared-types';
 
-export const MIN_ZOOM = 0.2;
-export const MAX_ZOOM = 2.0;
+export const MIN_ZOOM = 0.02;
+export const MAX_ZOOM = 3.0;
 export const ZOOM_STEP = 0.1;
 
-export function clampZoom(zoom: number): number {
-  const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+export function clampZoom(zoom: number, minZoom = MIN_ZOOM, maxZoom = MAX_ZOOM): number {
+  const clamped = Math.max(minZoom, Math.min(maxZoom, zoom));
   return Math.round(clamped * 100) / 100;
 }
 
@@ -19,7 +19,7 @@ export function formatZoomPercentage(zoom: number): string {
  */
 export function computeRecommendedZoom(dimensions: Dimensions): number {
   const maxStageWidth = 640;
-  const maxStageHeight = 520;
+  const maxStageHeight = 440;
   const ratioX = maxStageWidth / dimensions.width;
   const ratioY = maxStageHeight / dimensions.height;
   return clampZoom(Math.min(ratioX, ratioY, 1));

@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Apple Pro Studio Canvas Guides Overlay (CanvasGuidesOverlay)
+   ========================================================================== */
+
+.guidesOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-raised);
+  overflow: hidden;
+}
+
+.guideHorizontal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--border-width-hairline);
+  background-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-sm);
+  pointer-events: auto;
+  cursor: ns-resize;
+  z-index: var(--z-raised);
+}
+
+/* Extended transparent hit-target for effortless grabbing */
+.guideHorizontal::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--space-1));
+  bottom: calc(-1 * var(--space-1));
+  left: 0;
+  right: 0;
+}
+
+.guideHorizontal:hover {
+  height: var(--border-width-medium);
+  background-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.guideVertical {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--border-width-hairline);
+  background-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-sm);
+  pointer-events: auto;
+  cursor: ew-resize;
+  z-index: var(--z-raised);
+}
+
+.guideVertical::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--space-1));
+  right: calc(-1 * var(--space-1));
+  top: 0;
+  bottom: 0;
+}
+
+.guideVertical:hover {
+  width: var(--border-width-medium);
+  background-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.guideDragging {
+  background-color: var(--color-accent-hover) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.guideDeleting {
+  background-color: var(--color-danger) !important;
+  opacity: var(--opacity-60);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.coordBadge {
+  composes: glass-float from global;
+  position: absolute;
+  padding: calc(var(--space-1) * 0.5) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: var(--z-popover);
+  transform: translate(var(--space-2), var(--space-2));
+}
+
+.coordBadgeSnapped {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.coordBadgeDeleting {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}

@@ -15,6 +15,7 @@
   --color-surface-secondary: #f2f2f5;
   --color-surface-tertiary: #e8e8ed;
   --color-surface-elevated: #ffffff;
+  --color-surface-base: var(--color-surface-elevated);
   --color-surface-hover: rgba(24, 24, 27, 0.05);
   --color-surface-active: rgba(24, 24, 27, 0.09);
   --color-surface-inverse: #18181b;

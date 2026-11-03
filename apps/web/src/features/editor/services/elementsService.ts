@@ -28,13 +28,27 @@ export const POPULAR_BRANDS: readonly BrandLogoItem[] = [
   { name: 'Apple', domain: 'apple.com' },
   { name: 'Google', domain: 'google.com' },
   { name: 'GitHub', domain: 'github.com' },
+  { name: 'OpenAI', domain: 'openai.com' },
+  { name: 'Vercel', domain: 'vercel.com' },
+  { name: 'Linear', domain: 'linear.app' },
+  { name: 'Notion', domain: 'notion.so' },
+  { name: 'Stripe', domain: 'stripe.com' },
+  { name: 'Figma', domain: 'figma.com' },
   { name: 'Spotify', domain: 'spotify.com' },
   { name: 'YouTube', domain: 'youtube.com' },
   { name: 'Instagram', domain: 'instagram.com' },
   { name: 'WhatsApp', domain: 'whatsapp.com' },
   { name: 'X / Twitter', domain: 'x.com' },
-  { name: 'Figma', domain: 'figma.com' },
   { name: 'Discord', domain: 'discord.com' },
+  { name: 'Slack', domain: 'slack.com' },
+  { name: 'AWS', domain: 'aws' },
+  { name: 'Docker', domain: 'docker' },
+  { name: 'Kubernetes', domain: 'kubernetes' },
+  { name: 'Supabase', domain: 'supabase' },
+  { name: 'Tailwind CSS', domain: 'tailwindcss' },
+  { name: 'React', domain: 'react' },
+  { name: 'TypeScript', domain: 'typescript' },
+  { name: 'Next.js', domain: 'nextjs' },
 ];
 
 export const POPULAR_CURATED_ICONS: readonly VectorIconItem[] = [
@@ -43,6 +57,60 @@ export const POPULAR_CURATED_ICONS: readonly VectorIconItem[] = [
     name: 'Estrela',
     prefix: 'lucide',
     svgUrl: 'https://api.iconify.design/lucide/star.svg?width=512&height=512&color=%230071E3',
+  },
+  {
+    id: 'thesvg-github',
+    name: 'GitHub (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/github/default.svg',
+  },
+  {
+    id: 'thesvg-vercel',
+    name: 'Vercel (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/vercel/default.svg',
+  },
+  {
+    id: 'thesvg-docker',
+    name: 'Docker (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/docker/default.svg',
+  },
+  {
+    id: 'thesvg-supabase',
+    name: 'Supabase (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/supabase/default.svg',
+  },
+  {
+    id: 'thesvg-react',
+    name: 'React (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/react/default.svg',
+  },
+  {
+    id: 'thesvg-typescript',
+    name: 'TypeScript (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/typescript/default.svg',
+  },
+  {
+    id: 'thesvg-kubernetes',
+    name: 'Kubernetes (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/kubernetes/default.svg',
+  },
+  {
+    id: 'thesvg-aws',
+    name: 'AWS Cloud (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/aws/default.svg',
+  },
+  {
+    id: 'thesvg-tailwind',
+    name: 'Tailwind CSS (theSVG)',
+    prefix: 'thesvg',
+    svgUrl: 'https://thesvg.org/icons/tailwindcss/default.svg',
   },
   {
     id: 'lucide-heart',
@@ -86,6 +154,42 @@ export const POPULAR_CURATED_ICONS: readonly VectorIconItem[] = [
     name: 'Troféu',
     prefix: 'lucide',
     svgUrl: 'https://api.iconify.design/lucide/trophy.svg?width=512&height=512&color=%23FFD60A',
+  },
+  {
+    id: 'lucide-gem',
+    name: 'Diamante',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/gem.svg?width=512&height=512&color=%230A84FF',
+  },
+  {
+    id: 'lucide-compass',
+    name: 'Bússola',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/compass.svg?width=512&height=512&color=%235E5CE6',
+  },
+  {
+    id: 'lucide-terminal',
+    name: 'Terminal',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/terminal.svg?width=512&height=512&color=%2330D158',
+  },
+  {
+    id: 'lucide-cpu',
+    name: 'Processador',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/cpu.svg?width=512&height=512&color=%2364D2FF',
+  },
+  {
+    id: 'lucide-globe',
+    name: 'Planeta Web',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/globe.svg?width=512&height=512&color=%230A84FF',
+  },
+  {
+    id: 'lucide-award',
+    name: 'Medalha',
+    prefix: 'lucide',
+    svgUrl: 'https://api.iconify.design/lucide/award.svg?width=512&height=512&color=%23FF9F0A',
   },
   {
     id: 'lucide-badge-percent',
@@ -273,10 +377,21 @@ const BRAND_VECTOR_MAP: Record<string, string> = {
   notion: 'https://api.iconify.design/logos/notion-icon.svg?width=512&height=512',
   'slack.com': 'https://api.iconify.design/logos/slack-icon.svg?width=512&height=512',
   slack: 'https://api.iconify.design/logos/slack-icon.svg?width=512&height=512',
+  aws: 'https://thesvg.org/icons/aws/default.svg',
+  docker: 'https://thesvg.org/icons/docker/default.svg',
+  kubernetes: 'https://thesvg.org/icons/kubernetes/default.svg',
+  supabase: 'https://thesvg.org/icons/supabase/default.svg',
+  tailwindcss: 'https://thesvg.org/icons/tailwindcss/default.svg',
+  react: 'https://thesvg.org/icons/react/default.svg',
+  typescript: 'https://thesvg.org/icons/typescript/default.svg',
+  nextjs: 'https://thesvg.org/icons/nextjs/default.svg',
+  vercel: 'https://thesvg.org/icons/vercel/default.svg',
+  linear: 'https://thesvg.org/icons/linear/default.svg',
+  openai: 'https://thesvg.org/icons/openai/default.svg',
 };
 
 /**
- * Generates crisp, high-resolution vector SVG URL for brand logos via Iconify.
+ * Generates crisp, high-resolution vector SVG URL for brand logos via theSVG and Iconify.
  */
 export function getBrandIconUrl(domainOrBrand: string): string {
   const clean = domainOrBrand
@@ -287,5 +402,5 @@ export function getBrandIconUrl(domainOrBrand: string): string {
   const matched = BRAND_VECTOR_MAP[clean] || BRAND_VECTOR_MAP[clean.replace(/\.com$/, '')];
   if (matched) return matched;
   const brandName = clean.split('.')[0] || clean;
-  return `https://api.iconify.design/simple-icons/${encodeURIComponent(brandName)}.svg?width=512&height=512`;
+  return `https://thesvg.org/icons/${encodeURIComponent(brandName)}/default.svg`;
 }

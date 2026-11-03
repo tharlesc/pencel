@@ -1,0 +1,305 @@
+/* ==========================================================================
+   Apple Pro Studio Toolbar (TopToolbar)
+   Material Pencel Chrome System
+   ========================================================================== */
+
+.bar {
+  composes: glass-chrome from global;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 var(--space-4);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: var(--border-width-hairline) solid var(--material-chrome-border);
+  user-select: none;
+  position: relative;
+  z-index: var(--z-header);
+}
+
+/* --------------------------------------------------------------------------
+   1. Leading Area: Brand Lockup, Sidebar Toggle & History Controls
+   -------------------------------------------------------------------------- */
+.leading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.brandLockup {
+  display: inline-flex;
+  align-items: center;
+  padding-right: var(--space-3);
+}
+
+/* Generic Icon Toolbar Button (Sidebar, Theme, etc.) */
+.toolbarBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.toolbarBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.toolbarBtn:active:not(:disabled) {
+  transform: scale(0.96);
+  background-color: var(--color-surface-active);
+}
+
+.toolbarBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.toolbarBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.toolbarBtnActive {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-accent-primary);
+  border: none;
+}
+
+/* macOS Segmented Undo/Redo Group */
+.segmentedGroup {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-height-sm);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-0-5);
+}
+
+.segmentedBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-xs);
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius-sm) - var(--space-0-5));
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.segmentedBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+}
+
+.segmentedBtn:active:not(:disabled) {
+  transform: scale(0.95);
+  background-color: var(--color-surface-active);
+}
+
+.segmentedBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.segmentedBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.segmentedDivider {
+  width: var(--border-width-hairline);
+  height: var(--space-3-5);
+  background-color: var(--color-border-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   2. Center Area: Document Title & Meta
+   -------------------------------------------------------------------------- */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 2;
+  min-width: 0;
+}
+
+.documentProxy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: transparent;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.documentProxy:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.documentProxy:focus-within {
+  background-color: var(--color-surface-secondary);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-default);
+}
+
+.proxyContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.titleLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.srOnly {
+  position: absolute;
+  width: var(--space-px);
+  height: var(--space-px);
+  padding: 0;
+  margin: calc(-1 * var(--space-px));
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.titleInput {
+  background: transparent;
+  border: none;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+  text-align: center;
+  outline: none;
+  padding: var(--space-0-5) var(--space-2);
+  min-width: var(--size-title-min-w);
+  max-width: var(--size-title-max-w);
+  width: 100%;
+}
+
+.titleInput:focus-visible {
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. Trailing Area: Action Capsule & Export
+   -------------------------------------------------------------------------- */
+.trailing {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.secondaryToolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-secondary);
+  border: none;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.secondaryToolBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.secondaryToolBtn:active:not(:disabled) {
+  transform: scale(0.97);
+  background-color: var(--color-surface-active);
+}
+
+.secondaryToolBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.secondaryToolBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.primaryShareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent-primary);
+  border: none;
+  color: var(--color-text-on-accent);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  cursor: pointer;
+  box-shadow: var(--shadow-accent-specular);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.primaryShareBtn:hover:not(:disabled) {
+  background-color: var(--color-accent-primary-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.primaryShareBtn:active:not(:disabled) {
+  transform: scale(0.97);
+  background-color: var(--color-accent-primary-active);
+}
+
+.primaryShareBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.primaryShareBtn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}

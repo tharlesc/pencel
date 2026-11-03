@@ -1,0 +1,189 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3-5);
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.emptyTitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.emptyDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2-5);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.sectionHeader:hover {
+  opacity: 0.85;
+}
+
+.sectionCarat {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.sectionCaratCollapsed {
+  transform: rotate(-90deg);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.subHeader {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  margin-top: calc(-1 * var(--space-1));
+  margin-bottom: var(--space-1);
+}
+
+.subGroupTitle {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-2);
+}
+
+.controlRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.controlLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+}
+
+.numBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  height: 1.375rem;
+  padding: 0 var(--space-1-5);
+  background: var(--color-surface-subtle);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+  text-align: center;
+  outline: none;
+}
+
+.numBox:focus {
+  border-color: var(--color-focus-ring);
+  background: var(--color-surface);
+}
+
+.slider {
+  width: 100%;
+  height: var(--space-1);
+  appearance: none;
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  outline: none;
+  cursor: pointer;
+  margin: var(--space-1) 0;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--color-surface-inverse);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.slider::-moz-range-thumb {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--color-surface-inverse);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* Gradient track for temperature: blue to yellow */
+.sliderTrackTemp {
+  background: var(--gradient-cameraraw-temp);
+}
+
+/* Gradient track for tint: green to magenta */
+.sliderTrackTint {
+  background: var(--gradient-cameraraw-tint);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  margin-top: auto;
+}

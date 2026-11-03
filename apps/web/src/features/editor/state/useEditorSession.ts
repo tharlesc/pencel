@@ -4,6 +4,7 @@ import {
   deletePageFromDocument,
   duplicateActivePage,
   getActivePage,
+  renamePageInDocument,
   serializeDocument,
   setActivePageInDocument,
   updateActivePageBackground,
@@ -30,8 +31,15 @@ export interface EditorSessionController {
   readonly zoom: number;
   readonly isSchemaDialogOpen: boolean;
   readonly isExportDialogOpen: boolean;
+  readonly isCameraRawOpen: boolean;
+  readonly isNewDocumentModalOpen: boolean;
   readonly serializedPreview: string;
   readonly setDocumentTitle: (title: string) => void;
+  readonly createNewDocument: (
+    dimensions: Dimensions,
+    title?: string,
+    backgroundColor?: string,
+  ) => void;
   readonly selectPreset: (presetId: PresetId) => void;
   readonly setPageDimensions: (dimensions: Dimensions) => void;
   readonly setPageBackground: (color: string) => void;
@@ -47,6 +55,10 @@ export interface EditorSessionController {
   readonly closeSchemaDialog: () => void;
   readonly openExportDialog: () => void;
   readonly closeExportDialog: () => void;
+  readonly openCameraRaw: () => void;
+  readonly closeCameraRaw: () => void;
+  readonly openNewDocumentModal: () => void;
+  readonly closeNewDocumentModal: () => void;
   readonly addPage: (options?: {
     name?: string;
     dimensions?: Dimensions;
@@ -54,6 +66,7 @@ export interface EditorSessionController {
   }) => void;
   readonly duplicatePage: () => void;
   readonly deletePage: (pageId: string) => void;
+  readonly renamePage: (pageId: string, name: string) => void;
   readonly setActivePage: (pageId: string) => void;
   readonly nextPage: () => void;
   readonly prevPage: () => void;
@@ -84,6 +97,16 @@ export function useEditorSession(): EditorSessionController {
 
   const [isSchemaDialogOpen, setIsSchemaDialogOpen] = useState<boolean>(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState<boolean>(false);
+  const [isCameraRawOpen, setIsCameraRawOpen] = useState<boolean>(false);
+  const [isNewDocumentModalOpen, setIsNewDocumentModalOpen] = useState<boolean>(false);
+
+  const openNewDocumentModal = useCallback(() => {
+    setIsNewDocumentModalOpen(true);
+  }, []);
+
+  const closeNewDocumentModal = useCallback(() => {
+    setIsNewDocumentModalOpen(false);
+  }, []);
 
   const setDocumentTitle = useCallback((title: string) => {
     setDocument((prev) => ({
@@ -102,8 +125,24 @@ export function useEditorSession(): EditorSessionController {
     });
   }, []);
 
+  const createNewDocument = useCallback(
+    (dimensions: Dimensions, title?: string, backgroundColor?: string) => {
+      const nextDoc = createEmptyDocument({
+        title: title ?? `Documento sem título`,
+      });
+      const updated = updateActivePageDimensions(nextDoc, dimensions);
+      const finalDoc = backgroundColor
+        ? updateActivePageBackground(updated, backgroundColor)
+        : updated;
+      setDocument(finalDoc);
+      setZoomState(computeRecommendedZoom(dimensions));
+    },
+    [],
+  );
+
   const setPageDimensions = useCallback((dimensions: Dimensions) => {
     setDocument((prev) => updateActivePageDimensions(prev, dimensions));
+    setZoomState(computeRecommendedZoom(dimensions));
   }, []);
 
   const setPageBackground = useCallback((color: string) => {
@@ -141,6 +180,15 @@ export function useEditorSession(): EditorSessionController {
   const openExportDialog = useCallback(() => setIsExportDialogOpen(true), []);
   const closeExportDialog = useCallback(() => setIsExportDialogOpen(false), []);
 
+  const openCameraRaw = useCallback(() => {
+    setSidebarCategory('cameraRaw');
+    setIsDrawerOpen(true);
+    setIsCameraRawOpen(true);
+  }, [setSidebarCategory]);
+  const closeCameraRaw = useCallback(() => {
+    setIsCameraRawOpen(false);
+  }, []);
+
   const addPage = useCallback(
     (options?: { name?: string; dimensions?: Dimensions; backgroundColor?: string }) => {
       setDocument((prev) => addPageToDocument(prev, options));
@@ -154,6 +202,10 @@ export function useEditorSession(): EditorSessionController {
 
   const deletePage = useCallback((pageId: string) => {
     setDocument((prev) => deletePageFromDocument(prev, pageId));
+  }, []);
+
+  const renamePage = useCallback((pageId: string, name: string) => {
+    setDocument((prev) => renamePageInDocument(prev, pageId, name));
   }, []);
 
   const setActivePage = useCallback((pageId: string) => {
@@ -194,8 +246,11 @@ export function useEditorSession(): EditorSessionController {
     zoom,
     isSchemaDialogOpen,
     isExportDialogOpen,
+    isCameraRawOpen,
+    isNewDocumentModalOpen,
     serializedPreview,
     setDocumentTitle,
+    createNewDocument,
     selectPreset,
     setPageDimensions,
     setPageBackground,
@@ -211,9 +266,14 @@ export function useEditorSession(): EditorSessionController {
     closeSchemaDialog,
     openExportDialog,
     closeExportDialog,
+    openCameraRaw,
+    closeCameraRaw,
+    openNewDocumentModal,
+    closeNewDocumentModal,
     addPage,
     duplicatePage,
     deletePage,
+    renamePage,
     setActivePage,
     nextPage,
     prevPage,

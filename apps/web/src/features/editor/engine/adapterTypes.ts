@@ -54,6 +54,9 @@ export interface SelectedObjectProperties {
   readonly fill?: string;
   readonly stroke?: string;
   readonly strokeWidth?: number;
+  readonly strokeDashArray?: readonly number[] | null;
+  readonly strokeLineCap?: 'butt' | 'round' | 'square';
+  readonly strokeLineJoin?: 'miter' | 'round' | 'bevel';
   readonly opacity: number;
   readonly fontSize?: number;
   readonly fontFamily?: string;
@@ -72,6 +75,7 @@ export interface SelectedObjectProperties {
   readonly maskEnabled?: boolean;
   readonly maskInverted?: boolean;
   readonly isCropped?: boolean;
+  readonly blendMode?: string;
 }
 
 export interface LayerItem {
@@ -135,6 +139,9 @@ export function extractSelectedProperties(active: FabricObject): SelectedObjectP
     fill: typeof active.fill === 'string' ? active.fill : '#18181B',
     stroke: typeof active.stroke === 'string' ? active.stroke : undefined,
     strokeWidth: typeof active.strokeWidth === 'number' ? active.strokeWidth : undefined,
+    strokeDashArray: Array.isArray(active.strokeDashArray) ? active.strokeDashArray : null,
+    strokeLineCap: (active.strokeLineCap as 'butt' | 'round' | 'square') || 'butt',
+    strokeLineJoin: (active.strokeLineJoin as 'miter' | 'round' | 'bevel') || 'miter',
     opacity: active.opacity ?? 1,
     fontSize: typeof textObj.fontSize === 'number' ? textObj.fontSize : undefined,
     fontFamily: typeof textObj.fontFamily === 'string' ? textObj.fontFamily : undefined,
@@ -153,5 +160,6 @@ export function extractSelectedProperties(active: FabricObject): SelectedObjectP
     maskEnabled: active.get('maskEnabled') !== false,
     maskInverted: Boolean(active.get('maskInverted')),
     isCropped: Boolean(active.get('isCropped')),
+    blendMode: (active.get('globalCompositeOperation') as string) || 'source-over',
   };
 }

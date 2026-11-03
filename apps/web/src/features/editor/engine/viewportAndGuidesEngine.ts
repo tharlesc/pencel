@@ -1,12 +1,124 @@
-import {
-  isObjectBleedingOutsideArtboard,
-  screenToArtboard,
-  type Point2D,
-} from '@pencel/editor-core';
+import { screenToArtboard, type Point2D } from '@pencel/editor-core';
 import type { Dimensions } from '@pencel/shared-types';
-import { Canvas as FabricCanvas, FabricObject } from 'fabric';
+import {
+  Canvas as FabricCanvas,
+  classRegistry,
+  FabricObject,
+  Path as FabricPath,
+  Point as FabricPoint,
+  util as fabricUtil,
+  type TMat2D,
+} from 'fabric';
 import { createElementId } from '../../../shared/lib/idUtils.js';
 import type { CanvasAdapterConfig } from './adapterTypes.js';
+import { exportCanvasDataUrl, exportCanvasSvg } from './historyAndPageEngine.js';
+
+export interface EraserStrokeData {
+  readonly path: readonly (readonly (string | number)[])[];
+  readonly width: number;
+}
+
+export class EraserMask extends FabricObject {
+  static override type = 'EraserMask';
+  public strokes: EraserStrokeData[] = [];
+
+  constructor(options?: Record<string, unknown>) {
+    super({
+      left: 0,
+      top: 0,
+      originX: 'center',
+      originY: 'center',
+      strokeWidth: 0,
+      width: 0,
+      height: 0,
+      inverted: true,
+      absolutePositioned: false,
+      ...options,
+    });
+    if (Array.isArray(options?.strokes)) {
+      this.strokes = [...(options.strokes as EraserStrokeData[])];
+    }
+  }
+
+  public addStroke(path: readonly (readonly (string | number)[])[], width: number): void {
+    this.strokes.push({ path, width });
+    this.dirty = true;
+  }
+
+  override drawObject(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    for (const stroke of this.strokes) {
+      ctx.beginPath();
+      for (const cmd of stroke.path) {
+        const type = cmd[0];
+        if (type === 'M') {
+          ctx.moveTo(Number(cmd[1]), Number(cmd[2]));
+        } else if (type === 'L') {
+          ctx.lineTo(Number(cmd[1]), Number(cmd[2]));
+        } else if (type === 'Q') {
+          ctx.quadraticCurveTo(Number(cmd[1]), Number(cmd[2]), Number(cmd[3]), Number(cmd[4]));
+        } else if (type === 'C') {
+          ctx.bezierCurveTo(
+            Number(cmd[1]),
+            Number(cmd[2]),
+            Number(cmd[3]),
+            Number(cmd[4]),
+            Number(cmd[5]),
+            Number(cmd[6]),
+          );
+        } else if (type === 'Z') {
+          ctx.closePath();
+        }
+      }
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = stroke.width || 8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  override toObject(propertiesToInclude?: string[]): Record<string, unknown> {
+    return {
+      ...super.toObject(propertiesToInclude),
+      type: EraserMask.type,
+      strokes: this.strokes,
+    };
+  }
+
+  static override async fromObject(object: Record<string, unknown>): Promise<EraserMask> {
+    return new EraserMask(object);
+  }
+}
+
+classRegistry.setClass(EraserMask, 'EraserMask');
+
+export function transformPathCommandsToLocal(
+  pathCommands: readonly (readonly (string | number)[])[],
+  targetTransformMatrix: TMat2D,
+): (string | number)[][] {
+  const inv = fabricUtil.invertTransform(targetTransformMatrix);
+  return pathCommands.map((cmd) => {
+    const type = cmd[0];
+    if (type === 'M' || type === 'L') {
+      const p = fabricUtil.transformPoint(new FabricPoint(Number(cmd[1]), Number(cmd[2])), inv);
+      return [type, p.x, p.y];
+    }
+    if (type === 'Q') {
+      const cp = fabricUtil.transformPoint(new FabricPoint(Number(cmd[1]), Number(cmd[2])), inv);
+      const p = fabricUtil.transformPoint(new FabricPoint(Number(cmd[3]), Number(cmd[4])), inv);
+      return [type, cp.x, cp.y, p.x, p.y];
+    }
+    if (type === 'C') {
+      const cp1 = fabricUtil.transformPoint(new FabricPoint(Number(cmd[1]), Number(cmd[2])), inv);
+      const cp2 = fabricUtil.transformPoint(new FabricPoint(Number(cmd[3]), Number(cmd[4])), inv);
+      const p = fabricUtil.transformPoint(new FabricPoint(Number(cmd[5]), Number(cmd[6])), inv);
+      return [type, cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y];
+    }
+    return [...cmd];
+  });
+}
 
 export function createConfiguredFabricCanvas(
   canvasElement: HTMLCanvasElement,
@@ -54,6 +166,22 @@ export function createConfiguredFabricCanvas(
   return canvas;
 }
 
+export function renderArtboardBackground(
+  fabricCanvas: FabricCanvas,
+  pageDimensions: Dimensions,
+  backgroundColor: string,
+): void {
+  const ctx = fabricCanvas.getContext();
+  if (!ctx || typeof ctx.save !== 'function') return;
+
+  const v = fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+  ctx.save();
+  ctx.transform(v[0], v[1], v[2], v[3], v[4], v[5]);
+  ctx.fillStyle = backgroundColor || '#FFFFFF';
+  ctx.fillRect(0, 0, pageDimensions.width, pageDimensions.height);
+  ctx.restore();
+}
+
 export function renderArtboardClipAndPasteboardControls(
   fabricCanvas: FabricCanvas,
   pageDimensions: Dimensions,
@@ -76,29 +204,6 @@ export function renderArtboardClipAndPasteboardControls(
   ctx.clearRect(0, scaledMargin + scaledHeight, totalW, scaledMargin);
   ctx.clearRect(0, scaledMargin, scaledMargin, scaledHeight);
   ctx.clearRect(scaledMargin + scaledWidth, scaledMargin, scaledMargin, scaledHeight);
-
-  const objects = fabricCanvas.getObjects();
-  for (const obj of objects) {
-    if (obj.visible === false) continue;
-    const left = obj.left ?? 0;
-    const top = obj.top ?? 0;
-    const w = (obj.width ?? 0) * (obj.scaleX ?? 1);
-    const h = (obj.height ?? 0) * (obj.scaleY ?? 1);
-
-    if (
-      isObjectBleedingOutsideArtboard({ x: left, y: top, width: w, height: h }, pageDimensions) &&
-      typeof ctx.strokeRect === 'function'
-    ) {
-      ctx.save();
-      ctx.strokeStyle = 'rgba(0, 102, 204, 0.38)';
-      ctx.lineWidth = 1;
-      if (typeof ctx.setLineDash === 'function') {
-        ctx.setLineDash([4, 4]);
-      }
-      ctx.strokeRect(scaledMargin + left * scale, scaledMargin + top * scale, w * scale, h * scale);
-      ctx.restore();
-    }
-  }
 
   const active = fabricCanvas.getActiveObject();
   if (active && typeof fabricCanvas.drawControls === 'function') {
@@ -158,6 +263,7 @@ export interface InteractiveListenerContext {
   readonly onSelectionCleared: () => void;
   readonly onSaveHistory: () => void;
   readonly onCanvasChange: () => void;
+  readonly onBeforeRender?: () => void;
   readonly onAfterRender: () => void;
 }
 
@@ -165,6 +271,10 @@ export function attachCanvasInteractiveListeners(
   canvas: FabricCanvas,
   ctx: InteractiveListenerContext,
 ): void {
+  canvas.on('before:render', () => {
+    ctx.onBeforeRender?.();
+  });
+
   canvas.on('after:render', () => {
     ctx.onAfterRender();
   });
@@ -198,10 +308,45 @@ export function attachCanvasInteractiveListeners(
     const path = (e as { path?: FabricObject }).path;
     if (!path) return;
     if (ctx.getDrawingTool() === 'eraser') {
-      path.set({
-        globalCompositeOperation: 'destination-out',
-        name: createElementId('eraser'),
-      });
+      const eraserPath = path as FabricPath;
+      const eraserBounds = path.getBoundingRect();
+      const rawCommands = eraserPath.path;
+      const strokeWidth = eraserPath.strokeWidth || 8;
+
+      if (rawCommands && rawCommands.length > 0) {
+        for (const obj of canvas.getObjects()) {
+          if (obj === path) continue;
+          const name = (obj.get('name') as string) || '';
+          if (name.startsWith('brush') || name.startsWith('vector-path')) {
+            const objBounds = obj.getBoundingRect();
+            const overlaps = !(
+              eraserBounds.left > objBounds.left + objBounds.width ||
+              eraserBounds.left + eraserBounds.width < objBounds.left ||
+              eraserBounds.top > objBounds.top + objBounds.height ||
+              eraserBounds.top + eraserBounds.height < objBounds.top
+            );
+            if (overlaps) {
+              const localCommands = transformPathCommandsToLocal(
+                rawCommands,
+                obj.calcTransformMatrix(),
+              );
+              const effectiveScale = (obj.scaleX + obj.scaleY) / 2 || 1;
+              const localWidth = Math.max(1, strokeWidth / effectiveScale);
+
+              let mask = obj.clipPath as EraserMask | undefined;
+              if (!mask || !(mask instanceof EraserMask)) {
+                mask = new EraserMask();
+                obj.clipPath = mask;
+              }
+              mask.addStroke(localCommands, localWidth);
+              obj.objectCaching = true;
+              obj.dirty = true;
+            }
+          }
+        }
+      }
+      canvas.remove(path);
+      canvas.requestRenderAll();
     } else {
       path.set({
         name: createElementId('brush'),
@@ -276,4 +421,64 @@ export function attachCanvasInteractiveListeners(
       target.set('top', Math.round(artboardH - h));
     }
   });
+}
+
+export function computeDynamicBleedMargin(dimensions: Dimensions): number {
+  return Math.max(1200, Math.round(Math.max(dimensions.width, dimensions.height) * 1.5));
+}
+
+export class ViewportManager {
+  public currentScale = 1;
+  public pageDimensions: Dimensions = { width: 1080, height: 1080 };
+  public backgroundColor = '#FBFBFD';
+  public clipToArtboard = true;
+
+  public get bleedMargin(): number {
+    return computeDynamicBleedMargin(this.pageDimensions);
+  }
+
+  public screenPointToArtboard(
+    canvas: FabricCanvas | null,
+    clientX: number,
+    clientY: number,
+  ): Point2D {
+    return computeScreenPointToArtboard(
+      canvas,
+      this.currentScale,
+      this.bleedMargin,
+      clientX,
+      clientY,
+    );
+  }
+
+  public sync(canvas: FabricCanvas | null, config: CanvasAdapterConfig): void {
+    if (!canvas) return;
+    this.pageDimensions = config.dimensions;
+    this.currentScale = config.displayScale;
+    this.backgroundColor = config.backgroundColor;
+    syncCanvasViewport(canvas, config, this.bleedMargin);
+  }
+
+  public exportDataUrl(
+    canvas: FabricCanvas | null,
+    format: 'png' | 'jpeg' = 'png',
+    quality = 0.95,
+    maxDimension?: number,
+  ): string {
+    if (!canvas) return '';
+    return exportCanvasDataUrl(
+      canvas,
+      this.pageDimensions,
+      this.backgroundColor,
+      this.currentScale,
+      this.bleedMargin,
+      format,
+      quality,
+      maxDimension,
+    );
+  }
+
+  public exportSvg(canvas: FabricCanvas | null): string {
+    return canvas ? exportCanvasSvg(canvas, this.pageDimensions) : '';
+  }
 }

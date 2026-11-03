@@ -5,7 +5,7 @@ import styles from './Dialog.module.css';
 /**
  * Width presets for `<Dialog />` (Material Pencel Sheet layer).
  */
-export type DialogSize = 'sm' | 'md' | 'lg';
+export type DialogSize = 'sm' | 'md' | 'lg' | 'xl';
 
 export interface DialogProps {
   readonly open: boolean;

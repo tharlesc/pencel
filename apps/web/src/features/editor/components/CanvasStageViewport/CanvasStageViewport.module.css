@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Apple Pro Studio Canvas Stage Viewport (CanvasStageViewport)
+   ========================================================================== */
+.viewportScroll {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+  background-image: radial-gradient(
+    var(--color-border-subtle) var(--border-width-hairline),
+    transparent var(--border-width-hairline)
+  );
+  background-size: var(--size-stage-grid) var(--size-stage-grid);
+}
+
+.viewportScrollGrab {
+  cursor: grab !important;
+}
+
+.viewportScrollPanning {
+  cursor: grabbing !important;
+}
+
+.viewportScrollDrawing,
+.viewportScrollDrawing canvas {
+  cursor: none !important;
+}
+
+.artboardFrame {
+  position: relative;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-artboard);
+  border: var(--border-width-hairline) solid var(--surface-glass-border-outer);
+  overflow: visible;
+  flex-shrink: 0;
+  will-change: transform, width, height;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  pointer-events: auto;
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.artboardFramePanning {
+  pointer-events: none;
+}
+
+.canvasPositioner {
+  position: absolute;
+  pointer-events: auto;
+}

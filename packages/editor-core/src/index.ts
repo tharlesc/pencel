@@ -6,3 +6,4 @@ export * from './history/types.js';
 export * from './serialization/serializer.js';
 export * from './math/coordinateSystem.js';
 export * from './math/selectionAndMask.js';
+export * from './math/rulerAndGuides.js';

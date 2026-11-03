@@ -1,0 +1,175 @@
+/* ==========================================================================
+   Apple Pro Studio Glass Select Component (Select.module.css)
+   Material Pencel Float System & High-Precision Translucent Select
+   ========================================================================== */
+
+.selectContainer {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2-5);
+  background-color: var(--color-surface-secondary);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-tight);
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.trigger:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-default);
+}
+
+.trigger:focus-visible {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.triggerOpen {
+  background-color: var(--color-surface-active);
+  border-color: var(--color-accent-primary);
+}
+
+.size-sm {
+  height: var(--control-height-sm);
+  font-size: var(--font-size-xs);
+}
+
+.size-md {
+  height: var(--control-height-md);
+  font-size: var(--font-size-sm);
+}
+
+.label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  transition: transform var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: var(--color-accent-primary);
+}
+
+.dropdownPopover {
+  composes: glass-float from global;
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  min-width: 100%;
+  max-height: var(--size-dialog-sm);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+  border-radius: var(--radius-md);
+  z-index: var(--z-popover);
+  box-shadow: var(--shadow-glass-float);
+  animation: selectMenuEnter var(--duration-fast) var(--ease-out);
+  scrollbar-width: thin;
+}
+
+.align-start {
+  left: 0;
+  transform-origin: top left;
+}
+
+.align-end {
+  right: 0;
+  transform-origin: top right;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-1-5) var(--space-2);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-tight);
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-instant) var(--ease-out),
+    color var(--duration-instant) var(--ease-out);
+}
+
+.optionItem:hover,
+.optionItemFocused {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.optionItem:focus-visible {
+  outline: none;
+  background-color: var(--color-surface-hover);
+}
+
+.optionItemSelected {
+  background-color: var(--color-selection-bg);
+  color: var(--color-accent-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.optionItemSelected:hover {
+  background-color: var(--color-selection-bg);
+}
+
+.optionLabel {
+  flex: 1;
+}
+
+.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent-primary);
+  flex-shrink: 0;
+}
+
+@keyframes selectMenuEnter {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--space-1))) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

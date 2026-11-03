@@ -11,6 +11,27 @@ import { searchGiphyStills, type GiphyItem } from '../services/giphyService.js';
 
 export type ElementsSubTab = 'shapes' | 'brands' | 'stickers' | 'icons' | 'emojis';
 
+export const ELEMENTS_SUB_TABS: readonly { id: ElementsSubTab; label: string }[] = [
+  { id: 'shapes', label: 'Formas' },
+  { id: 'icons', label: 'Ícones' },
+  { id: 'emojis', label: 'Emojis' },
+  { id: 'stickers', label: 'Figurinhas' },
+  { id: 'brands', label: 'Marcas' },
+];
+
+export const QUICK_BRAND_DOMAINS = [
+  'apple.com',
+  'google.com',
+  'github.com',
+  'spotify.com',
+  'youtube.com',
+  'instagram.com',
+  'whatsapp.com',
+  'x.com',
+  'figma.com',
+  'discord.com',
+] as const;
+
 interface FeedState<T> {
   readonly items: readonly T[];
   readonly query: string;

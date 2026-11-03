@@ -5,13 +5,13 @@
  */
 
 :root {
-  /* Typography Families (Web-safe system stacks resolving to SF Pro / SF Mono on macOS) */
+  /* Typography Families (Google Fonts Inter as primary with macOS SF fallbacks) */
   --font-family-ui:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
   --font-family-text:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto, Helvetica,
-    Arial, sans-serif;
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
   --font-family-mono:
     ui-monospace, 'SFMono-Regular', 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', Menlo, Consolas,
     monospace;
@@ -98,6 +98,16 @@
   --space-14: 3.5rem; /* 56px */
   --space-16: 4rem; /* 64px */
 
+  /* Spatial T-Shirt Size Aliases (Mapped to standard 4px base grid) */
+  --space-3xs: var(--space-0-5); /* 2px */
+  --space-2xs: var(--space-0-75); /* 3px */
+  --space-xs: var(--space-1); /* 4px */
+  --space-sm: var(--space-2); /* 8px */
+  --space-md: var(--space-4); /* 16px */
+  --space-lg: var(--space-6); /* 24px */
+  --space-xl: var(--space-8); /* 32px */
+  --space-2xl: var(--space-12); /* 48px */
+
   /* Control Heights & Layout Dimensions */
   --control-height-2xs: 1.25rem; /* 20px */
   --control-height-xs: 1.5rem; /* 24px */
@@ -125,6 +135,7 @@
   --size-dialog-sm: 22.5rem; /* 360px */
   --size-dialog-md: 30rem; /* 480px */
   --size-dialog-lg: 33.75rem; /* 540px */
+  --size-dialog-xl: 57.5rem; /* 920px */
   --size-color-area-h: 8.125rem; /* 130px */
   --size-preview-h: 7.5rem; /* 120px */
   --size-list-max-h: 15rem; /* 240px */
@@ -137,8 +148,8 @@
   --size-checkerboard: 0.5rem; /* 8px */
   --size-checkerboard-half: 0.25rem; /* 4px */
   --size-checkerboard-neg-half: -0.25rem; /* -4px */
-  --size-title-min-w: 7.5rem; /* 120px */
-  --size-title-max-w: 20rem; /* 320px */
+  --size-title-min-w: 18rem; /* 288px */
+  --size-title-max-w: 36rem; /* 576px */
   --size-font-trigger-min-w: 8.125rem; /* 130px */
   --size-font-trigger-max-w: 11.25rem; /* 180px */
   --size-font-list-max-h: 18.125rem; /* 290px */
@@ -225,6 +236,10 @@
     #ff0000 360deg
   );
 
+  /* Camera Raw Balance Gradients */
+  --gradient-cameraraw-temp: linear-gradient(to right, #3b82f6 0%, #a1a1aa 50%, #eab308 100%);
+  --gradient-cameraraw-tint: linear-gradient(to right, #22c55e 0%, #a1a1aa 50%, #ec4899 100%);
+
   /* Backdrop Blur & Vibrancy (Legacy aliases resolved to Material Pencel tiers) */
   --backdrop-blur-glass: var(--material-chrome-blur);
   --backdrop-blur-liquid: var(--material-float-blur);
@@ -233,11 +248,13 @@
   --duration-instant: 90ms;
   --duration-fast: 150ms;
   --duration-normal: 200ms;
+  --duration-smooth: 360ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Material Pencel - Three-Layer Glass Utility System */
@@ -304,5 +321,6 @@
     --duration-instant: 0.01ms;
     --duration-fast: 0.01ms;
     --duration-normal: 0.01ms;
+    --duration-smooth: 0.01ms;
   }
 }

@@ -1,9 +1,11 @@
-import type { ReactElement } from 'react';
-import { Icon } from '../../../../components/ui/Icon/Icon.js';
+import { useState, type ReactElement } from 'react';
+import { Icon, Select } from '../../../../components/ui/index.js';
 import type { LayerItem, SelectedObjectProperties } from '../../engine/FabricCanvasAdapter.js';
+import { BlendModePopover, CATEGORIZED_BLEND_MODES } from './BlendModePopover.js';
+import { LayerBottomActions } from './LayerBottomActions.js';
 import { LayerTreeItem } from './LayerTreeItem.js';
 import styles from './LayersPanel.module.css';
-import { BLEND_MODES, useLayerTreeState } from './useLayerTreeState.js';
+import { useLayerTreeState } from './useLayerTreeState.js';
 
 export interface LayersPanelProps {
   readonly layers: readonly LayerItem[];
@@ -21,6 +23,8 @@ export interface LayersPanelProps {
   readonly onDuplicateLayer: () => void;
   readonly onAddNewLayer: (type?: string) => void;
   readonly onAddGroup?: () => void;
+  readonly onUngroup?: () => void;
+  readonly onAssignLayerToGroup?: (layerName: string, groupName: string | null) => void;
   readonly onToggleLayerMask?: (
     layerName?: string,
     shape?: 'circle' | 'rounded' | 'ellipse',
@@ -43,6 +47,8 @@ export function LayersPanel({
   onDuplicateLayer,
   onAddNewLayer,
   onAddGroup,
+  onUngroup,
+  onAssignLayerToGroup,
   onToggleLayerMask,
   onInvertLayerMask,
   onRemoveLayerMask,
@@ -54,7 +60,12 @@ export function LayersPanel({
     onSelectMultipleLayers,
     onRenameLayer,
     onReorderLayerToIndex,
+    onAssignLayerToGroup,
   });
+
+  const [showBlendPopover, setShowBlendPopover] = useState(false);
+  const activeBlendLabel =
+    CATEGORIZED_BLEND_MODES.find((m) => m.value === tree.currentBlendMode)?.label ?? 'Normal';
 
   const renderLayerRow = (layer: LayerItem, isChild = false): ReactElement => {
     const isEditing = tree.editingLayerName === layer.name;
@@ -87,6 +98,7 @@ export function LayersPanel({
         onToggleLock={onToggleLock}
         onToggleLayerMask={onToggleLayerMask}
         onDuplicateLayer={onDuplicateLayer}
+        onExtractFromGroup={(name) => onAssignLayerToGroup?.(name, null)}
         onDeleteLayer={onDeleteLayer}
         onDragStart={tree.handleDragStart}
         onDragOver={tree.handleDragOver}
@@ -99,17 +111,17 @@ export function LayersPanel({
   return (
     <div className={styles.panel}>
       <div className={styles.filterBar}>
-        <select
-          className={styles.filterSelect}
+        <Select
           value={tree.filterType}
-          onChange={(e) => tree.setFilterType(e.target.value as 'all' | 'image' | 'text' | 'shape')}
-          aria-label="Filtrar camadas por tipo"
-        >
-          <option value="all">Tipo: Todos</option>
-          <option value="text">Tipo: Texto</option>
-          <option value="shape">Tipo: Forma</option>
-          <option value="image">Tipo: Imagem</option>
-        </select>
+          options={[
+            { label: 'Tipo: Todos', value: 'all' },
+            { label: 'Tipo: Texto', value: 'text' },
+            { label: 'Tipo: Forma', value: 'shape' },
+            { label: 'Tipo: Imagem', value: 'image' },
+          ]}
+          onChange={(val) => tree.setFilterType(val as 'all' | 'image' | 'text' | 'shape')}
+          ariaLabel="Filtrar camadas por tipo"
+        />
 
         <div className={styles.filterChips}>
           <button
@@ -159,21 +171,53 @@ export function LayersPanel({
 
       <div className={styles.controlsBar}>
         <div className={styles.controlRow}>
-          <select
-            className={styles.blendSelect}
-            value={tree.currentBlendMode}
-            onChange={(e) =>
-              tree.activeLayer && onSetBlendMode(tree.activeLayer.name, e.target.value)
-            }
-            disabled={!tree.activeLayer}
-            aria-label="Modo de mesclagem"
-          >
-            {BLEND_MODES.map((mode) => (
-              <option key={mode.value} value={mode.value}>
-                {mode.label}
-              </option>
-            ))}
-          </select>
+          <div className={styles.blendContainer}>
+            <button
+              type="button"
+              className={styles.blendSelect}
+              onClick={() => setShowBlendPopover((prev) => !prev)}
+              disabled={!tree.activeLayer}
+              aria-label="Selecionar modo de mesclagem"
+            >
+              <span>{activeBlendLabel}</span>
+              <Icon name="chevronDown" size="xs" tone="muted" />
+            </button>
+            <select
+              aria-label="Modo de mesclagem"
+              className={styles.blendSelectHidden}
+              value={tree.currentBlendMode}
+              onChange={(e) => {
+                if (tree.activeLayer) onSetBlendMode(tree.activeLayer.name, e.target.value);
+              }}
+              tabIndex={-1}
+            >
+              <option value="source-over">Normal</option>
+              <option value="multiply">Multiplicação</option>
+              <option value="screen">Divisão (Screen)</option>
+              <option value="overlay">Sobrepor (Overlay)</option>
+              <option value="darken">Escurecer</option>
+              <option value="lighten">Clarear</option>
+              <option value="color-dodge">Subexposição de Cores</option>
+              <option value="color-burn">Superexposição de Cores</option>
+              <option value="hard-light">Luz Direta (Hard Light)</option>
+              <option value="soft-light">Luz Indireta (Soft Light)</option>
+              <option value="difference">Diferença</option>
+              <option value="exclusion">Exclusão</option>
+              <option value="hue">Matiz</option>
+              <option value="saturation">Saturação</option>
+              <option value="color">Cor</option>
+              <option value="luminosity">Luminosidade</option>
+            </select>
+            {showBlendPopover && tree.activeLayer && (
+              <BlendModePopover
+                currentBlendMode={tree.currentBlendMode}
+                onSelectBlendMode={(mode) => {
+                  if (tree.activeLayer) onSetBlendMode(tree.activeLayer.name, mode);
+                }}
+                onClose={() => setShowBlendPopover(false)}
+              />
+            )}
+          </div>
 
           <div className={styles.lockIconsGroup}>
             <button
@@ -192,7 +236,13 @@ export function LayersPanel({
         </div>
       </div>
 
-      <div className={styles.treeContainer} role="tree" aria-label="Árvore de camadas">
+      <div
+        className={styles.treeContainer}
+        role="tree"
+        aria-label="Árvore de camadas"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={tree.handleDropOnRoot}
+      >
         {tree.rootLayers.length === 0 ? (
           <div className={styles.emptyState}>
             <Icon name="layers" size="lg" tone="muted" />
@@ -222,71 +272,16 @@ export function LayersPanel({
         )}
       </div>
 
-      <div className={styles.bottomBar} role="toolbar" aria-label="Ações de camadas">
-        <button
-          type="button"
-          className={styles.bottomBtn}
-          onClick={() => onToggleLayerMask?.(tree.activeLayer?.name, 'circle')}
-          disabled={!tree.activeLayer}
-          title={
-            tree.activeLayer?.hasMask
-              ? 'Ativar/Desativar Máscara de Camada'
-              : 'Adicionar Máscara de Camada Não Destrutiva'
-          }
-          aria-label="Adicionar máscara de camada"
-        >
-          <Icon name="circle" size="xs" />
-        </button>
-        <button
-          type="button"
-          className={styles.bottomBtn}
-          onClick={() => onInvertLayerMask?.(tree.activeLayer?.name)}
-          disabled={!tree.activeLayer?.hasMask}
-          title="Inverter Máscara de Camada"
-          aria-label="Inverter máscara de camada"
-        >
-          <Icon name="contrast" size="xs" />
-        </button>
-        {tree.activeLayer?.hasMask && (
-          <button
-            type="button"
-            className={styles.bottomBtn}
-            onClick={() => tree.activeLayer && onRemoveLayerMask?.(tree.activeLayer.name)}
-            title="Remover Máscara (Preservar Camada)"
-            aria-label="Remover máscara de camada"
-          >
-            <Icon name="close" size="xs" />
-          </button>
-        )}
-        <button
-          type="button"
-          className={styles.bottomBtn}
-          onClick={onAddGroup}
-          title="Nova Pasta / Grupo"
-          aria-label="Nova pasta ou grupo"
-        >
-          <Icon name="folder" size="xs" />
-        </button>
-        <button
-          type="button"
-          className={styles.bottomBtn}
-          onClick={() => onAddNewLayer()}
-          title="Criar Nova Camada Limpa"
-          aria-label="Criar nova camada limpa"
-        >
-          <Icon name="plus" size="xs" />
-        </button>
-        <button
-          type="button"
-          className={styles.bottomBtn}
-          onClick={() => tree.activeLayer && onDeleteLayer(tree.activeLayer.name)}
-          disabled={!tree.activeLayer}
-          title="Excluir Camada"
-          aria-label="Excluir camada selecionada"
-        >
-          <Icon name="trash" size="xs" />
-        </button>
-      </div>
+      <LayerBottomActions
+        activeLayer={tree.activeLayer ?? null}
+        onToggleLayerMask={onToggleLayerMask}
+        onInvertLayerMask={onInvertLayerMask}
+        onRemoveLayerMask={onRemoveLayerMask}
+        onAddGroup={() => onAddGroup?.()}
+        onUngroup={onUngroup}
+        onAddNewLayer={onAddNewLayer}
+        onDeleteLayer={onDeleteLayer}
+      />
     </div>
   );
 }

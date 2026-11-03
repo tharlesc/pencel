@@ -57,7 +57,7 @@ export interface CoordinatePipelineConfig {
 
 export const IDENTITY_MATRIX_2D: Matrix2D = [1, 0, 0, 1, 0, 0];
 
-export const MIN_ZOOM = 0.05;
+export const MIN_ZOOM = 0.02;
 export const MAX_ZOOM = 8.0;
 
 /**

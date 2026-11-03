@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Apple Pro Studio Floating Canvas Toolbar (FloatingStudioToolbar)
+   Grounding: Sleek rounded-rectangular studio toolbar, tactile glass material.
+   Supports horizontal bottom positioning and vertical left palette positioning.
+   ========================================================================== */
+
+.floatingToolbar {
+  composes: glass-float from global;
+  position: absolute;
+  bottom: calc(var(--control-height-lg) + var(--space-3));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1-5) var(--space-2);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: var(--border-width-hairline) solid var(--material-float-border);
+  z-index: var(--z-toolbar);
+  user-select: none;
+  pointer-events: auto;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
+}
+
+.floatingToolbarVertical {
+  bottom: auto;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  flex-direction: column;
+  padding: var(--space-2) var(--space-1-5);
+  border-radius: var(--radius-xl);
+}
+
+.toolButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-9);
+  height: var(--space-9);
+  border-radius: var(--radius-md);
+  border: var(--border-width-hairline) solid transparent;
+  background-color: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  transition:
+    background-color var(--duration-instant) var(--ease-out),
+    color var(--duration-instant) var(--ease-out),
+    border-color var(--duration-instant) var(--ease-out);
+}
+
+.toolButton:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.toolButton:focus-visible {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.toolButtonActive {
+  background-color: var(--color-accent-primary) !important;
+  color: var(--color-text-on-accent) !important;
+  border-color: transparent;
+  box-shadow:
+    0 0 0 var(--border-width-hairline) var(--color-focus-ring),
+    var(--shadow-sm);
+}
+
+.toolButtonActive svg {
+  color: var(--color-text-on-accent) !important;
+  stroke: var(--color-text-on-accent) !important;
+}
+
+.toolButtonDisabled {
+  opacity: var(--opacity-40);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.divider {
+  width: var(--border-width-hairline);
+  height: var(--space-5);
+  background-color: var(--color-border-subtle);
+  margin: 0 var(--space-0-5);
+}
+
+.dividerVertical {
+  width: var(--space-5);
+  height: var(--border-width-hairline);
+  background-color: var(--color-border-subtle);
+  margin: var(--space-0-5) 0;
+}

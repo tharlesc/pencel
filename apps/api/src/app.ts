@@ -8,6 +8,7 @@ import { createHealthRouter } from './modules/health/health.routes.js';
 import { createImageRouter } from './modules/image/image.routes.js';
 import type { CliRunner } from './modules/image/image.service.js';
 import { createMediaRouter } from './modules/media/media.routes.js';
+import { createAiRouter } from './modules/ai/ai.routes.js';
 
 export interface CreateAppOptions {
   readonly cliRunner?: CliRunner;
@@ -44,6 +45,7 @@ export function createApp(customEnv?: ApiEnvConfig, options?: CreateAppOptions):
   app.use('/api/v1', createHealthRouter(env));
   app.use('/api/v1', createImageRouter(env, options?.cliRunner));
   app.use('/api/v1', createMediaRouter(env));
+  app.use('/api/v1', createAiRouter(env));
 
   app.use(notFoundHandler);
   app.use(centralizedErrorHandler);

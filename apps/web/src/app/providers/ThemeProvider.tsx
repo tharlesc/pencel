@@ -19,7 +19,7 @@ export interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { readonly children: ReactNode }): ReactElement {
-  const [theme, setTheme] = useState<ThemeMode>('light');
+  const [theme, setTheme] = useState<ThemeMode>('dark');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

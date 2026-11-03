@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
 export interface ApiEnvConfig {
   readonly port: number;
   readonly host: string;
@@ -9,11 +12,36 @@ export interface ApiEnvConfig {
   readonly unsplashAccessKey?: string;
   readonly pexelsApiKey?: string;
   readonly giphyApiKey?: string;
+  readonly googleFontsApiKey?: string;
+  readonly geminiApiKey?: string;
+  readonly openaiApiKey?: string;
+  readonly anthropicApiKey?: string;
+  readonly deepseekApiKey?: string;
 }
 
 const VALID_ENVIRONMENTS = new Set(['development', 'test', 'production'] as const);
 const DEFAULT_PHOTOCRAFT_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function tryLoadEnvFile(): void {
+  if (typeof process.loadEnvFile !== 'function') return;
+  const candidates = [
+    path.resolve(process.cwd(), 'apps/api/.env'),
+    path.resolve(process.cwd(), '.env'),
+  ];
+  for (const envPath of candidates) {
+    if (existsSync(envPath)) {
+      try {
+        process.loadEnvFile(envPath);
+        break;
+      } catch {
+        // Silently skip if unable to parse
+      }
+    }
+  }
+}
+
+tryLoadEnvFile();
 
 /**
  * Validates and normalizes environment variables required to boot `@pencel/api`.
@@ -54,6 +82,11 @@ export function loadApiEnvConfig(rawEnv: NodeJS.ProcessEnv = process.env): ApiEn
   const unsplashAccessKey = rawEnv.UNSPLASH_ACCESS_KEY?.trim() || undefined;
   const pexelsApiKey = rawEnv.PEXELS_API_KEY?.trim() || undefined;
   const giphyApiKey = rawEnv.GIPHY_API_KEY?.trim() || undefined;
+  const googleFontsApiKey = rawEnv.GOOGLE_FONTS_API_KEY?.trim() || undefined;
+  const geminiApiKey = rawEnv.GEMINI_API_KEY?.trim() || undefined;
+  const openaiApiKey = rawEnv.OPENAI_API_KEY?.trim() || undefined;
+  const anthropicApiKey = rawEnv.ANTHROPIC_API_KEY?.trim() || undefined;
+  const deepseekApiKey = rawEnv.DEEPSEEK_API_KEY?.trim() || undefined;
 
   return {
     port: parsedPort,
@@ -66,5 +99,10 @@ export function loadApiEnvConfig(rawEnv: NodeJS.ProcessEnv = process.env): ApiEn
     ...(unsplashAccessKey ? { unsplashAccessKey } : {}),
     ...(pexelsApiKey ? { pexelsApiKey } : {}),
     ...(giphyApiKey ? { giphyApiKey } : {}),
+    ...(googleFontsApiKey ? { googleFontsApiKey } : {}),
+    ...(geminiApiKey ? { geminiApiKey } : {}),
+    ...(openaiApiKey ? { openaiApiKey } : {}),
+    ...(anthropicApiKey ? { anthropicApiKey } : {}),
+    ...(deepseekApiKey ? { deepseekApiKey } : {}),
   };
 }

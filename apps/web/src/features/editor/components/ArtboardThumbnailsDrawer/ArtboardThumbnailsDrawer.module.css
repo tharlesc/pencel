@@ -1,0 +1,291 @@
+/**
+ * Staggered Spatial Artboard Reel
+ * Exact implementation of the user's spatial staggered artboard design
+ * Positioned on the RIGHT side, vertically centered in the middle of the screen height.
+ * Strict Design Tokens - Zero px literals, zero hex literals, zero raw backdrop-filter
+ */
+
+.drawerOverlay {
+  position: absolute;
+  top: calc(var(--control-height-xl) + 1.5rem + var(--space-2));
+  bottom: calc(var(--control-height-lg) + var(--space-2));
+  right: var(--space-6);
+  width: 18.5rem;
+  max-width: 90vw;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  animation: fadeInSpatial var(--duration-smooth) var(--ease-smooth);
+}
+
+@keyframes fadeInSpatial {
+  from {
+    opacity: 0;
+    transform: translateX(var(--space-4));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.cardList {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 var(--space-1);
+  pointer-events: none;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.cardList::-webkit-scrollbar {
+  display: none;
+}
+
+/* Base Card Style with Tactile Springs and Interactive Transitions */
+.card {
+  composes: glass-float from global;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  gap: var(--space-1);
+  cursor: pointer;
+  box-shadow: var(--shadow-glass-float);
+  transition:
+    transform var(--duration-smooth) var(--ease-smooth),
+    opacity var(--duration-smooth) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    width var(--duration-smooth) var(--ease-smooth);
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+/*
+ * STAGGERED ALIGNMENT:
+ * In-View Artboard: WIDER (16.5rem), shifted to the LEFT (align-self: flex-start)
+ * Previous / Next: COMPACT (13rem), shifted to the RIGHT (align-self: flex-end)
+ * Distant: MORE COMPACT (11.5rem), aligned to the RIGHT (align-self: flex-end)
+ */
+
+@keyframes selectArtboardBounce {
+  0% {
+    transform: scale(0.97);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 1. Prancheta em visualização (Ativa / Deslocada para a Esquerda / Maior / Animação Spring) */
+.cardInView {
+  align-self: flex-start;
+  width: 16.5rem;
+  border-color: var(--color-primary);
+  box-shadow:
+    0 0 0 var(--border-width-focus) var(--color-primary),
+    var(--shadow-canvas);
+  opacity: 1;
+  z-index: 3;
+  animation: selectArtboardBounce var(--duration-smooth) var(--ease-smooth);
+}
+
+/* 2. Prancheta anterior imediata (Deslocada para a Direita / Recuada) */
+.cardPrevious {
+  align-self: flex-end;
+  width: 13rem;
+  opacity: 0.88;
+  z-index: 2;
+}
+
+.cardPrevious:hover {
+  transform: translateX(calc(-1 * var(--space-2))) scale(1.02);
+  opacity: 1;
+  border-color: var(--color-border-strong);
+}
+
+/* 3. Prancheta posterior imediata (Deslocada para a Direita / Recuada) */
+.cardNext {
+  align-self: flex-end;
+  width: 13rem;
+  opacity: 0.88;
+  z-index: 2;
+}
+
+.cardNext:hover {
+  transform: translateX(calc(-1 * var(--space-2))) scale(1.02);
+  opacity: 1;
+  border-color: var(--color-border-strong);
+}
+
+/* 4. Pranchetas distantes (Mais de 1 passo da ativa / Mais recuadas à Direita) */
+.cardDistant {
+  align-self: flex-end;
+  width: 11.5rem;
+  opacity: 0.65;
+  z-index: 1;
+}
+
+.cardDistant:hover {
+  transform: translateX(calc(-1 * var(--space-1))) scale(1.02);
+  opacity: 0.9;
+}
+
+.cardNameWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.activeDot {
+  color: var(--color-primary);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-none);
+}
+
+.renameBtn {
+  opacity: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: var(--space-0-5);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.card:hover .renameBtn {
+  opacity: 1;
+}
+
+.renameBtn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.renameInput {
+  flex: 1;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-elevated);
+  border: var(--border-width-hairline) solid var(--color-primary);
+  border-radius: var(--radius-xs);
+  padding: var(--space-0-5) var(--space-1);
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-primary);
+}
+
+.cardMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.cardName {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardDims {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.previewBox {
+  width: 100%;
+  height: 4.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--material-float-bg);
+  border: var(--border-width-hairline) solid var(--material-float-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  padding: var(--space-1);
+}
+
+.cardInView .previewBox {
+  height: 8rem;
+}
+
+.cardPrevious .previewBox,
+.cardNext .previewBox {
+  height: 5.5rem;
+}
+
+.cardDistant .previewBox {
+  height: 4.5rem;
+}
+
+.thumbnailImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-sm);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-elevated);
+}
+
+.previewArtboardMini {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-sm);
+}
+
+.emptyPlaceholderText {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-1);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}

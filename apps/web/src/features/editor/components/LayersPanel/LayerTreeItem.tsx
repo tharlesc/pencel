@@ -25,6 +25,7 @@ export interface LayerTreeItemProps {
     shape?: 'circle' | 'rounded' | 'ellipse',
   ) => void;
   readonly onDuplicateLayer: () => void;
+  readonly onExtractFromGroup?: (name: string) => void;
   readonly onDeleteLayer: (name: string) => void;
   readonly onDragStart: (e: DragEvent<HTMLDivElement>, name: string) => void;
   readonly onDragOver: (e: DragEvent<HTMLDivElement>, name: string) => void;
@@ -51,6 +52,7 @@ export function LayerTreeItem({
   onToggleLock,
   onToggleLayerMask,
   onDuplicateLayer,
+  onExtractFromGroup,
   onDeleteLayer,
   onDragStart,
   onDragOver,
@@ -137,8 +139,11 @@ export function LayerTreeItem({
             aria-label="Editar nome da camada"
           />
         ) : (
-          <span className={styles.layerName} title={layer.name}>
-            {layer.name}
+          <span
+            className={styles.layerName}
+            title={typeof layer.name === 'string' ? layer.name : 'Camada'}
+          >
+            {typeof layer.name === 'string' ? layer.name : 'Camada'}
           </span>
         )}
       </div>
@@ -180,6 +185,17 @@ export function LayerTreeItem({
       )}
 
       <div className={styles.hoverActions} onClick={(e) => e.stopPropagation()}>
+        {(isChild || Boolean(layer.groupName)) && onExtractFromGroup && (
+          <button
+            type="button"
+            className={styles.actionBtn}
+            onClick={() => onExtractFromGroup(layer.name)}
+            title="Retirar do grupo"
+            aria-label="Retirar elemento do grupo"
+          >
+            <Icon name="link" size="xs" />
+          </button>
+        )}
         <button
           type="button"
           className={styles.actionBtn}

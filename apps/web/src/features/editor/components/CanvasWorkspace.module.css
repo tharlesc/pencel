@@ -38,6 +38,47 @@
   cursor: grabbing !important;
 }
 
+.viewportScrollDrawing,
+.viewportScrollDrawing canvas {
+  cursor: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Brush & Drawing Interactive Cursor Indicator (Apple HIG / Studio Precision)
+   -------------------------------------------------------------------------- */
+.brushCursorIndicator {
+  position: fixed;
+  pointer-events: none;
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width-hairline) solid var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  background-color: var(--color-surface-overlay-subtle);
+  will-change: left, top, width, height;
+}
+
+.brushHardnessCore {
+  position: absolute;
+  border-radius: var(--radius-pill);
+  border: var(--border-width-hairline) dashed var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  pointer-events: none;
+}
+
+.brushCursorCenterDot {
+  position: absolute;
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-elevated);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-surface-overlay-strong);
+  pointer-events: none;
+}
+
 .artboardFrame {
   position: relative;
   border-radius: var(--radius-sm);
@@ -45,7 +86,9 @@
   border: var(--border-width-hairline) solid var(--surface-glass-border-outer);
   overflow: visible;
   flex-shrink: 0;
-  will-change: transform;
+  will-change: transform, width, height;
+  transform-origin: center center;
+  backface-visibility: hidden;
   pointer-events: auto;
   transition: box-shadow var(--duration-fast) var(--ease-out);
 }
@@ -55,6 +98,7 @@
 }
 
 .canvasPositioner {
+  position: absolute;
   pointer-events: auto;
 }
 
@@ -63,6 +107,7 @@
    -------------------------------------------------------------------------- */
 .bottomBar {
   composes: glass-chrome from global;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -80,6 +125,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  z-index: var(--z-base);
 }
 
 .statTag {
@@ -96,14 +142,21 @@
 }
 
 .bottomCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
+  z-index: var(--z-raised);
+  pointer-events: auto;
 }
 
 .bottomRight {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  margin-left: auto;
+  z-index: var(--z-base);
 }
 
 .pageIndicator {
@@ -112,8 +165,19 @@
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
   color: var(--color-text-secondary);
-  padding: 0 var(--space-2);
+  padding: calc(var(--space-1) * 0.75) var(--space-2);
   white-space: nowrap;
+  background: transparent;
+  border: var(--border-width-hairline) solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--motion-duration-fast) var(--motion-easing-apple);
+}
+
+.pageIndicator:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-subtle);
 }
 
 .zoomReadout {

@@ -31,6 +31,8 @@ export function useLayersPanel() {
           engine?.addText({ text: 'Nova Camada' });
         }),
       onAddGroup: engine?.createGroup,
+      onUngroup: engine?.ungroupSelected,
+      onAssignLayerToGroup: engine?.assignLayerToGroup,
       onToggleLayerMask: engine?.toggleLayerMask,
       onInvertLayerMask: engine?.invertLayerMask,
       onRemoveLayerMask: engine?.removeLayerMask,

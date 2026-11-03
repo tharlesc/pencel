@@ -168,7 +168,7 @@ describe('@pencel/editor-core geometric & coordinate system engine (Parte X)', (
     expect(ptAfter.x).toBeCloseTo(ptBefore.x, TOLERANCE);
     expect(ptAfter.y).toBeCloseTo(ptBefore.y, TOLERANCE);
     expect(clampZoom(999)).toBe(8);
-    expect(clampZoom(0.001)).toBe(0.05);
+    expect(clampZoom(0.001)).toBe(0.02);
   });
 
   it('calculates rotated bounding boxes, hit testing, artboard bleed, and clipping intersection', () => {

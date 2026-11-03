@@ -87,6 +87,14 @@
   line-height: var(--line-height-tight);
 }
 
+.railDivider {
+  width: var(--space-6);
+  height: var(--border-width-hairline);
+  background-color: var(--color-border-subtle);
+  margin: var(--space-1-5) auto;
+  border: none;
+}
+
 /* --------------------------------------------------------------------------
    2. Expandable Studio Drawer
    -------------------------------------------------------------------------- */
@@ -128,9 +136,12 @@
   flex: 1;
   padding: var(--space-4);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .drawerBodyLayers {
@@ -246,126 +257,21 @@
   box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
 }
 
-.customSizeCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  margin-bottom: var(--space-3);
-  background-color: var(--color-surface-secondary);
-  border-radius: var(--radius-lg);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-}
-
-.customInputsRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.customInputGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-75);
-}
-
-.customInputLabel {
-  font-family: var(--font-family-ui);
-  font-size: var(--font-size-2xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-}
-
-.customNumberInput {
-  height: var(--control-height-sm);
-  padding: 0 var(--space-2);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface-primary);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  font-variant-numeric: tabular-nums;
-  outline: none;
-}
-
-.customNumberInput:focus,
-.customNumberInput:focus-visible {
-  outline: none;
-  border-color: var(--color-focus-ring);
-  box-shadow: 0 0 0 var(--border-width-medium) var(--color-focus-ring);
-}
-
-.customSelectGroup {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.customSelectInput {
-  height: var(--control-height-sm);
-  padding: 0 var(--space-2);
-  border: var(--border-width-hairline) solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface-primary);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-ui);
-  font-size: var(--font-size-xs);
-  outline: none;
-  cursor: pointer;
-}
-
-.customSelectInput:focus-visible {
-  outline: none;
-  border-color: var(--color-focus-ring);
-  box-shadow: 0 0 0 var(--border-width-medium) var(--color-focus-ring);
-}
-
-.customApplyBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: var(--control-height-md);
-  border: none;
-  border-radius: var(--radius-md);
-  background-color: var(--color-accent-primary);
-  color: var(--color-text-on-accent);
-  font-family: var(--font-family-ui);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    transform var(--duration-instant) var(--ease-spring);
-}
-
-.customApplyBtn:hover:not(:disabled) {
-  background-color: var(--color-accent-primary-hover);
-}
-
-.customApplyBtn:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.customApplyBtn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
-}
-
 /* GIPHY Stickers Grid */
 .giphyGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
-  max-height: var(--size-giphy-max-h);
-  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--space-0-5);
 }
 
 .giphyItemBtn {
   position: relative;
   aspect-ratio: 1 / 1;
+  min-width: 0;
+  width: 100%;
   padding: var(--space-1);
   border: none;
   border-radius: var(--radius-md);
@@ -522,6 +428,13 @@
   border-radius: var(--radius-sm);
   padding: var(--space-0-5);
   gap: var(--space-0-5);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.segmentedSubTabs::-webkit-scrollbar {
+  display: none;
 }
 
 .subTabBtn {
@@ -693,8 +606,10 @@
 /* Iconify Vector Icons Grid */
 .iconsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-2);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .iconElementCard {
@@ -704,6 +619,9 @@
   justify-content: center;
   gap: var(--space-1);
   padding: var(--space-2);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   border-radius: var(--radius-sm);
   border: none;
   background-color: var(--color-surface-secondary);
@@ -1102,7 +1020,7 @@
 
 .photoThumbWrapper:hover .photoHoverOverlay {
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .hoverTitle {
@@ -1132,6 +1050,7 @@
   text-underline-offset: var(--space-0-5);
   font-weight: var(--font-weight-semibold);
   transition: color var(--duration-fast) var(--ease-out);
+  pointer-events: auto;
 }
 
 .hoverLink:hover {

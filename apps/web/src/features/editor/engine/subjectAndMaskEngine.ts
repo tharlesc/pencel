@@ -6,6 +6,7 @@ import {
   type Canvas as FabricCanvas,
   type FabricObject,
 } from 'fabric';
+import { removeBackgroundWithAi } from '../services/aiBackgroundRemovalService.js';
 import { removeImageBackgroundViaApi } from '../services/imageProcessingService.js';
 
 export async function selectSubjectOnCanvas(
@@ -53,6 +54,42 @@ export async function selectSubjectOnCanvas(
 
     if (mode === 'removeBg') {
       try {
+        const aiResult = await removeBackgroundWithAi(originalDataUrl);
+        if (aiResult.success && aiResult.imageBase64) {
+          const newImg = await FabricImage.fromURL(aiResult.imageBase64, {
+            crossOrigin: 'anonymous',
+          });
+          newImg.set({
+            left: fabricImg.left,
+            top: fabricImg.top,
+            scaleX: fabricImg.scaleX,
+            scaleY: fabricImg.scaleY,
+            angle: fabricImg.angle,
+            name: `${(fabricImg.get('name') as string) || 'Imagem'} (Recorte IA RMBG)`,
+          });
+
+          const currentIdx = fabricCanvas.getObjects().indexOf(fabricImg);
+          fabricCanvas.remove(fabricImg);
+          fabricCanvas.add(newImg);
+          if (currentIdx >= 0) {
+            fabricCanvas.moveObjectTo(newImg, currentIdx);
+          }
+
+          fabricCanvas.setActiveObject(newImg);
+          fabricCanvas.requestRenderAll();
+          onSaveHistory();
+          onSelectionUpdate();
+
+          return {
+            success: true,
+            message: 'Fundo removido com sucesso via IA no navegador (RMBG-1.4)!',
+          };
+        }
+      } catch {
+        // Fallback to API if available
+      }
+
+      try {
         const json = await removeImageBackgroundViaApi(originalDataUrl);
         if (json?.success && json.imageBase64) {
           const newImg = await FabricImage.fromURL(json.imageBase64, {
@@ -69,10 +106,9 @@ export async function selectSubjectOnCanvas(
 
           const currentIdx = fabricCanvas.getObjects().indexOf(fabricImg);
           fabricCanvas.remove(fabricImg);
+          fabricCanvas.add(newImg);
           if (currentIdx >= 0) {
-            fabricCanvas.insertAt(currentIdx, newImg);
-          } else {
-            fabricCanvas.add(newImg);
+            fabricCanvas.moveObjectTo(newImg, currentIdx);
           }
 
           fabricCanvas.setActiveObject(newImg);
@@ -216,10 +252,9 @@ export async function selectSubjectOnCanvas(
 
       const currentIdx = fabricCanvas.getObjects().indexOf(fabricImg);
       fabricCanvas.remove(fabricImg);
+      fabricCanvas.add(newImg);
       if (currentIdx >= 0) {
-        fabricCanvas.insertAt(currentIdx, newImg);
-      } else {
-        fabricCanvas.add(newImg);
+        fabricCanvas.moveObjectTo(newImg, currentIdx);
       }
 
       fabricCanvas.setActiveObject(newImg);

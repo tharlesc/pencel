@@ -10,6 +10,7 @@ import {
   duplicateActivePage,
   getActivePage,
   getDocumentPresetById,
+  renamePageInDocument,
   serializeDocument,
   setActivePageInDocument,
   updateActivePageBackground,
@@ -70,9 +71,16 @@ describe('@pencel/editor-core domain foundation', () => {
     expect(withSecondPage.activePageId).toBe(withSecondPage.pages[1]!.id);
     expect(getActivePage(withSecondPage).name).toBe('Página 2');
 
-    const duplicated = duplicateActivePage(withSecondPage);
+    const withRenamed = renamePageInDocument(
+      withSecondPage,
+      withSecondPage.pages[1]!.id,
+      'Capa Principal',
+    );
+    expect(withRenamed.pages[1]!.name).toBe('Capa Principal');
+
+    const duplicated = duplicateActivePage(withRenamed);
     expect(duplicated.pages).toHaveLength(3);
-    expect(getActivePage(duplicated).name).toBe('Página 2 (Cópia)');
+    expect(getActivePage(duplicated).name).toBe('Capa Principal (Cópia)');
 
     const switchedBack = setActivePageInDocument(duplicated, doc.pages[0]!.id);
     expect(switchedBack.activePageId).toBe(doc.pages[0]!.id);

@@ -13,6 +13,7 @@ export * from './NumberField/NumberField.js';
 export * from './Panel/Panel.js';
 export * from './Popover/Popover.js';
 export * from './SegmentedControl/SegmentedControl.js';
+export * from './Select/Select.js';
 export * from './Skeleton/Skeleton.js';
 export * from './Slider/Slider.js';
 export * from './Tabs/Tabs.js';

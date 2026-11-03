@@ -246,7 +246,11 @@ export async function searchUnsplashPhotos(
   }
 
   let items: PublicPhotoItem[] = [];
-  if (Array.isArray(result.data.items)) {
+  if (Array.isArray(result.data)) {
+    items = (result.data as UnsplashRawPhoto[])
+      .filter((p) => Boolean(p.urls?.small || p.urls?.regular))
+      .map((p) => normalizeUnsplashPhoto(p, cleanQuery));
+  } else if (Array.isArray(result.data.items)) {
     items = result.data.items;
   } else if (Array.isArray(result.data.results)) {
     items = result.data.results
@@ -432,7 +436,8 @@ export async function searchWikimediaCommons(
         title: cleanTitle || `Foto (${cleanQuery})`,
         author: 'Wikimedia Commons',
         thumbUrl: info.thumburl || info.url || '',
-        fullUrl: info.url || info.thumburl || '',
+        fullUrl:
+          info.url && !/\.(tif|tiff|webm|ogv)$/i.test(info.url) ? info.url : info.thumburl || '',
         source: 'Wikimedia Commons',
         category: cleanQuery,
       };
@@ -500,6 +505,164 @@ export async function searchNasaMedia(query: string): Promise<PublicPhotoItem[]>
   return items;
 }
 
+const createSvgStickerUrl = (svgContent: string): string =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">${svgContent}</svg>`,
+  )}`;
+
+export const CURATED_FALLBACK_STICKERS: readonly GiphyItem[] = [
+  {
+    id: 'curated-sticker-sparkles',
+    title: 'Estrela Mágica / Sparkles',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M64 4l9.2 38.6L112 52l-38.8 9.4L64 100l-9.2-38.6L16 52l38.8-9.4z"/><path fill="#FF9F0A" d="M96 76l4.6 19.3L120 100l-19.4 4.7L96 124l-4.6-19.3L72 100l19.4-4.7z"/><circle cx="28" cy="24" r="8" fill="#30D158"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M64 4l9.2 38.6L112 52l-38.8 9.4L64 100l-9.2-38.6L16 52l38.8-9.4z"/><path fill="#FF9F0A" d="M96 76l4.6 19.3L120 100l-19.4 4.7L96 124l-4.6-19.3L72 100l19.4-4.7z"/><circle cx="28" cy="24" r="8" fill="#30D158"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-fire',
+    title: 'Fogo em Chamas / Fire',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FF453A" d="M64 8c-6 18-28 32-28 60 0 24.3 19.7 44 44 44s44-19.7 44-44c0-26-22-42-26-60-2 16-10 26-18 26-8 0-12-14-16-26z"/><path fill="#FF9F0A" d="M64 42c-4 12-18 22-18 40 0 16.6 13.4 30 30 30s30-13.4 30-30c0-18-15-28-18-40-2 10-7 18-12 18s-9-10-12-18z"/><path fill="#FFD60A" d="M64 74c-2 6-9 11-9 20 0 8.3 6.7 15 15 15s15-6.7 15-15c0-9-7-14-9-20-1 5-4 9-6 9s-5-5-6-9z"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FF453A" d="M64 8c-6 18-28 32-28 60 0 24.3 19.7 44 44 44s44-19.7 44-44c0-26-22-42-26-60-2 16-10 26-18 26-8 0-12-14-16-26z"/><path fill="#FF9F0A" d="M64 42c-4 12-18 22-18 40 0 16.6 13.4 30 30 30s30-13.4 30-30c0-18-15-28-18-40-2 10-7 18-12 18s-9-10-12-18z"/><path fill="#FFD60A" d="M64 74c-2 6-9 11-9 20 0 8.3 6.7 15 15 15s15-6.7 15-15c0-9-7-14-9-20-1 5-4 9-6 9s-5-5-6-9z"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-rocket',
+    title: 'Foguete Decolando / Rocket',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#E5E5EA" d="M64 12c20 20 28 48 28 68l-28-8-28 8c0-20 8-48 28-68z"/><path fill="#0071E3" d="M36 72L16 94l12 6 8-12 28-8z"/><path fill="#0071E3" d="M92 72l20 22-12 6-8-12-28-8z"/><circle cx="64" cy="48" r="10" fill="#64D2FF"/><path fill="#FF453A" d="M54 90l10 26 10-26-10-6z"/><path fill="#FFD60A" d="M58 90l6 16 6-16-6-4z"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#E5E5EA" d="M64 12c20 20 28 48 28 68l-28-8-28 8c0-20 8-48 28-68z"/><path fill="#0071E3" d="M36 72L16 94l12 6 8-12 28-8z"/><path fill="#0071E3" d="M92 72l20 22-12 6-8-12-28-8z"/><circle cx="64" cy="48" r="10" fill="#64D2FF"/><path fill="#FF453A" d="M54 90l10 26 10-26-10-6z"/><path fill="#FFD60A" d="M58 90l6 16 6-16-6-4z"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-heart',
+    title: 'Coração Vermelho / Heart',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FF2D55" d="M64 116s-44-27.4-44-60c0-17.7 14.3-32 32-32 10.7 0 20.3 5.3 26.2 13.5 1.4 1.9 2.2 3.1 3.8 3.1 1.6 0 2.4-1.2 3.8-3.1C91.7 29.3 101.3 24 112 24c17.7 0 32 14.3 32 32 0 32.6-44 60-44 60l-36-3z"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FF2D55" d="M64 116s-44-27.4-44-60c0-17.7 14.3-32 32-32 10.7 0 20.3 5.3 26.2 13.5 1.4 1.9 2.2 3.1 3.8 3.1 1.6 0 2.4-1.2 3.8-3.1C91.7 29.3 101.3 24 112 24c17.7 0 32 14.3 32 32 0 32.6-44 60-44 60l-36-3z"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-trophy',
+    title: 'Troféu Campeão / Trophy',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M36 20h56v40c0 15.5-12.5 28-28 28s-28-12.5-28-28V20z"/><path fill="#FF9F0A" d="M64 88v18H48v10h32v-10H64V88z"/><path fill="#FFD60A" d="M36 26H20c0 14 10 24 20 24v-8c-5 0-8-6-8-12h4v-4zm56 0h16c0 14-10 24-20 24v-8c5 0 8-6 8-12h-4v-4z"/><polygon points="64,36 67,45 76,45 69,51 71,60 64,54 57,60 59,51 52,45 61,45" fill="#FFFFFF"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M36 20h56v40c0 15.5-12.5 28-28 28s-28-12.5-28-28V20z"/><path fill="#FF9F0A" d="M64 88v18H48v10h32v-10H64V88z"/><path fill="#FFD60A" d="M36 26H20c0 14 10 24 20 24v-8c-5 0-8-6-8-12h4v-4zm56 0h16c0 14-10 24-20 24v-8c5 0 8-6 8-12h-4v-4z"/><polygon points="64,36 67,45 76,45 69,51 71,60 64,54 57,60 59,51 52,45 61,45" fill="#FFFFFF"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-party',
+    title: 'Celebração e Festa / Party',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#BF5AF2" d="M24 104l16-64 48 48-64 16z"/><circle cx="84" cy="32" r="6" fill="#FF375F"/><circle cx="98" cy="48" r="5" fill="#FFD60A"/><circle cx="72" cy="18" r="4" fill="#30D158"/><circle cx="106" cy="24" r="5" fill="#64D2FF"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#BF5AF2" d="M24 104l16-64 48 48-64 16z"/><circle cx="84" cy="32" r="6" fill="#FF375F"/><circle cx="98" cy="48" r="5" fill="#FFD60A"/><circle cx="72" cy="18" r="4" fill="#30D158"/><circle cx="106" cy="24" r="5" fill="#64D2FF"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-crown',
+    title: 'Coroa Dourada / Crown',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M20 92l10-56 22 24 12-32 12 32 22-24 10 56H20z"/><circle cx="20" cy="36" r="6" fill="#FF375F"/><circle cx="64" cy="24" r="6" fill="#0071E3"/><circle cx="108" cy="36" r="6" fill="#30D158"/><rect x="20" y="96" width="88" height="12" rx="4" fill="#FF9F0A"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M20 92l10-56 22 24 12-32 12 32 22-24 10 56H20z"/><circle cx="20" cy="36" r="6" fill="#FF375F"/><circle cx="64" cy="24" r="6" fill="#0071E3"/><circle cx="108" cy="36" r="6" fill="#30D158"/><rect x="20" y="96" width="88" height="12" rx="4" fill="#FF9F0A"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-diamond',
+    title: 'Diamante / Gem',
+    staticUrl: createSvgStickerUrl(
+      '<polygon points="40,24 88,24 112,52 64,108 16,52" fill="#64D2FF"/><polygon points="40,24 64,52 88,24" fill="#0A84FF"/><polygon points="16,52 64,52 64,108" fill="#0071E3"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<polygon points="40,24 88,24 112,52 64,108 16,52" fill="#64D2FF"/><polygon points="40,24 64,52 88,24" fill="#0A84FF"/><polygon points="16,52 64,52 64,108" fill="#0071E3"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-thumbsup',
+    title: 'Joinha / Thumbs Up',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M48 48V28c0-8.8-7.2-16-16-16-3.3 0-6 2.7-6 6v30h-8c-5.5 0-10 4.5-10 10v40c0 5.5 4.5 10 10 10h56c7.4 0 13.8-5 15.5-12.2l6.8-29.2c1.4-6-1.7-12.1-7.4-14.6-2.2-1-4.7-1.4-7.2-1.4H68c4.4-4.4 8-11.4 8-18.6V48H48z"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#FFD60A" d="M48 48V28c0-8.8-7.2-16-16-16-3.3 0-6 2.7-6 6v30h-8c-5.5 0-10 4.5-10 10v40c0 5.5 4.5 10 10 10h56c7.4 0 13.8-5 15.5-12.2l6.8-29.2c1.4-6-1.7-12.1-7.4-14.6-2.2-1-4.7-1.4-7.2-1.4H68c4.4-4.4 8-11.4 8-18.6V48H48z"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-lightning',
+    title: 'Raio de Energia / Lightning',
+    staticUrl: createSvgStickerUrl(
+      '<polygon points="72,8 24,72 60,72 48,120 104,52 68,52" fill="#FFD60A" stroke="#FF9F0A" stroke-width="4"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<polygon points="72,8 24,72 60,72 48,120 104,52 68,52" fill="#FFD60A" stroke="#FF9F0A" stroke-width="4"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-verified',
+    title: 'Selo Verificado / Verified Badge',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#0071E3" d="M64 12l10 8 13-3 5 12 13 4-1 13 9 9-7 11 4 13-12 5-3 13-13-1-8 10-10-8-13 3-5-12-13-4 1-13-9-9 7-11-4-13 12-5 3-13 13 1z"/><path fill="#FFFFFF" d="M54 62l-10-10-6 6 16 16 34-34-6-6z"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#0071E3" d="M64 12l10 8 13-3 5 12 13 4-1 13 9 9-7 11 4 13-12 5-3 13-13-1-8 10-10-8-13 3-5-12-13-4 1-13-9-9 7-11-4-13 12-5 3-13 13 1z"/><path fill="#FFFFFF" d="M54 62l-10-10-6 6 16 16 34-34-6-6z"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+  {
+    id: 'curated-sticker-palette',
+    title: 'Paleta do Artista / Palette',
+    staticUrl: createSvgStickerUrl(
+      '<path fill="#D1D1D6" d="M64 16C37.5 16 16 37.5 16 64c0 14.3 6.3 27.2 16.3 36 3.7 3.3 8.7 5.2 13.7 5.2h6.5c7.2 0 13-5.8 13-13 0-3.3-1.2-6.3-3.2-8.6-2.5-2.8-4-6.5-4-10.6 0-8.8 7.2-16 16-16h8.7c18.4 0 33.3-14.9 33.3-33.3C116.3 32.3 92.8 16 64 16z"/><circle cx="40" cy="44" r="8" fill="#FF375F"/><circle cx="64" cy="34" r="8" fill="#FFD60A"/><circle cx="88" cy="44" r="8" fill="#30D158"/><circle cx="94" cy="70" r="8" fill="#0071E3"/>',
+    ),
+    previewUrl: createSvgStickerUrl(
+      '<path fill="#D1D1D6" d="M64 16C37.5 16 16 37.5 16 64c0 14.3 6.3 27.2 16.3 36 3.7 3.3 8.7 5.2 13.7 5.2h6.5c7.2 0 13-5.8 13-13 0-3.3-1.2-6.3-3.2-8.6-2.5-2.8-4-6.5-4-10.6 0-8.8 7.2-16 16-16h8.7c18.4 0 33.3-14.9 33.3-33.3C116.3 32.3 92.8 16 64 16z"/><circle cx="40" cy="44" r="8" fill="#FF375F"/><circle cx="64" cy="34" r="8" fill="#FFD60A"/><circle cx="88" cy="44" r="8" fill="#30D158"/><circle cx="94" cy="70" r="8" fill="#0071E3"/>',
+    ),
+    width: 128,
+    height: 128,
+  },
+];
+
+export function getCuratedFallbackStickers(query = ''): readonly GiphyItem[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return CURATED_FALLBACK_STICKERS;
+  return CURATED_FALLBACK_STICKERS.filter((s) => s.title.toLowerCase().includes(q));
+}
+
 export async function searchGiphyStickers(
   query: string,
   limit = 24,
@@ -523,7 +686,7 @@ export async function searchGiphyStickers(
   }>(endpoint, { timeoutMs: 6000 });
 
   if (!result.ok) {
-    return [];
+    return getCuratedFallbackStickers(trimmed);
   }
 
   let items: GiphyItem[] = [];
@@ -536,6 +699,10 @@ export async function searchGiphyStickers(
         items.push(normalized);
       }
     }
+  }
+
+  if (items.length === 0) {
+    items = [...getCuratedFallbackStickers(trimmed)];
   }
 
   if (items.length > 0) {
@@ -555,4 +722,6 @@ export const mediaProvider = {
   searchGiphyStickers,
   trackUnsplashDownload,
   getCuratedFallbackPhotos,
+  getCuratedFallbackStickers,
+  CURATED_FALLBACK_STICKERS,
 };

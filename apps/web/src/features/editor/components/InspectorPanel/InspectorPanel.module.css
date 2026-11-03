@@ -1,0 +1,133 @@
+/* ==========================================================================
+   Apple Pro Studio Property Inspector (InspectorPanel)
+   Principles: Millimetric numeric precision, tabular typography, high density.
+   ========================================================================== */
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  user-select: none;
+}
+
+.topHeader {
+  composes: glass-chrome from global;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  height: var(--panel-header-height);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: var(--border-width-hairline) solid var(--material-chrome-border);
+  flex-shrink: 0;
+}
+
+.topTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-text-primary);
+}
+
+.gridTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.swatchGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.swatchButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-instant) var(--ease-spring);
+}
+
+.swatchButton:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+}
+
+.swatchButton:active:not(:disabled) {
+  background-color: var(--color-surface-active);
+  transform: scale(0.99);
+}
+
+.swatchButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-focus) var(--color-focus-ring);
+}
+
+.swatchButton:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.swatchActive {
+  background-color: var(--color-selection-bg);
+  border-color: var(--color-selection-border);
+}
+
+.swatchCircle {
+  width: var(--size-swatch-sm);
+  height: var(--size-swatch-sm);
+  border-radius: var(--radius-sm);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.swatchMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.swatchName {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.swatchHex {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-tertiary);
+}
+
+.metaList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+}

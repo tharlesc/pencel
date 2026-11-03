@@ -188,6 +188,24 @@ export function duplicateActivePage(
 }
 
 /**
+ * Renames a page/artboard in the document.
+ */
+export function renamePageInDocument(
+  document: DesignDocument,
+  pageId: string,
+  name: string,
+  nowIso = new Date().toISOString(),
+): DesignDocument {
+  const cleanName = name.trim();
+  if (!cleanName) return document;
+  return {
+    ...document,
+    updatedAt: nowIso,
+    pages: document.pages.map((p) => (p.id === pageId ? { ...p, name: cleanName } : p)),
+  };
+}
+
+/**
  * Deletes a page/artboard from the document.
  * Documents must have at least one page.
  */

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { loadApiEnvConfig, type ApiEnvConfig } from '../../config/env.js';
 import {
+  fetchGoogleFontsCatalog,
   fetchPhotosFromProvider,
   fetchStickersFromGiphy,
   synthesizeHarmonicPalette,
@@ -69,6 +70,17 @@ export function createMediaRouter(customEnv?: ApiEnvConfig): Router {
         env,
       );
 
+      res.status(200).json(data);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.get('/media/fonts', async (req, res, next) => {
+    try {
+      const sort = typeof req.query.sort === 'string' ? req.query.sort : 'popularity';
+      const category = typeof req.query.category === 'string' ? req.query.category : undefined;
+      const data = await fetchGoogleFontsCatalog({ sort, category }, env);
       res.status(200).json(data);
     } catch (err) {
       next(err);

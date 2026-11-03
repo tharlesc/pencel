@@ -143,6 +143,10 @@ export async function fetchMediaByCategory(category: string, page = 1): Promise<
   }
 
   return getCuratedFallbackPhotos().filter(
-    (p) => !p.category || p.category.toLowerCase().includes(category.toLowerCase()),
+    (p) =>
+      category === 'Fotos' ||
+      category === 'Todos' ||
+      !p.category ||
+      p.category.toLowerCase().includes(category.toLowerCase()),
   );
 }

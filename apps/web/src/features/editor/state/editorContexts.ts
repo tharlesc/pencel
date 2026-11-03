@@ -15,8 +15,15 @@ export interface EditorSessionContextValue {
   readonly zoom: number;
   readonly isSchemaDialogOpen: boolean;
   readonly isExportDialogOpen: boolean;
+  readonly isCameraRawOpen: boolean;
+  readonly isNewDocumentModalOpen: boolean;
   readonly serializedPreview: string;
   readonly setDocumentTitle: (title: string) => void;
+  readonly createNewDocument: (
+    dimensions: Dimensions,
+    title?: string,
+    backgroundColor?: string,
+  ) => void;
   readonly selectPreset: (presetId: PresetId) => void;
   readonly setPageDimensions: (dimensions: Dimensions) => void;
   readonly setPageBackground: (color: string) => void;
@@ -30,6 +37,10 @@ export interface EditorSessionContextValue {
   readonly closeSchemaDialog: () => void;
   readonly openExportDialog: () => void;
   readonly closeExportDialog: () => void;
+  readonly openCameraRaw: () => void;
+  readonly closeCameraRaw: () => void;
+  readonly openNewDocumentModal: () => void;
+  readonly closeNewDocumentModal: () => void;
   readonly addPage: (options?: {
     name?: string;
     dimensions?: Dimensions;
@@ -37,6 +48,7 @@ export interface EditorSessionContextValue {
   }) => void;
   readonly duplicatePage: () => void;
   readonly deletePage: (pageId: string) => void;
+  readonly renamePage: (pageId: string, name: string) => void;
   readonly setActivePage: (pageId: string) => void;
   readonly nextPage: () => void;
   readonly prevPage: () => void;

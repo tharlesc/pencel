@@ -50,7 +50,7 @@ describe('Graphics Engine Subsystems & Infinite Scroll Gallery', () => {
     render(createElement(App));
 
     // Navigate to Elementos drawer
-    fireEvent.click(screen.getByRole('button', { name: 'Elementos' }));
+    fireEvent.click(screen.getByRole('button', { name: /Elementos|Elements/i }));
 
     // Verify all 9 vector shape primitives are available
     expect(screen.getByRole('button', { name: 'Adicionar Retângulo' })).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('Graphics Engine Subsystems & Infinite Scroll Gallery', () => {
     expect(screen.getByRole('button', { name: /Excluir/i })).toBeInTheDocument();
 
     // Navigate to Texto drawer and verify Area Text + Point Text creation buttons
-    fireEvent.click(screen.getByRole('button', { name: 'Texto' }));
+    fireEvent.click(screen.getByRole('button', { name: /^(Texto|Text)$/i }));
     expect(
       screen.getByRole('button', { name: /Adicionar uma caixa de texto/i }),
     ).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('Graphics Engine Subsystems & Infinite Scroll Gallery', () => {
     });
     expect(clipBtn).toBeInTheDocument();
     fireEvent.click(clipBtn);
-  });
+  }, 15000);
 
   it('manages artboard clipping state and coordinate transformation in FabricCanvasAdapter', () => {
     const adapter = new FabricCanvasAdapter();

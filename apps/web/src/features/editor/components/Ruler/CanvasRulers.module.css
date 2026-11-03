@@ -1,0 +1,102 @@
+/* ==========================================================================
+   Apple Pro Studio Canvas Rulers (CanvasRulers)
+   Precision Photorealistic Rulers (Photoshop / HIG standard)
+   ========================================================================== */
+
+.rulerContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-overlay);
+  user-select: none;
+}
+
+.cornerBox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--color-surface-secondary);
+  border-right: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-3xs);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.cornerBox:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.cornerBox:active {
+  background-color: var(--color-surface-active);
+}
+
+.horizontalRuler {
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  right: 0;
+  height: 1.5rem;
+  background-color: var(--color-surface-secondary);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  cursor: n-resize;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.verticalRuler {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  bottom: 0;
+  width: 1.5rem;
+  background-color: var(--color-surface-secondary);
+  border-right: var(--border-width-hairline) solid var(--color-border-subtle);
+  cursor: w-resize;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.rulerSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tickLine {
+  stroke: var(--color-border-default);
+  stroke-width: var(--border-width-hairline);
+  shape-rendering: crispEdges;
+}
+
+.tickLineMajor {
+  stroke: var(--color-text-secondary);
+  stroke-width: var(--border-width-hairline);
+  shape-rendering: crispEdges;
+}
+
+.tickLabel {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-3xs);
+  font-variant-numeric: tabular-nums;
+  fill: var(--color-text-secondary);
+  user-select: none;
+  dominant-baseline: hanging;
+}
+
+.cursorTracker {
+  stroke: var(--color-accent-primary);
+  stroke-width: var(--border-width-medium);
+  shape-rendering: crispEdges;
+  pointer-events: none;
+}
