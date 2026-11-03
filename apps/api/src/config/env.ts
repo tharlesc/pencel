@@ -90,7 +90,7 @@ export function loadApiEnvConfig(rawEnv: NodeJS.ProcessEnv = process.env): ApiEn
 
   return {
     port: parsedPort,
-    host: rawEnv.HOST?.trim() || '127.0.0.1',
+    host: rawEnv.HOST?.trim() || (nodeEnv === 'production' ? '0.0.0.0' : '127.0.0.1'),
     nodeEnv,
     corsOrigin: rawEnv.CORS_ORIGIN?.trim() || 'http://localhost:5173',
     ...(photocraftCliPath ? { photocraftCliPath } : {}),

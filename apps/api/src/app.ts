@@ -34,9 +34,20 @@ export function createApp(customEnv?: ApiEnvConfig, options?: CreateAppOptions):
       maxRequests: options?.maxRequestsPerMinute ?? 120,
     }),
   );
+  const allowedOrigin = env.corsOrigin;
   app.use(
     cors({
-      origin: env.corsOrigin,
+      origin: (requestOrigin, callback) => {
+        if (!requestOrigin || allowedOrigin === '*') {
+          return callback(null, true);
+        }
+        const normalizedRequest = requestOrigin.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+        const normalizedAllowed = allowedOrigin.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+        if (requestOrigin === allowedOrigin || normalizedRequest === normalizedAllowed) {
+          return callback(null, true);
+        }
+        callback(null, false);
+      },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     }),
   );
