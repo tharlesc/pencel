@@ -13,7 +13,7 @@ _Desktop-grade creative ergonomics inspired by macOS Human Interface Guidelines,
 [![Tests Passing](https://img.shields.io/badge/Tests-Vitest%20Passed-green?style=flat-square&logo=vitest&logoColor=white)](#testing--quality-gates)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
 
-[**Live Demo**](https://pencel.app) · [**Explore Architecture**](#architecture--package-boundaries) · [**Quick Start**](#quick-start) · [**Documentation**](docs/) · [**Report Issue**](../../issues)
+[**Test Now**]([https://pencelstudio.vercel.app/]) · [**Explore Architecture**](#architecture--package-boundaries) · [**Quick Start**](#quick-start) · [**Documentation**](docs/) · [**Report Issue**](../../issues)
 
 </div>
 
