@@ -53,10 +53,27 @@ export function createApp(customEnv?: ApiEnvConfig, options?: CreateAppOptions):
   );
   app.use(express.json({ limit: '15mb' }));
 
-  app.use('/api/v1', createHealthRouter(env));
-  app.use('/api/v1', createImageRouter(env, options?.cliRunner));
-  app.use('/api/v1', createMediaRouter(env));
-  app.use('/api/v1', createAiRouter(env));
+  const healthRouter = createHealthRouter(env);
+  const imageRouter = createImageRouter(env, options?.cliRunner);
+  const mediaRouter = createMediaRouter(env);
+  const aiRouter = createAiRouter(env);
+
+  // Canonical API v1 routes
+  app.use('/api/v1', healthRouter);
+  app.use('/api/v1', imageRouter);
+  app.use('/api/v1', mediaRouter);
+  app.use('/api/v1', aiRouter);
+
+  // Fallback aliases for proxies or clients without /api/v1 prefix
+  app.use('/api', healthRouter);
+  app.use('/api', imageRouter);
+  app.use('/api', mediaRouter);
+  app.use('/api', aiRouter);
+
+  app.use('/', healthRouter);
+  app.use('/', imageRouter);
+  app.use('/', mediaRouter);
+  app.use('/', aiRouter);
 
   app.use(notFoundHandler);
   app.use(centralizedErrorHandler);

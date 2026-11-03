@@ -45,7 +45,8 @@ export function getApiBaseUrl(): string {
   try {
     const raw = import.meta.env?.VITE_API_BASE_URL;
     if (typeof raw === 'string' && raw.trim().length > 0) {
-      return raw.trim().replace(/\/+$/, '');
+      const clean = raw.trim().replace(/\/+$/, '');
+      return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
     }
   } catch {
     // Fallback in non-Vite test environments
@@ -65,12 +66,10 @@ export function resolveRequestUrl(endpoint: string): string {
   }
 
   const baseUrl = getApiBaseUrl();
-  if (trimmed.startsWith('/api/v1')) {
-    const suffix = trimmed.slice('/api/v1'.length);
-    return `${baseUrl}${suffix.startsWith('/') ? suffix : `/${suffix}`}`;
-  }
+  const cleanEndpoint = trimmed.startsWith('/api/v1') ? trimmed.slice('/api/v1'.length) : trimmed;
 
-  return `${baseUrl}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+  const normalizedSuffix = cleanEndpoint.startsWith('/') ? cleanEndpoint : `/${cleanEndpoint}`;
+  return `${baseUrl}${normalizedSuffix}`;
 }
 
 function createChainedAbortSignal(
