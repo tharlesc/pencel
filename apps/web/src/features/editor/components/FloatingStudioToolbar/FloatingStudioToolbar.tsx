@@ -229,7 +229,7 @@ export function FloatingStudioToolbar({
           className={styles.toolButton}
           onClick={onOpenGuideLayout}
           aria-label="Novo Layout de Guia..."
-          title="Novo Layout de Guia & Fatias (Photoshop)"
+          title="Novo Layout de Guia & Fatias (Estúdio)"
         >
           <Icon name="grid" size="md" />
         </button>

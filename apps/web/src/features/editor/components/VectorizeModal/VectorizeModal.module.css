@@ -1,0 +1,695 @@
+/* ==========================================================================
+   Apple Pro Studio Vectorize Modal (VectorizeModal)
+   Strict Design Tokens - Zero px literals, zero hex literals, zero raw backdrop-filter
+   ========================================================================== */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--material-sheet-scrim);
+  padding: var(--space-4);
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalCard {
+  width: min(73.75rem, 95vw);
+  height: min(48.75rem, 92vh);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-base);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-2xl);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-elevated);
+}
+
+.modalTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.modalTitle {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.badgePro {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-3xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.closeButton:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+.modalBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 23.75rem;
+  overflow: hidden;
+}
+
+/* Controls Panel */
+.controlsPanel {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  background-color: var(--color-surface-elevated);
+  border-left: var(--border-width-hairline) solid var(--color-border-subtle);
+  overflow-y: auto;
+  gap: var(--space-4);
+}
+
+.sectionTitleGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-secondary);
+}
+
+.resetButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-0-5) var(--space-1-5);
+  border-radius: var(--radius-xs);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.resetButton:hover:not(:disabled) {
+  color: var(--color-accent-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.presetCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-3);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-base);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.presetCard:hover:not(:disabled) {
+  border-color: var(--color-accent-primary);
+  transform: translateY(-0.0625rem);
+}
+
+.presetCardActive {
+  border-color: var(--color-accent-primary);
+  background-color: var(--color-accent-subtle);
+  box-shadow: 0 0 0 var(--border-width-hairline) var(--color-accent-primary);
+}
+
+.presetHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.presetIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.presetName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.presetDesc {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-snug);
+}
+
+.advancedToggleRow {
+  padding-top: var(--space-2);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.advancedToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent-primary);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+
+.advancedSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-surface-base);
+  border-radius: var(--radius-md);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.sliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sliderLabelGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sliderLabel {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.sliderValue {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliderHelp {
+  font-size: var(--font-size-3xs);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-snug);
+}
+
+.rangeInput {
+  width: 100%;
+  accent-color: var(--color-accent-primary);
+  cursor: pointer;
+}
+
+.modeSegmentedGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  background-color: var(--color-surface-hover);
+  padding: var(--space-0-5);
+  border-radius: var(--radius-sm);
+}
+
+.modeButton {
+  border: none;
+  background: transparent;
+  padding: var(--space-1-5) var(--space-2);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.modeButtonActive {
+  background-color: var(--color-surface-base);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Preview Area */
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-bg-canvas-stage);
+  position: relative;
+  overflow: hidden;
+}
+
+.previewToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-surface-primary);
+  border-bottom: var(--border-width-hairline) solid var(--color-border-subtle);
+  z-index: var(--z-overlay);
+}
+
+.viewModeTabs {
+  display: flex;
+  gap: var(--space-1);
+  background-color: var(--color-surface-hover);
+  padding: var(--space-0-5);
+  border-radius: var(--radius-sm);
+}
+
+.viewTab {
+  border: none;
+  background: transparent;
+  padding: var(--space-1) var(--space-2-5);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.viewTab:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.viewTabActive {
+  background-color: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.zoomControlGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.bgControlGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  background-color: var(--color-surface-hover);
+  padding: var(--space-0-5);
+  border-radius: var(--radius-sm);
+}
+
+.bgBtn {
+  border: none;
+  background: transparent;
+  padding: var(--space-1) var(--space-1-5);
+  font-size: var(--font-size-2xs);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.bgBtn:hover {
+  color: var(--color-text-primary);
+}
+
+.bgBtnActive {
+  background-color: var(--color-surface-base);
+  color: var(--color-accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.zoomDisplay {
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.viewportStage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+  background-color: var(--color-surface-secondary);
+}
+
+.viewportStageCheckerboard {
+  background-color: var(--color-surface-secondary);
+  background-image:
+    linear-gradient(45deg, var(--color-surface-hover) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-surface-hover) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-surface-hover) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-surface-hover) 75%);
+  background-size: var(--space-4) var(--space-4);
+  background-position:
+    0 0,
+    0 var(--space-2),
+    var(--space-2) calc(-1 * var(--space-2)),
+    calc(-1 * var(--space-2)) 0;
+}
+
+.viewportStageLight {
+  background-color: var(--color-surface-elevated);
+}
+
+.viewportStageDark {
+  background-color: var(--color-surface-inverse);
+}
+
+.toggleRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-surface-base);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.checkboxLabelContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.viewportStageZoomed {
+  cursor: grab;
+}
+
+.viewportStagePanning {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.stageContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 95%;
+  max-height: 95%;
+  transform-origin: center center;
+  transition: transform var(--duration-instant) var(--ease-out);
+  pointer-events: auto;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-xs);
+  display: block;
+}
+
+.svgWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-xs);
+  background-color: transparent;
+}
+
+.svgWrapper svg {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+.splitViewer {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border-radius: var(--radius-xs);
+}
+
+.splitBadgeOriginal {
+  position: absolute;
+  top: var(--space-2-5);
+  left: var(--space-2-5);
+  background-color: var(--color-surface-inverse);
+  color: var(--color-text-on-accent);
+  padding: var(--space-0-75) var(--space-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-3xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  z-index: var(--z-raised);
+  pointer-events: none;
+}
+
+.splitBadgeVector {
+  position: absolute;
+  top: var(--space-2-5);
+  right: var(--space-2-5);
+  background-color: var(--color-accent-primary);
+  color: var(--color-text-on-accent);
+  padding: var(--space-0-75) var(--space-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-3xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  z-index: var(--z-raised);
+  pointer-events: none;
+}
+
+.splitOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splitOverlay .svgWrapper {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+}
+
+.splitHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--border-width-focus);
+  transform: translateX(-50%);
+  pointer-events: auto;
+  z-index: var(--z-raised);
+}
+
+.splitSliderControl {
+  position: absolute;
+  top: 0;
+  left: -1.25rem;
+  width: 2.5rem;
+  height: 100%;
+  opacity: 0;
+  cursor: ew-resize;
+  margin: 0;
+}
+
+.splitLine {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-accent-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.splitKnob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--control-height-xs);
+  height: var(--control-height-xs);
+  background-color: var(--color-surface-elevated);
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-primary);
+  pointer-events: none;
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+}
+
+.processingOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--material-sheet-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-overlay);
+}
+
+.spinnerCard {
+  background-color: var(--color-surface-elevated);
+  border: var(--border-width-hairline) solid var(--color-border-subtle);
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 16.25rem;
+  box-shadow: var(--shadow-2xl);
+}
+
+.spinnerRing {
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  border: var(--space-0-75) solid var(--color-border-subtle);
+  border-top-color: var(--color-accent-primary);
+  border-radius: var(--radius-pill);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.progressTextGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.progressStatus {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.progressPercent {
+  font-size: var(--font-size-xs);
+  color: var(--color-accent-primary);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressBarTrack {
+  width: 100%;
+  height: var(--space-1);
+  background-color: var(--color-border-subtle);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: var(--color-accent-primary);
+  transition: width var(--duration-fast) var(--ease-out);
+}
+
+.previewFooterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1-5) var(--space-3);
+  background-color: var(--color-surface-primary);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+  font-size: var(--font-size-2xs);
+}
+
+.engineBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.securityNote {
+  color: var(--color-text-secondary);
+}
+
+/* Modal Footer */
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width-hairline) solid var(--color-border-subtle);
+  background-color: var(--color-surface-elevated);
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}

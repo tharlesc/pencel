@@ -15,6 +15,8 @@ This document defines the delivered features and the progressive development roa
 - Autonomous AI Layout Generator with multi-provider Bring Your Own Key (BYOK) support (Google Gemini, Anthropic Claude, OpenAI, DeepSeek).
 - Camera Raw photo adjustments (non-destructive brightness, contrast, saturation, hue, blur, noise, pixelate).
 - In-browser and API-assisted background removal.
+- In-browser WebAssembly Image Vectorization (VTracer Rust engine) with 4 intelligent presets, comparative split preview, stage background controls (checkerboard/light/dark), and automatic background removal.
+- High-fidelity native-resolution multi-scale export engine (1x Standard, 2x Retina, 3x Print Ultra-HD) with transparent PNG/SVG support.
 - Standalone Express 5 API with environment validation, health check `/api/v1/health`, rate limiting, defensive security headers, and media proxy endpoints.
 - Full automated test suite (Vitest), linter (ESLint 9), formatter (Prettier), and automated CI quality gate (GitHub Actions).
 
@@ -22,7 +24,7 @@ This document defines the delivered features and the progressive development roa
 
 ## 2. Progressive Product Roadmap
 
-- **Milestone 1 — Real-time Vector Enhancements:** Advanced Bézier curve editing, pen tool refinements, boolean shape operations (union, subtract, intersect).
+- **Milestone 1 — Real-time Vector Enhancements & Curve Editing:** Advanced Bézier curve editing, pen tool refinements, and boolean shape operations (union, subtract, intersect). *(Client-side WebAssembly VTracer Vectorization delivered).*
 - **Milestone 2 — Advanced Typography & OpenType:** Web-safe font pairings, tracking/kerning, variable font axes, and curved text paths.
 - **Milestone 3 — Production Cloud Persistence & Collaboration:** Optional database sync (PostgreSQL/Supabase), collaborative sessions via WebSockets / CRDTs, and cloud asset storage (S3/R2).
-- **Milestone 4 — High-Resolution Vector Export:** Multi-format export engine supporting high-DPI rasterization (1x, 2x, 3x PNG/JPEG), vector SVG, and print-ready CMYK PDF.
+- **Milestone 4 — Print-Ready Vector Export:** CMYK print-ready vector PDF export and color separation profiles. *(High-resolution 1x, 2x, 3x rasterization and transparent background export delivered).*

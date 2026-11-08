@@ -7,11 +7,13 @@ import {
   NewDocumentModal,
   SidebarNav,
   TopToolbar,
+  VectorizeModal,
 } from '../../features/editor/components/index.js';
 import styles from '../../features/editor/components/ExportDialog/ExportDialog.module.css';
 import {
   EditorProvider,
   useEditorSessionContext,
+  useOptionalEditorEngine,
 } from '../../features/editor/state/EditorProvider.js';
 
 function SchemaPreviewDialog(): ReactElement {
@@ -30,6 +32,28 @@ function SchemaPreviewDialog(): ReactElement {
   );
 }
 
+function VectorizeModalWrapper(): ReactElement | null {
+  const session = useEditorSessionContext();
+  const engine = useOptionalEditorEngine();
+  const targetImage = engine?.getAdapter()?.getActiveImageForVectorize();
+
+  if (!session.isVectorizeOpen || !targetImage) {
+    return null;
+  }
+
+  return (
+    <VectorizeModal
+      isOpen={session.isVectorizeOpen}
+      imageSrc={targetImage.src}
+      onApply={async (svgString, mode) => {
+        await engine?.getAdapter()?.applyVectorizedSvg(targetImage, svgString, mode);
+        session.closeVectorize();
+      }}
+      onClose={session.closeVectorize}
+    />
+  );
+}
+
 export function EditorRoute(): ReactElement {
   return (
     <EditorProvider>
@@ -41,6 +65,7 @@ export function EditorRoute(): ReactElement {
       <ExportDialog />
       <SchemaPreviewDialog />
       <NewDocumentModal />
+      <VectorizeModalWrapper />
     </EditorProvider>
   );
 }

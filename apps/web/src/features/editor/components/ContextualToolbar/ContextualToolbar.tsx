@@ -20,6 +20,7 @@ export interface ContextualToolbarProps {
   readonly onBringForward?: () => void;
   readonly onSendBackward?: () => void;
   readonly onClearCanvas: () => void;
+  readonly onOpenVectorize?: () => void;
   readonly onSelectSubject?: (mode: 'select' | 'removeBg') => void | Promise<unknown>;
   readonly onAlignSelected?: (
     alignment: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom',
@@ -55,6 +56,7 @@ export function ContextualToolbar({
   onDeleteSelected,
   onDuplicateSelected,
   onClearCanvas,
+  onOpenVectorize,
   onSelectSubject,
   onAlignSelected,
   onDistributeSelected,
@@ -214,6 +216,18 @@ export function ContextualToolbar({
           >
             {isProcessingSubject ? 'Removendo Fundo...' : 'Remover Fundo'}
           </Button>
+          {onOpenVectorize && (
+            <Button
+              variant="toolbar"
+              size="sm"
+              icon="vectorize"
+              onClick={onOpenVectorize}
+              aria-label="Vetorizar Imagem para SVG"
+              title="Converter imagem bitmap em caminhos vetoriais com curvas de Bézier"
+            >
+              Vetorizar
+            </Button>
+          )}
           {onApplyCrop && (
             <>
               <Button

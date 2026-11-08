@@ -1,4 +1,4 @@
-# ADR 0023 — Modal de Novo Documento e Tamanho Personalizado (Arquitetura Photocraft.exe / Photoshop)
+# ADR 0023 — Modal de Novo Documento e Tamanho Personalizado (Arquitetura Studio Desktop / PhotoCraft)
 
 ## Status
 
@@ -6,7 +6,7 @@ Aprovado / Implementado
 
 ## Contexto
 
-O usuário solicitou um modal de tamanho personalizado / criação de novo documento idêntico e inspirado na arquitetura profissional do `photocraft.exe` (engenharia de desktop estilo Adobe Photoshop):
+O usuário solicitou um modal de tamanho personalizado / criação de novo documento idêntico e inspirado na arquitetura profissional de estúdios desktop (semelhante a outros no mercado) e no PhotoCraft (`photocraft.exe`):
 
 1. **Predefinições de Documento por Categorias:** Categorias completas organizadas em abas superiores (Recentes, Salvos, Redes Sociais, Foto, Impressão, Arte & Ilustração, Web, Mobile, Filme & Vídeo).
 2. **Painel de Detalhes da Predefinição com Conversão de Unidades e DPI:** Suporte estrito a unidades de medida físicas e digitais (`px`, `in`, `cm`, `mm`, `pt`, `pica`), conversão dinâmica de resolução em PPI e PPCm, e preservação da dimensão física ao alterar a resolução.
@@ -54,6 +54,6 @@ Para respeitar a governança arquitetural de Pencel (nenhum componente `.tsx` co
 
 ## Consequências
 
-- Experiência completa e profissional de criação de telas idêntica à do Photoshop / Photocraft.exe.
+- Experiência completa e profissional de criação de telas (semelhante a outros no mercado / PhotoCraft.exe).
 - 100% dos testes unitários e de integração aprovados (155 testes no monorepo).
 - Código estritamente tipado em TypeScript, sem `any`, sem `@ts-ignore` e em total conformidade com o linter ESLint e formatador Prettier.

@@ -167,6 +167,7 @@ export const ICON_REGISTRY = {
   ruler: Ruler,
   grid: LayoutGrid,
   cameraRaw: SlidersHorizontal,
+  vectorize: Wand2,
   orientationPortrait: RectangleVertical,
   orientationLandscape: RectangleHorizontal,
   settings: Settings,

@@ -9,11 +9,60 @@ export interface ExportDialogProps {
   readonly onClose?: () => void;
   readonly dimensions?: Dimensions;
   readonly documentTitle?: string;
-  readonly onExportImage?: (format: 'png' | 'jpeg') => string;
+  readonly onExportImage?: (
+    format: 'png' | 'jpeg',
+    quality?: number,
+    maxDimension?: number,
+    scaleFactor?: number,
+    transparentBackground?: boolean,
+  ) => string;
   readonly serializedJson?: string;
 }
 
 export type ExportFormat = 'png' | 'jpeg' | 'svg' | 'pdf' | 'json';
+
+interface FormatOption {
+  readonly format: ExportFormat;
+  readonly name: string;
+  readonly tag: string;
+  readonly isAccent?: boolean;
+  readonly desc: string;
+}
+
+const FORMAT_OPTIONS: readonly FormatOption[] = [
+  {
+    format: 'png',
+    name: 'PNG (Recomendado)',
+    tag: 'Alta Qualidade',
+    isAccent: true,
+    desc: 'Ideal para redes sociais, banners e imagens com texto nítido e fundo transparente.',
+  },
+  {
+    format: 'jpeg',
+    name: 'JPEG',
+    tag: 'Arquivo Menor',
+    desc: 'Compacto e rápido para envio por mensagens e compartilhamento rápido na web.',
+  },
+  {
+    format: 'svg',
+    name: 'SVG Vetorial',
+    tag: 'Escalável',
+    isAccent: true,
+    desc: 'Vetor puro escalável sem perda de resolução, pronto para Illustrator, Figma e impressão.',
+  },
+  {
+    format: 'pdf',
+    name: 'PDF (Impressão)',
+    tag: 'Documento',
+    desc: 'Ideal para documentos, portfólios e envio para gráficas e impressoras.',
+  },
+  {
+    format: 'json',
+    name: 'Pencel Studio (.pencel / JSON)',
+    tag: 'Editável',
+    desc: 'Salva todo o documento, páginas e camadas para continuar editando no Pencel depois.',
+  },
+];
 
 export function ExportDialog(props: ExportDialogProps): ReactElement | null {
   const session = useOptionalEditorSession();
@@ -21,14 +70,15 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
 
   const open = props.open ?? session?.isExportDialogOpen ?? false;
   const onClose = props.onClose ?? session?.closeExportDialog ?? (() => {});
-  const dimensions = props.dimensions ??
-    session?.activePage.dimensions ?? { width: 1080, height: 1080 };
+  const dimensions =
+    props.dimensions ?? session?.activePage.dimensions ?? { width: 1080, height: 1080 };
   const documentTitle = props.documentTitle ?? session?.document.title ?? 'design';
   const onExportImage = props.onExportImage ?? engine?.exportImage ?? (() => '');
   const serializedJson = props.serializedJson ?? session?.serializedPreview ?? '{}';
 
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
   const [scaleFactor, setScaleFactor] = useState<number>(1);
+  const [transparentBackground, setTransparentBackground] = useState<boolean>(true);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleDownload = (): void => {
@@ -57,7 +107,7 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
         a.click();
         URL.revokeObjectURL(url);
       } else if (selectedFormat === 'pdf') {
-        const dataUrl = onExportImage('png');
+        const dataUrl = onExportImage('png', 0.95, undefined, scaleFactor, transparentBackground);
         if (dataUrl) {
           const printWindow = window.open('', '_blank');
           if (printWindow) {
@@ -80,7 +130,13 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
           }
         }
       } else {
-        const dataUrl = onExportImage(selectedFormat);
+        const dataUrl = onExportImage(
+          selectedFormat,
+          0.95,
+          undefined,
+          scaleFactor,
+          transparentBackground,
+        );
         if (dataUrl) {
           const a = document.createElement('a');
           a.href = dataUrl;
@@ -109,143 +165,33 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
           <span className={styles.label}>Tipo de Arquivo</span>
 
           <div className={styles.optionsList}>
-            <label
-              className={[
-                styles.optionCard,
-                selectedFormat === 'png' ? styles.optionCardActive : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <input
-                type="radio"
-                name="exportFormat"
-                value="png"
-                checked={selectedFormat === 'png'}
-                onChange={() => setSelectedFormat('png')}
-                className={styles.radioInput}
-              />
-              <div className={styles.optionContent}>
-                <div className={styles.optionHeader}>
-                  <span className={styles.formatName}>PNG (Recomendado)</span>
-                  <span className={styles.tag}>Alta Qualidade</span>
+            {FORMAT_OPTIONS.map((opt) => (
+              <label
+                key={opt.format}
+                className={[
+                  styles.optionCard,
+                  selectedFormat === opt.format ? styles.optionCardActive : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value={opt.format}
+                  checked={selectedFormat === opt.format}
+                  onChange={() => setSelectedFormat(opt.format)}
+                  className={styles.radioInput}
+                />
+                <div className={styles.optionContent}>
+                  <div className={styles.optionHeader}>
+                    <span className={styles.formatName}>{opt.name}</span>
+                    <span className={opt.isAccent ? styles.tag : styles.tagNeutral}>{opt.tag}</span>
+                  </div>
+                  <span className={styles.formatDesc}>{opt.desc}</span>
                 </div>
-                <span className={styles.formatDesc}>
-                  Ideal para posts de Instagram, banners e imagens complexas com texto nítido e
-                  fundo transparente.
-                </span>
-              </div>
-            </label>
-
-            <label
-              className={[
-                styles.optionCard,
-                selectedFormat === 'jpeg' ? styles.optionCardActive : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <input
-                type="radio"
-                name="exportFormat"
-                value="jpeg"
-                checked={selectedFormat === 'jpeg'}
-                onChange={() => setSelectedFormat('jpeg')}
-                className={styles.radioInput}
-              />
-              <div className={styles.optionContent}>
-                <div className={styles.optionHeader}>
-                  <span className={styles.formatName}>JPEG</span>
-                  <span className={styles.tagNeutral}>Arquivo Menor</span>
-                </div>
-                <span className={styles.formatDesc}>
-                  Compacto e rápido para envio por mensagens e compartilhamento rápido na web.
-                </span>
-              </div>
-            </label>
-
-            <label
-              className={[
-                styles.optionCard,
-                selectedFormat === 'svg' ? styles.optionCardActive : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <input
-                type="radio"
-                name="exportFormat"
-                value="svg"
-                checked={selectedFormat === 'svg'}
-                onChange={() => setSelectedFormat('svg')}
-                className={styles.radioInput}
-              />
-              <div className={styles.optionContent}>
-                <div className={styles.optionHeader}>
-                  <span className={styles.formatName}>SVG Vetorial</span>
-                  <span className={styles.tag}>Escalável</span>
-                </div>
-                <span className={styles.formatDesc}>
-                  Vetor puro escalável sem perda de resolução, pronto para Illustrator, Figma e
-                  impressão.
-                </span>
-              </div>
-            </label>
-
-            <label
-              className={[
-                styles.optionCard,
-                selectedFormat === 'pdf' ? styles.optionCardActive : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <input
-                type="radio"
-                name="exportFormat"
-                value="pdf"
-                checked={selectedFormat === 'pdf'}
-                onChange={() => setSelectedFormat('pdf')}
-                className={styles.radioInput}
-              />
-              <div className={styles.optionContent}>
-                <div className={styles.optionHeader}>
-                  <span className={styles.formatName}>PDF (Impressão)</span>
-                  <span className={styles.tagNeutral}>Documento</span>
-                </div>
-                <span className={styles.formatDesc}>
-                  Ideal para documentos, portfólios e envio para gráficas e impressoras.
-                </span>
-              </div>
-            </label>
-
-            <label
-              className={[
-                styles.optionCard,
-                selectedFormat === 'json' ? styles.optionCardActive : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <input
-                type="radio"
-                name="exportFormat"
-                value="json"
-                checked={selectedFormat === 'json'}
-                onChange={() => setSelectedFormat('json')}
-                className={styles.radioInput}
-              />
-              <div className={styles.optionContent}>
-                <div className={styles.optionHeader}>
-                  <span className={styles.formatName}>Pencel Studio (.pencel / JSON)</span>
-                  <span className={styles.tagNeutral}>Editável</span>
-                </div>
-                <span className={styles.formatDesc}>
-                  Salva todo o documento, páginas e camadas para continuar editando no Pencel
-                  depois.
-                </span>
-              </div>
-            </label>
+              </label>
+            ))}
           </div>
         </div>
 
@@ -270,6 +216,23 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
             ))}
           </div>
         </div>
+
+        {(selectedFormat === 'png' || selectedFormat === 'svg') && (
+          <label className={styles.checkboxRow}>
+            <input
+              type="checkbox"
+              checked={transparentBackground}
+              onChange={(e) => setTransparentBackground(e.target.checked)}
+              className={styles.checkboxInput}
+            />
+            <div className={styles.checkboxLabelGroup}>
+              <span className={styles.checkboxLabel}>Fundo Transparente (Sem Fundo)</span>
+              <span className={styles.checkboxHint}>
+                Exporta apenas os elementos do design sem a cor sólida da prancheta.
+              </span>
+            </div>
+          </label>
+        )}
 
         <div className={styles.metaRow}>
           <span>Resolução de Saída:</span>

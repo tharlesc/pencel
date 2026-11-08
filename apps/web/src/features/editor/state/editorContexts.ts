@@ -17,6 +17,7 @@ export interface EditorSessionContextValue {
   readonly isExportDialogOpen: boolean;
   readonly isCameraRawOpen: boolean;
   readonly isNewDocumentModalOpen: boolean;
+  readonly isVectorizeOpen: boolean;
   readonly serializedPreview: string;
   readonly setDocumentTitle: (title: string) => void;
   readonly createNewDocument: (
@@ -41,6 +42,8 @@ export interface EditorSessionContextValue {
   readonly closeCameraRaw: () => void;
   readonly openNewDocumentModal: () => void;
   readonly closeNewDocumentModal: () => void;
+  readonly openVectorize: () => void;
+  readonly closeVectorize: () => void;
   readonly addPage: (options?: {
     name?: string;
     dimensions?: Dimensions;

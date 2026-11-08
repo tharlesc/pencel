@@ -1,8 +1,8 @@
-# ADR 0010: Photoshop & Canva Mechanics, Multi-Artboard Engine e Apple Liquid Glass
+# ADR 0010: Mecânicas Avançadas de Manipulação, Multi-Artboard Engine e Apple Liquid Glass
 
 - **Status:** Aprovado
 - **Data:** 2026-10-23
-- **Contexto:** Solicitação de evolução arquitetural com base nas mecânicas de manipulação do Adobe Photoshop 2026 e do Canva, incorporando materiais translúcidos de vidro (Apple HIG), seleção múltipla nas camadas via tecla `Shift`, integração de figurinhas estáticas do GIPHY e sistema de múltiplas pranchetas.
+- **Contexto:** Solicitação de evolução arquitetural com base nas mecânicas de manipulação de suítes de criação profissional (semelhante a outros no mercado), incorporando materiais translúcidos de vidro (Apple HIG), seleção múltipla nas camadas via tecla `Shift`, integração de figurinhas estáticas do GIPHY e sistema de múltiplas pranchetas.
 
 ---
 
@@ -47,7 +47,7 @@ O editor necessitava de refinamentos essenciais para atingir paridade com suíte
   - Seleção múltipla (`ActiveSelection`): alinhamento relativo à caixa envolvente coletiva e distribuição equidistante.
 - Encaixe magnético no evento `object:moving` com limiar de 6px para centro e bordas.
 
-### 2.5. Múltiplas Pranchetas (Canva Hybrid)
+### 2.5. Múltiplas Pranchetas (Estilo Pranchetas Múltiplas)
 
 - Expansão de `@pencel/editor-core/documentFactory`: `addPageToDocument`, `duplicateActivePage`, `deletePageFromDocument`, `setActivePageInDocument`.
 - `FabricCanvasAdapter` armazena serializações JSON em mapa em memória (`pageStates`), restaurando o estado do canvas instantaneamente na troca de página.
@@ -58,7 +58,7 @@ O editor necessitava de refinamentos essenciais para atingir paridade com suíte
 ## 3. Consequências
 
 - **Positivas:**
-  - Fluxo de trabalho idêntico a suítes de alto nível (Photoshop e Canva).
+  - Fluxo de trabalho idêntico a suítes de alto nível (semelhante a outros no mercado).
   - Alto desempenho gráfico e economia de requisições externas com cache local.
   - Conformidade estrita com as regras do monorepo e 100% de cobertura nos testes automatizados.
 - **Limitações:**

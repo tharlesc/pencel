@@ -156,6 +156,7 @@ export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
         onBringForward={props.onBringForward ?? engine?.bringForward ?? NOOP}
         onSendBackward={props.onSendBackward ?? engine?.sendBackward ?? NOOP}
         onClearCanvas={props.onClearCanvas ?? engine?.clearCanvas ?? NOOP}
+        onOpenVectorize={session?.openVectorize}
         onSelectSubject={
           props.onSelectSubject ?? (engine ? (m) => engine.selectSubject(m) : undefined)
         }

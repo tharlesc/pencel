@@ -16,3 +16,4 @@ export * from './Ruler/index.js';
 export * from './sidebar/index.js';
 export * from './SidebarNav/index.js';
 export * from './TopToolbar/index.js';
+export * from './VectorizeModal/index.js';
