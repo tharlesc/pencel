@@ -1,4 +1,4 @@
-# ADR 0017: Sistema de Réguas e Linhas Guias Photoshop e Menu Flutuante Studio Glass
+# ADR 0017: Sistema de Réguas e Linhas Guias de Precisão e Menu Flutuante Studio Glass
 
 ## Status
 
@@ -8,7 +8,7 @@ Aceito
 
 O editor Pencel requeria aprimoramento na precisão espacial da prancheta e evolução na ergonomia de ferramentas de estúdio.
 
-1. **Ferramental de precisão:** Como em aplicações profissionais como Adobe Photoshop e Figma, o usuário necessita de réguas milimetricamente adaptativas à escala de zoom com marcações principais/secundárias (major/medium/minor ticks), indicação em tempo real da posição do cursor e capacidade de puxar linhas guias (guias magnéticas) diretamente das réguas vertical e horizontal com suporte a snap magnético nos limites e centro da prancheta.
+1. **Ferramental de precisão:** Como em aplicações profissionais de edição gráfica (semelhante a outros no mercado, como Figma), o usuário necessita de réguas milimetricamente adaptativas à escala de zoom com marcações principais/secundárias (major/medium/minor ticks), indicação em tempo real da posição do cursor e capacidade de puxar linhas guias (guias magnéticas) diretamente das réguas vertical e horizontal com suporte a snap magnético nos limites e centro da prancheta.
 2. **HUD & Hierarquia Visual (Apple HIG & Design Taste):** Os botões de seleção de ferramentas (`select`, `directSelect`, `pen`, `brush`, `eraser`, `shapeBuilder`, etc.) anteriormente ocupavam a extremidade esquerda do rodapé (`CanvasBottomHud`). Conforme demonstração visual aprovada, o rodapé inferior deve reservar sua superfície para telemetria de documento (dimensões e contagem de elementos), controles de zoom/enquadramento e navegação de pranchetas, enquanto as ferramentas de desenho e criação ganham destaque em uma barra flutuante (`FloatingStudioToolbar`) centralizada imediatamente acima do HUD inferior, estruturada sob a camada de material de vidro translúcido (`Material Pencel Float System` / `.glass-float`).
 
 ## Decisão Técnica

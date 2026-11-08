@@ -1,5 +1,5 @@
 import type { Dimensions } from '@pencel/shared-types';
-import type { Canvas as FabricCanvas } from 'fabric';
+import type { Canvas as FabricCanvas, TMat2D } from 'fabric';
 import type { CanvasAdapterConfig } from './adapterTypes.js';
 
 export class CanvasHistoryState {
@@ -99,56 +99,86 @@ export function exportCanvasDataUrl(
   fabricCanvas: FabricCanvas,
   pageDimensions: Dimensions,
   backgroundColor: string,
-  currentScale: number,
-  bleedMargin: number,
+  _currentScale: number,
+  _bleedMargin: number,
   format: 'png' | 'jpeg',
   quality: number,
   maxDimension?: number,
+  scaleFactor = 1,
+  transparentBackground = false,
 ): string {
-  const scale = currentScale || 1;
-  const scaledMargin = Math.round(bleedMargin * scale);
-  const scaledWidth = Math.max(1, Math.round(pageDimensions.width * scale));
-  const scaledHeight = Math.max(1, Math.round(pageDimensions.height * scale));
-
-  let outW = pageDimensions.width;
-  let outH = pageDimensions.height;
+  const mult = scaleFactor > 0 ? scaleFactor : 1;
+  let outW = Math.round(pageDimensions.width * mult);
+  let outH = Math.round(pageDimensions.height * mult);
 
   if (maxDimension && maxDimension > 0) {
     const aspect = pageDimensions.width / Math.max(1, pageDimensions.height);
     if (aspect >= 1) {
-      outW = Math.min(maxDimension, pageDimensions.width);
+      outW = Math.min(maxDimension, outW);
       outH = Math.max(1, Math.round(outW / aspect));
     } else {
-      outH = Math.min(maxDimension, pageDimensions.height);
+      outH = Math.min(maxDimension, outH);
       outW = Math.max(1, Math.round(outH * aspect));
     }
   }
 
-  const offCanvas = document.createElement('canvas');
-  offCanvas.width = outW;
-  offCanvas.height = outH;
-  const ctx = offCanvas.getContext('2d');
-  if (!ctx) return '';
+  const exportZoom = outW / Math.max(1, pageDimensions.width);
 
-  ctx.fillStyle = backgroundColor || '#FFFFFF';
-  ctx.fillRect(0, 0, outW, outH);
+  // Preserve original interactive canvas configuration
+  const origTransform = fabricCanvas.viewportTransform
+    ? ([...fabricCanvas.viewportTransform] as unknown as TMat2D)
+    : null;
+  const origW = fabricCanvas.getWidth();
+  const origH = fabricCanvas.getHeight();
+  const activeObj = fabricCanvas.getActiveObject();
 
-  const src = fabricCanvas.lowerCanvasEl || fabricCanvas.getElement();
-  if (src) {
-    const canvasLogicalWidth = fabricCanvas.width || scaledWidth + 2 * scaledMargin || 1;
-    const canvasLogicalHeight = fabricCanvas.height || scaledHeight + 2 * scaledMargin || 1;
-    const pixelRatioX = (src.width || 1) / canvasLogicalWidth;
-    const pixelRatioY = (src.height || 1) / canvasLogicalHeight;
-
-    const sx = Math.round(scaledMargin * pixelRatioX);
-    const sy = Math.round(scaledMargin * pixelRatioY);
-    const sw = Math.round(scaledWidth * pixelRatioX);
-    const sh = Math.round(scaledHeight * pixelRatioY);
-
-    ctx.drawImage(src, sx, sy, sw, sh, 0, 0, outW, outH);
+  if (activeObj) {
+    fabricCanvas.discardActiveObject();
   }
 
-  return offCanvas.toDataURL(format === 'jpeg' ? 'image/jpeg' : 'image/png', quality);
+  // Set canvas dimensions and zoom directly to the target resolution
+  fabricCanvas.setDimensions({ width: outW, height: outH });
+  fabricCanvas.setViewportTransform([exportZoom, 0, 0, exportZoom, 0, 0]);
+
+  // Synchronously render the scene at full output resolution
+  fabricCanvas.renderAll();
+
+  let dataUrl = '';
+  const isTransparent = transparentBackground && format === 'png';
+
+  if (isTransparent) {
+    dataUrl = fabricCanvas.toDataURL({
+      format: 'png',
+      quality,
+      multiplier: 1,
+    });
+  } else {
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = outW;
+    offCanvas.height = outH;
+    const ctx = offCanvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = backgroundColor || '#FFFFFF';
+      ctx.fillRect(0, 0, outW, outH);
+      const lower = fabricCanvas.lowerCanvasEl || fabricCanvas.getElement();
+      if (lower) {
+        ctx.drawImage(lower, 0, 0, outW, outH);
+      }
+      dataUrl = offCanvas.toDataURL(format === 'jpeg' ? 'image/jpeg' : 'image/png', quality);
+    }
+  }
+
+  // Restore interactive canvas state
+  if (origTransform) {
+    fabricCanvas.setDimensions({ width: origW, height: origH });
+    fabricCanvas.setViewportTransform(origTransform);
+  }
+  if (activeObj) {
+    fabricCanvas.setActiveObject(activeObj);
+  }
+  fabricCanvas.requestRenderAll();
+
+  return dataUrl;
 }
 
 export function exportCanvasSvg(fabricCanvas: FabricCanvas, dimensions: Dimensions): string {

@@ -15,13 +15,16 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['@huggingface/transformers'],
+    exclude: ['@huggingface/transformers', 'vtracer-browser'],
   },
   build: {
     target: 'es2022',
     rollupOptions: {
       output: {
         manualChunks(id: string): string | undefined {
+          if (id.includes('node_modules/vtracer-browser')) {
+            return 'vendor-vtracer';
+          }
           if (
             id.includes('node_modules/@huggingface/transformers') ||
             id.includes('node_modules/onnxruntime-web')

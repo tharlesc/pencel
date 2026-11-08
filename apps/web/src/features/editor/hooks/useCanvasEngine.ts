@@ -52,7 +52,13 @@ export interface UseCanvasEngineResult {
   readonly clearCanvas: () => void;
   readonly undo: () => Promise<void>;
   readonly redo: () => Promise<void>;
-  readonly exportImage: (format: 'png' | 'jpeg', quality?: number, maxDimension?: number) => string;
+  readonly exportImage: (
+    format: 'png' | 'jpeg',
+    quality?: number,
+    maxDimension?: number,
+    scaleFactor?: number,
+    transparentBackground?: boolean,
+  ) => string;
   readonly exportSvg: () => string;
   readonly loadDesignJson: (jsonStr: string) => Promise<boolean>;
   readonly selectObjectByName: (name: string) => void;
@@ -357,8 +363,22 @@ export function useCanvasEngine({
   }, [syncHistoryState]);
 
   const exportImage = useCallback(
-    (format: 'png' | 'jpeg', quality = 0.95, maxDimension?: number) => {
-      return adapterRef.current?.exportDataUrl(format, quality, maxDimension) || '';
+    (
+      format: 'png' | 'jpeg',
+      quality = 0.95,
+      maxDimension?: number,
+      scaleFactor = 1,
+      transparentBackground = false,
+    ) => {
+      return (
+        adapterRef.current?.exportDataUrl(
+          format,
+          quality,
+          maxDimension,
+          scaleFactor,
+          transparentBackground,
+        ) || ''
+      );
     },
     [],
   );

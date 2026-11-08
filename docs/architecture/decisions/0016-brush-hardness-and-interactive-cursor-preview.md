@@ -9,18 +9,18 @@ Aceito
 A ferramenta de desenho livre (`brush` e `eraser`) no Pencel necessitava de dois aprimoramentos críticos identificados pelo usuário:
 
 1. **Restabelecimento do Círculo de Pré-visualização do Pincel**: Ao ativar a ferramenta de pincel/borracha, o cursor do mouse sofria alteração sem que a indicação circular da espessura real do traço e sua área de impacto fosse visível sobre o canvas e a área de trabalho.
-2. **Investigação e Integração da Dureza (_Hardness_) na Mecânica de Suavidade**: Em suítes de ilustração e pintura digital profissionais (como Photoshop, Krita e Procreate), a espessura do pincel interage diretamente com o parâmetro de dureza (_hardness_ / _feathering_). A mecânica anterior no Pencel vinculava a suavidade exclusivamente à decimação de vértices (`decimate`), sem alterar o esfumaçamento radial (_radial falloff_) e o núcleo de cobertura da borda.
+2. **Investigação e Integração da Dureza (_Hardness_) na Mecânica de Suavidade**: Em suítes de ilustração e pintura digital profissionais (semelhante a outros no mercado, como Krita e Procreate), a espessura do pincel interage diretamente com o parâmetro de dureza (_hardness_ / _feathering_). A mecânica anterior no Pencel vinculava a suavidade exclusivamente à decimação de vértices (`decimate`), sem alterar o esfumaçamento radial (_radial falloff_) e o núcleo de cobertura da borda.
 
 Utilizou-se o fluxo de análise e engenharia reversa do REA (`rea-agents`) e inspeção de abstrações do motor Fabric.js para mapear o comportamento canônico de dispersão de traço, sombras vetoriais com `Shadow` e feedback visual concêntrico.
 
 ## Decisão Técnica
 
-### 1. Mecânica de Suavidade e Dureza Calibrada (Photoshop & PhotoCraft)
+### 1. Mecânica de Suavidade e Dureza Calibrada (semelhante a outros no mercado & PhotoCraft)
 
-A partir da investigação minuciosa com REA e ferramentas de análise de binários no **Photoshop 2026** (`Photoshop.exe`, Drover `brush_slider.eve`) e **PhotoCraft** (`photocraft.exe`, engine Rust em `crates/paint` e `crates/engine`):
+A partir da investigação minuciosa com REA e ferramentas de análise de binários em aplicações profissionais de edição gráfica (semelhante a outros no mercado) e **PhotoCraft** (`photocraft.exe`, engine Rust em `crates/paint` e `crates/engine`):
 
 - **Descoberta Fundamental**:
-  - Tanto no Photoshop quanto no PhotoCraft, em traços suaves (`hardness = 0` ou `suavidade = 100%`), o centro do traço mantém um núcleo denso e sólido ($\text{luma} = 0$, opacidade total), enquanto a borda se expande em uma auréola contínua com decaimento gaussiano/radial.
+  - Tanto em suítes de estúdio (semelhante a outros no mercado) quanto no PhotoCraft, em traços suaves (`hardness = 0` ou `suavidade = 100%`), o centro do traço mantém um núcleo denso e sólido ($\text{luma} = 0$, opacidade total), enquanto a borda se expande em uma auréola contínua com decaimento gaussiano/radial.
   - No Canvas 2D tradicional, desenhar um traço com `shadowBlur` e `lineWidth = 0` causava uma névoa apagada e transparente.
   - A solução implementada no Pencel utiliza **renderização em múltiplos estágios com projeção offscreen**:
     1. **Camada de difusão externa (Halo)**: Projeção de sombra gaussiana offscreen (`ctx.shadowOffsetX = 10000; ctx.translate(-10000, 0)`) com `shadowBlur = width * s * 0.5` e largura moderada, gerando a transição suave sem qualquer corte abrupto.

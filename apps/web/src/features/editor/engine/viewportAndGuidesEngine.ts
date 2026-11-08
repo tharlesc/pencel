@@ -432,6 +432,8 @@ export class ViewportManager {
   public pageDimensions: Dimensions = { width: 1080, height: 1080 };
   public backgroundColor = '#FBFBFD';
   public clipToArtboard = true;
+  public isExporting = false;
+  public exportSuppressBackground = false;
 
   public get bleedMargin(): number {
     return computeDynamicBleedMargin(this.pageDimensions);
@@ -464,18 +466,29 @@ export class ViewportManager {
     format: 'png' | 'jpeg' = 'png',
     quality = 0.95,
     maxDimension?: number,
+    scaleFactor = 1,
+    transparentBackground = false,
   ): string {
     if (!canvas) return '';
-    return exportCanvasDataUrl(
-      canvas,
-      this.pageDimensions,
-      this.backgroundColor,
-      this.currentScale,
-      this.bleedMargin,
-      format,
-      quality,
-      maxDimension,
-    );
+    this.isExporting = true;
+    this.exportSuppressBackground = transparentBackground && format === 'png';
+    try {
+      return exportCanvasDataUrl(
+        canvas,
+        this.pageDimensions,
+        this.backgroundColor,
+        this.currentScale,
+        this.bleedMargin,
+        format,
+        quality,
+        maxDimension,
+        scaleFactor,
+        transparentBackground,
+      );
+    } finally {
+      this.isExporting = false;
+      this.exportSuppressBackground = false;
+    }
   }
 
   public exportSvg(canvas: FabricCanvas | null): string {

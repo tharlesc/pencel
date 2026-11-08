@@ -33,6 +33,7 @@ export interface EditorSessionController {
   readonly isExportDialogOpen: boolean;
   readonly isCameraRawOpen: boolean;
   readonly isNewDocumentModalOpen: boolean;
+  readonly isVectorizeOpen: boolean;
   readonly serializedPreview: string;
   readonly setDocumentTitle: (title: string) => void;
   readonly createNewDocument: (
@@ -59,6 +60,8 @@ export interface EditorSessionController {
   readonly closeCameraRaw: () => void;
   readonly openNewDocumentModal: () => void;
   readonly closeNewDocumentModal: () => void;
+  readonly openVectorize: () => void;
+  readonly closeVectorize: () => void;
   readonly addPage: (options?: {
     name?: string;
     dimensions?: Dimensions;
@@ -99,6 +102,15 @@ export function useEditorSession(): EditorSessionController {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState<boolean>(false);
   const [isCameraRawOpen, setIsCameraRawOpen] = useState<boolean>(false);
   const [isNewDocumentModalOpen, setIsNewDocumentModalOpen] = useState<boolean>(false);
+  const [isVectorizeOpen, setIsVectorizeOpen] = useState<boolean>(false);
+
+  const openVectorize = useCallback(() => {
+    setIsVectorizeOpen(true);
+  }, []);
+
+  const closeVectorize = useCallback(() => {
+    setIsVectorizeOpen(false);
+  }, []);
 
   const openNewDocumentModal = useCallback(() => {
     setIsNewDocumentModalOpen(true);
@@ -248,6 +260,7 @@ export function useEditorSession(): EditorSessionController {
     isExportDialogOpen,
     isCameraRawOpen,
     isNewDocumentModalOpen,
+    isVectorizeOpen,
     serializedPreview,
     setDocumentTitle,
     createNewDocument,
@@ -270,6 +283,8 @@ export function useEditorSession(): EditorSessionController {
     closeCameraRaw,
     openNewDocumentModal,
     closeNewDocumentModal,
+    openVectorize,
+    closeVectorize,
     addPage,
     duplicatePage,
     deletePage,

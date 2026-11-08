@@ -63,9 +63,9 @@ flowchart TD
 - **Internal Organization:**
   - `components/ui/`: Reusable design system primitives (`Button`, `Icon`, `Input`, `Tabs`, `Panel`, `Toolbar`, `Badge`, `Tooltip`, `Dialog`).
   - `components/layout/`: 4-zone structural shell inspired by desktop creative suites.
-  - `features/editor/`: Session state, custom hooks, canvas stage, property inspectors, and the isolated `Fabric.js` engine adapter (`features/editor/engine/`).
+  - `features/editor/`: Session state, custom hooks, canvas stage, property inspectors, and the isolated `Fabric.js` engine adapter (`features/editor/engine/`) supporting high-fidelity multi-scale exports (1x, 2x Retina, 3x Print) and transparent PNG/SVG output.
   - `features/ai/`: Autonomous AI generation engine with BYOK multi-provider support.
-  - `features/image/`: Camera Raw adjustments, background removal, and media library.
+  - `features/image/`: Camera Raw adjustments, background removal, in-browser WebAssembly image vectorization (VTracer), and media library.
 
 ### 2.5 `@pencel/api` (`apps/api`)
 

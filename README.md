@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="apps/web/public/brand/pencel-symbol-color.svg" width="96" height="96" alt="Pencel Icon" />
+
 # Pencel
 
 **High-Performance Open-Source Web Graphic Studio**  
@@ -21,9 +23,9 @@ _Desktop-grade creative ergonomics inspired by macOS Human Interface Guidelines,
 
 ## ⚡ Overview
 
-**Pencel** is a modern, privacy-first, desktop-class web graphics editor designed for content creators, marketers, developers, and designers. It blends the rapid, template-driven workflow of modern web suites (Canva) with the ergonomic precision, layer depth, and vector control of pro desktop creative software (Photoshop, Illustrator), all wrapped in an **Apple Human Interface Guidelines (HIG)** aesthetic.
+**Pencel** is a modern, privacy-first, desktop-class web graphics editor designed for content creators, marketers, developers, and designers. It blends the rapid, template-driven workflow of modern web creative suites (semelhante a outros no mercado) with the ergonomic precision, layer depth, and vector control of pro desktop creative software, all wrapped in an **Apple Human Interface Guidelines (HIG)** aesthetic.
 
-Built from first principles on a zero-dependency domain model, Pencel features non-destructive raster photo filters, vector Bézier curve tools, precision rulers with dynamic magnetic snapping, and autonomous **Bring Your Own Key (BYOK)** generative AI layout synthesis supporting **Google Gemini, Anthropic Claude, OpenAI, and DeepSeek**.
+Built from first principles on a zero-dependency domain model, Pencel features non-destructive raster photo filters, vector Bézier curve tools, precision rulers with dynamic magnetic snapping, client-side WebAssembly image vectorization (VTracer), high-fidelity native-resolution multi-scale export, and autonomous **Bring Your Own Key (BYOK)** generative AI layout synthesis supporting **Google Gemini, Anthropic Claude, OpenAI, and DeepSeek**.
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -46,7 +48,7 @@ Built from first principles on a zero-dependency domain model, Pencel features n
 
 ## 💡 Why Pencel?
 
-| Dimension           | Typical Web Editors (Canva / SaaS)                         | Pencel Studio                                                                       |
+| Dimension           | Typical Web Editors (semelhante a outros no mercado)       | Pencel Studio                                                                       |
 | :------------------ | :--------------------------------------------------------- | :---------------------------------------------------------------------------------- |
 | **Data Privacy**    | Projects & assets stored on proprietary cloud servers      | **100% Local-First:** Your documents, images, and keys stay in your browser         |
 | **AI Pricing**      | Expensive recurring subscription with restricted credits   | **Bring Your Own Key (BYOK):** Direct API access at wholesale token cost            |
@@ -65,11 +67,28 @@ Built from first principles on a zero-dependency domain model, Pencel features n
 - **Infinite Viewport:** Fluid panning, trackpad pinch-to-zoom (10% to 500%), optical center alignment, and responsive retina device pixel scaling.
 - **Multi-Artboard Reel:** Staggered visual artboard management with one-click cloning, renaming, deletion, and cross-page navigation.
 
-### 📐 Photoshop-Grade Rulers & Magnetic Smart Snapping
+### 📐 Precision Studio Rulers & Magnetic Smart Snapping
 
 - **Dynamic Pixel Rulers:** Adaptive step subdivisions with responsive tick marks synchronized with canvas zoom and panning.
 - **Interactive Guides:** Drag guides directly from horizontal and vertical rulers onto the artboard with sub-pixel precision.
 - **Bounding-Box Smart Guides:** Automatic magnetic snapping with visual alignment indicators and distance badges.
+
+### ⚡ Client-Side WebAssembly Vectorization (VTracer Image Trace)
+
+- **100% In-Browser Vector Engine:** Converts raster graphics (PNG, JPEG, logos, sketches, signatures) into clean SVG Bézier curves powered by Rust/WASM via a dedicated background Web Worker (`vtracer.worker.ts`).
+- **4 Intelligent Presets:**
+  - *Logotipo / Ilustração:* Clean solid color cuts and smooth Bézier splines.
+  - *Silhueta P&B / Tinta:* High-contrast binary tracing tailored for emblems, stamps, and icons.
+  - *Alta Fidelidade:* Nuance and gradient retention with rich path density.
+  - *Geométrico / Low-Poly:* Sharp polygonal styling with planar facet boundaries.
+- **Interactive Split Preview:** Real-time split before/after viewer with auto-fit zoom, pan navigation, and 3 stage background inspection modes (Checkerboard, Light, Dark).
+- **Background Stripping & Node Optimization:** Optional background removal (`stripSvgBackground`) for transparent vector extraction, combined with path decimation to prevent canvas freezes on complex artwork.
+
+### 💎 High-Fidelity Native-Resolution Multi-Scale Export
+
+- **True Resolution Engine:** Bypasses screen-zoom rasterization to render directly from the vector document model at nominal artboard resolution.
+- **Multi-Scale DPI Factors:** Export at **1x Standard** (web/social), **2x Retina** (high-density displays), or **3x Print Ultra-HD** (press/merch) with razor-sharp raster edges.
+- **Transparent Background PNG & SVG:** Dedicated `Fundo Transparente (Sem Fundo)` option temporarily suppresses artboard background fills during export for transparent sticker and icon workflows.
 
 ### 🤖 Autonomous Multi-Provider Generative AI (BYOK)
 
@@ -84,7 +103,7 @@ Built from first principles on a zero-dependency domain model, Pencel features n
 
 ### 📸 Camera Raw Non-Destructive Photo Adjustments
 
-- **Photoshop-Style Grading:** Real-time adjustments for Brightness, Contrast, Saturation, Vibrance, Hue Rotation, Blur, Noise, and Pixelation.
+- **Studio Color Grading:** Real-time adjustments for Brightness, Contrast, Saturation, Vibrance, Hue Rotation, Blur, Noise, and Pixelation (semelhante a outros no mercado).
 - **Layer Blend Modes:** Normal, Multiply, Screen, Overlay, Darken, Lighten, Color Dodge, Color Burn, Hard Light, Soft Light, Difference, and Exclusion.
 - **AI Background Removal:** Instant background separation directly in the browser via client-side HuggingFace WebAssembly models, with server-side CLI fallback.
 
@@ -253,11 +272,13 @@ Switch languages dynamically at runtime via **Studio Settings → Language**.
 - [x] Camera Raw photo adjustment filters & blend modes
 - [x] Autonomous BYOK AI layout generation (Gemini, Claude, OpenAI, DeepSeek)
 - [x] Dynamic pixel rulers, draggable guides, and magnetic smart snapping
+- [x] In-Browser WebAssembly Image Vectorization (VTracer) with multi-preset spline fitting and background stripping
+- [x] High-Fidelity multi-scale export (1x, 2x Retina, 3x Print) with transparent background support
 - [x] Containerization via Docker & Docker Compose
-- [ ] **Milestone 1:** Advanced Bézier curve editing and boolean vector operations (Union, Subtract, Intersect)
+- [ ] **Milestone 1:** Advanced Bézier curve editing, boolean vector operations (Union, Subtract, Intersect)
 - [ ] **Milestone 2:** Rich text curve wrapping, font pairing suggestions, and variable typography axes
 - [ ] **Milestone 3:** Optional PostgreSQL sync and WebRTC/CRDT multi-user real-time collaboration
-- [ ] **Milestone 4:** High-DPI rasterization (1x, 2x, 3x) and CMYK print-ready vector PDF export
+- [ ] **Milestone 4:** CMYK print-ready vector PDF export and color separation profiles
 
 ---
 
