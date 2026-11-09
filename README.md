@@ -77,10 +77,10 @@ Built from first principles on a zero-dependency domain model, Pencel features n
 
 - **100% In-Browser Vector Engine:** Converts raster graphics (PNG, JPEG, logos, sketches, signatures) into clean SVG Bézier curves powered by Rust/WASM via a dedicated background Web Worker (`vtracer.worker.ts`).
 - **4 Intelligent Presets:**
-  - *Logotipo / Ilustração:* Clean solid color cuts and smooth Bézier splines.
-  - *Silhueta P&B / Tinta:* High-contrast binary tracing tailored for emblems, stamps, and icons.
-  - *Alta Fidelidade:* Nuance and gradient retention with rich path density.
-  - *Geométrico / Low-Poly:* Sharp polygonal styling with planar facet boundaries.
+  - _Logotipo / Ilustração:_ Clean solid color cuts and smooth Bézier splines.
+  - _Silhueta P&B / Tinta:_ High-contrast binary tracing tailored for emblems, stamps, and icons.
+  - _Alta Fidelidade:_ Nuance and gradient retention with rich path density.
+  - _Geométrico / Low-Poly:_ Sharp polygonal styling with planar facet boundaries.
 - **Interactive Split Preview:** Real-time split before/after viewer with auto-fit zoom, pan navigation, and 3 stage background inspection modes (Checkerboard, Light, Dark).
 - **Background Stripping & Node Optimization:** Optional background removal (`stripSvgBackground`) for transparent vector extraction, combined with path decimation to prevent canvas freezes on complex artwork.
 

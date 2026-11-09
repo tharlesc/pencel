@@ -25,6 +25,7 @@ export async function addImageFromUrlToCanvas(
   altText: string,
   onSelect: () => void,
   fallbackUrl?: string,
+  position?: { x?: number; y?: number; left?: number; top?: number },
 ): Promise<void> {
   if (!url) return;
 
@@ -41,11 +42,22 @@ export async function addImageFromUrlToCanvas(
     const scaledW = rawW * scale;
     const scaledH = rawH * scale;
 
+    const left =
+      position?.left ??
+      (position?.x !== undefined
+        ? Math.round(position.x - scaledW / 2)
+        : Math.round((artboardW - scaledW) / 2));
+    const top =
+      position?.top ??
+      (position?.y !== undefined
+        ? Math.round(position.y - scaledH / 2)
+        : Math.round((artboardH - scaledH) / 2));
+
     obj.set({
       originX: 'left',
       originY: 'top',
-      left: Math.round((artboardW - scaledW) / 2),
-      top: Math.round((artboardH - scaledH) / 2),
+      left,
+      top,
       name: createElementId(prefix),
       altText,
       naturalWidth: rawW,
@@ -130,6 +142,8 @@ export async function addImageFromUrlToCanvas(
         fallbackUrl,
         altText,
         onSelect,
+        undefined,
+        position,
       );
     }
   } catch (err) {

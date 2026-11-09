@@ -1,9 +1,50 @@
 /// <reference types="vitest/config" />
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function vtracerWasmPlugin(): Plugin {
+  return {
+    name: 'vtracer-wasm',
+    generateBundle() {
+      const candidates = [
+        path.resolve(__dirname, '../../node_modules/vtracer-browser/dist/vtracer_bg.wasm'),
+        path.resolve(__dirname, 'node_modules/vtracer-browser/dist/vtracer_bg.wasm'),
+        path.resolve(process.cwd(), 'node_modules/vtracer-browser/dist/vtracer_bg.wasm'),
+      ];
+      const found = candidates.find((p) => fs.existsSync(p));
+      if (found) {
+        const wasmBuffer = fs.readFileSync(found);
+        this.emitFile({
+          type: 'asset',
+          fileName: 'assets/vtracer_bg.wasm',
+          source: wasmBuffer,
+        });
+        this.emitFile({
+          type: 'asset',
+          fileName: 'vtracer_bg.wasm',
+          source: wasmBuffer,
+        });
+      }
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url && req.url.endsWith('.wasm')) {
+          res.setHeader('Content-Type', 'application/wasm');
+        }
+        next();
+      });
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), vtracerWasmPlugin()],
   server: {
     port: 5173,
     strictPort: false,

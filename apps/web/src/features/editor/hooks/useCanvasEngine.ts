@@ -33,6 +33,7 @@ export interface UseCanvasEngineResult {
     fill?: string;
     textAlign?: 'left' | 'center' | 'right' | 'justify';
     boxMode?: 'point' | 'area';
+    position?: { x?: number; y?: number };
   }) => void;
   readonly addShape: (options: {
     shapeVariant: ShapeVariant;
@@ -40,8 +41,20 @@ export interface UseCanvasEngineResult {
     stroke?: string;
     strokeWidth?: number;
   }) => void;
-  readonly addImage: (url: string, fallbackUrl?: string) => Promise<void>;
-  readonly addImageFromUrl: (url: string, altText?: string, fallbackUrl?: string) => Promise<void>;
+  readonly addImage: (
+    url: string,
+    fallbackUrl?: string,
+    position?: { x?: number; y?: number; left?: number; top?: number },
+  ) => Promise<void>;
+  readonly addImageFromUrl: (
+    url: string,
+    altText?: string,
+    fallbackUrl?: string,
+    position?: { x?: number; y?: number; left?: number; top?: number },
+  ) => Promise<void>;
+  readonly copySelected: () => Promise<boolean>;
+  readonly pasteCopied: () => Promise<boolean>;
+  readonly hasInternalClipboard: () => boolean;
   readonly applyTemplate: (templateId: string) => void;
   readonly applyGeneratedLayout: (layout: GeneratedLayoutDto) => void;
   readonly updateSelectedProperties: (props: Partial<SelectedObjectProperties>) => void;
@@ -237,11 +250,7 @@ export function useCanvasEngine({
         adapterRef.current?.layers.createGroup();
         syncHistoryState();
       } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
-        // Copy active
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
-        // Paste active (duplicate)
-        e.preventDefault();
-        void adapterRef.current?.duplicateSelected().then(syncHistoryState);
+        void adapterRef.current?.copySelected();
       } else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'i') {
         // Photoshop I shortcut: Eyedropper / Pipette
         if (typeof (window as unknown as { EyeDropper?: unknown }).EyeDropper !== 'undefined') {
@@ -297,8 +306,12 @@ export function useCanvasEngine({
   );
 
   const addImage = useCallback(
-    async (url: string, fallbackUrl?: string) => {
-      await adapterRef.current?.addImageFromUrl(url, 'Imagem', fallbackUrl);
+    async (
+      url: string,
+      fallbackUrl?: string,
+      position?: { x?: number; y?: number; left?: number; top?: number },
+    ) => {
+      await adapterRef.current?.addImageFromUrl(url, 'Imagem', fallbackUrl, position);
       syncHistoryState();
     },
     [syncHistoryState],
@@ -394,12 +407,33 @@ export function useCanvasEngine({
   }, []);
 
   const addImageFromUrl = useCallback(
-    async (url: string, altText?: string, fallbackUrl?: string) => {
-      await adapterRef.current?.addImageFromUrl(url, altText, fallbackUrl);
+    async (
+      url: string,
+      altText?: string,
+      fallbackUrl?: string,
+      position?: { x?: number; y?: number; left?: number; top?: number },
+    ) => {
+      await adapterRef.current?.addImageFromUrl(url, altText, fallbackUrl, position);
       syncHistoryState();
     },
     [syncHistoryState],
   );
+
+  const copySelected = useCallback(async (): Promise<boolean> => {
+    return (await adapterRef.current?.copySelected()) ?? false;
+  }, []);
+
+  const pasteCopied = useCallback(async (): Promise<boolean> => {
+    const result = (await adapterRef.current?.pasteCopied()) ?? false;
+    if (result) {
+      syncHistoryState();
+    }
+    return result;
+  }, [syncHistoryState]);
+
+  const hasInternalClipboard = useCallback((): boolean => {
+    return adapterRef.current?.hasInternalClipboard() ?? false;
+  }, []);
 
   const assignLayerToGroup = useCallback((layerName: string, groupName: string | null) => {
     adapterRef.current?.layers.assignToGroup(layerName, groupName);
@@ -639,6 +673,9 @@ export function useCanvasEngine({
     updateSelectedProperties,
     deleteSelected,
     duplicateSelected,
+    copySelected,
+    pasteCopied,
+    hasInternalClipboard,
     bringForward,
     sendBackward,
     clearCanvas,

@@ -24,7 +24,7 @@ This document defines the delivered features and the progressive development roa
 
 ## 2. Progressive Product Roadmap
 
-- **Milestone 1 — Real-time Vector Enhancements & Curve Editing:** Advanced Bézier curve editing, pen tool refinements, and boolean shape operations (union, subtract, intersect). *(Client-side WebAssembly VTracer Vectorization delivered).*
+- **Milestone 1 — Real-time Vector Enhancements & Curve Editing:** Advanced Bézier curve editing, pen tool refinements, and boolean shape operations (union, subtract, intersect). _(Client-side WebAssembly VTracer Vectorization delivered)._
 - **Milestone 2 — Advanced Typography & OpenType:** Web-safe font pairings, tracking/kerning, variable font axes, and curved text paths.
 - **Milestone 3 — Production Cloud Persistence & Collaboration:** Optional database sync (PostgreSQL/Supabase), collaborative sessions via WebSockets / CRDTs, and cloud asset storage (S3/R2).
-- **Milestone 4 — Print-Ready Vector Export:** CMYK print-ready vector PDF export and color separation profiles. *(High-resolution 1x, 2x, 3x rasterization and transparent background export delivered).*
+- **Milestone 4 — Print-Ready Vector Export:** CMYK print-ready vector PDF export and color separation profiles. _(High-resolution 1x, 2x, 3x rasterization and transparent background export delivered)._

@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactElement } from 'react';
+import { useCanvasDropZone } from '../../hooks/useCanvasDropZone.js';
 import { useCanvasGuides } from '../../hooks/useCanvasGuides.js';
 import { useCanvasShortcuts } from '../../hooks/useCanvasShortcuts.js';
 import { useCanvasViewportPan } from '../../hooks/useCanvasViewportPan.js';
@@ -9,7 +10,11 @@ import {
   useOptionalEditorSession,
 } from '../../state/EditorProvider.js';
 import type { CanvasWorkspaceProps } from '../../types/canvasWorkspace.types.js';
-import { FALLBACK_PAGE } from '../../types/canvasWorkspace.types.js';
+import {
+  FALLBACK_PAGE,
+  getSavedToolbarPosition,
+  saveToolbarPosition,
+} from '../../types/canvasWorkspace.types.js';
 import { CanvasArtboardDrawer } from '../CanvasArtboardDrawer/index.js';
 import { CanvasBottomHud } from '../CanvasBottomHud/index.js';
 import { CanvasStageViewport } from '../CanvasStageViewport/index.js';
@@ -56,27 +61,13 @@ export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
 
   const [clipArtboard, setClipArtboard] = useState(true);
   const [showArtboardDrawer, setShowArtboardDrawer] = useState(false);
-  const [floatingToolbarPosition, setFloatingToolbarPosition] = useState<'bottom' | 'left'>(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const saved = window.localStorage.getItem('pencel_floating_toolbar_position');
-        if (saved === 'left' || saved === 'bottom') return saved;
-      }
-    } catch {
-      /* ignore */
-    }
-    return 'bottom';
-  });
+  const [floatingToolbarPosition, setFloatingToolbarPosition] = useState<'bottom' | 'left'>(
+    getSavedToolbarPosition,
+  );
 
   const handleFloatingToolbarPositionChange = (pos: 'bottom' | 'left'): void => {
     setFloatingToolbarPosition(pos);
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        window.localStorage.setItem('pencel_floating_toolbar_position', pos);
-      }
-    } catch {
-      /* ignore */
-    }
+    saveToolbarPosition(pos);
   };
 
   const artboardRef = useRef<HTMLDivElement | null>(null);
@@ -122,6 +113,9 @@ export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
   });
 
   const [showGuideLayoutModal, setShowGuideLayoutModal] = useState(false);
+
+  const { isDragOver, handleDragEnter, handleDragOver, handleDragLeave, handleDrop } =
+    useCanvasDropZone({ engine, artboardRef, zoom });
 
   useCanvasShortcuts({
     engine,
@@ -214,6 +208,11 @@ export function CanvasWorkspace(props: CanvasWorkspaceProps): ReactElement {
         mousePos={mousePos}
         handleStartCreateGuide={handleStartCreateGuide}
         handleResetOrigin={handleResetOrigin}
+        isDragOver={isDragOver}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       />
 
       <FloatingStudioToolbar

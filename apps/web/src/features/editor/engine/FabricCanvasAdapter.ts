@@ -204,14 +204,20 @@ export class FabricCanvasAdapter {
       );
   }
 
-  public addImage(url: string, altText = 'Imagem', fallbackUrl?: string): Promise<void> {
-    return this.addImageFromUrl(url, altText, fallbackUrl);
+  public addImage(
+    url: string,
+    altText = 'Imagem',
+    fallbackUrl?: string,
+    position?: { x?: number; y?: number; left?: number; top?: number },
+  ): Promise<void> {
+    return this.addImageFromUrl(url, altText, fallbackUrl, position);
   }
 
   public async addImageFromUrl(
     url: string,
     altText = 'Imagem',
     fallbackUrl?: string,
+    position?: { x?: number; y?: number; left?: number; top?: number },
   ): Promise<void> {
     if (this.fabricCanvas && url)
       await imgTpl.addImageFromUrlToCanvas(
@@ -222,6 +228,7 @@ export class FabricCanvasAdapter {
         altText,
         this.onCommitSel,
         fallbackUrl,
+        position,
       );
   }
 
@@ -262,6 +269,22 @@ export class FabricCanvasAdapter {
       this.handleSelectionUpdate();
       this.history.save(this.fabricCanvas);
     });
+  }
+
+  public async copySelected(): Promise<boolean> {
+    return this.fabricCanvas ? shapeText.copyActiveObject(this.fabricCanvas) : false;
+  }
+
+  public async pasteCopied(): Promise<boolean> {
+    if (!this.fabricCanvas) return false;
+    return shapeText.pasteActiveObject(this.fabricCanvas, () => {
+      this.handleSelectionUpdate();
+      this.history.save(this.fabricCanvas);
+    });
+  }
+
+  public hasInternalClipboard(): boolean {
+    return shapeText.hasInternalClipboardObject();
   }
 
   public async selectSubject(
@@ -366,21 +389,11 @@ export class FabricCanvasAdapter {
     );
   }
 
-  public getBrushColor(): string {
-    return this.drawingMgr.color;
-  }
-  public getBrushWidth(): number {
-    return this.drawingMgr.width;
-  }
-  public getBrushHardness(): number {
-    return this.drawingMgr.hardness;
-  }
-  public getBrushSoftness(): number {
-    return this.drawingMgr.softness;
-  }
-  public getBrushSmoothness(): number {
-    return this.drawingMgr.smoothness;
-  }
+  public getBrushColor = (): string => this.drawingMgr.color;
+  public getBrushWidth = (): number => this.drawingMgr.width;
+  public getBrushHardness = (): number => this.drawingMgr.hardness;
+  public getBrushSoftness = (): number => this.drawingMgr.softness;
+  public getBrushSmoothness = (): number => this.drawingMgr.smoothness;
 
   public setDrawingMode(
     enabled: boolean,

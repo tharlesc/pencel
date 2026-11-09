@@ -8,6 +8,13 @@ import {
 } from 'fabric';
 import { createElementId } from '../../../shared/lib/idUtils.js';
 
+export interface ElementPositionOptions {
+  readonly x?: number;
+  readonly y?: number;
+  readonly left?: number;
+  readonly top?: number;
+}
+
 export interface AddTextOptions {
   readonly text: string;
   readonly fontSize?: number;
@@ -18,6 +25,7 @@ export interface AddTextOptions {
   readonly charSpacing?: number;
   readonly lineHeight?: number;
   readonly boxMode?: 'point' | 'area';
+  readonly position?: { readonly x?: number; readonly y?: number };
 }
 
 export interface AddShapeOptions {

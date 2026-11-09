@@ -27,7 +27,8 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
     id: 'quote-post',
     name: 'Inspiring Quote',
     category: 'Social Media & Quotes',
-    description: 'Minimalist editorial style with prominent quotation marks and balanced typography.',
+    description:
+      'Minimalist editorial style with prominent quotation marks and balanced typography.',
     previewBg: '#F5F5F7',
     previewAccent: '#0071E3',
     badgeText: 'INSPIRATION',
@@ -68,8 +69,7 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
     id: 'open-design-carousel',
     name: 'Editorial Carousel (Open Design)',
     category: 'Social Media & Carousels',
-    description:
-      'Seamless multi-slide editorial composition for social feeds with Swiss contrast.',
+    description: 'Seamless multi-slide editorial composition for social feeds with Swiss contrast.',
     previewBg: '#1C1C1E',
     previewAccent: '#FF9F0A',
     badgeText: '01 / 05',
@@ -79,8 +79,7 @@ export const CANVA_TEMPLATES: readonly VisualTemplate[] = [
     id: 'open-design-poster',
     name: 'Swiss Typographic Poster (Open Design)',
     category: 'Graphic Design & Posters',
-    description:
-      'International typographic style with geometric grid and strict visual rhythm.',
+    description: 'International typographic style with geometric grid and strict visual rhythm.',
     previewBg: '#F2F2F7',
     previewAccent: '#FF3B30',
     badgeText: 'SWISS STYLE',

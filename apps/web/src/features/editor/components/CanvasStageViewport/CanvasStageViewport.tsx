@@ -1,6 +1,7 @@
 import type { GuideLine, Point2D } from '@pencel/editor-core';
 import type { Dimensions } from '@pencel/shared-types';
 import type { RefObject, ReactElement } from 'react';
+import { Icon } from '../../../../components/ui/index.js';
 import { BrushCursorIndicator } from '../BrushCursorIndicator/index.js';
 import styles from './CanvasStageViewport.module.css';
 import {
@@ -45,6 +46,11 @@ export interface CanvasStageViewportProps {
     startClientPos: { clientX: number; clientY: number },
   ) => void;
   readonly handleResetOrigin: () => void;
+  readonly isDragOver?: boolean;
+  readonly onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
+  readonly onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  readonly onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
+  readonly onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export function CanvasStageViewport({
@@ -79,6 +85,11 @@ export function CanvasStageViewport({
   mousePos,
   handleStartCreateGuide,
   handleResetOrigin,
+  isDragOver = false,
+  onDragEnter,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: CanvasStageViewportProps): ReactElement {
   return (
     <div
@@ -104,6 +115,10 @@ export function CanvasStageViewport({
         setBrushCursor(null);
         handleViewportMouseLeave();
       }}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
     >
       {isDrawing && brushCursor && (
         <BrushCursorIndicator
@@ -169,6 +184,15 @@ export function CanvasStageViewport({
           onStartCreateGuide={handleStartCreateGuide}
           onResetOrigin={handleResetOrigin}
         />
+      )}
+
+      {isDragOver && (
+        <div className={styles.dropZoneOverlay} data-testid="canvas-drop-zone-overlay">
+          <div className={styles.dropZoneBadge}>
+            <Icon name="image" size="lg" />
+            <span>Solte a imagem para adicionar ao canvas</span>
+          </div>
+        </div>
       )}
     </div>
   );

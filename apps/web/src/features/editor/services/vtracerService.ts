@@ -236,6 +236,17 @@ export async function vectorizeImageData(
       return { success: false, error: 'Cancelado.' };
     }
     const msg = err instanceof Error ? err.message : String(err);
+    if (
+      msg.includes('MIME type') ||
+      msg.includes('application/wasm') ||
+      msg.includes('Incorrect response')
+    ) {
+      return {
+        success: false,
+        error:
+          'Falha ao carregar o motor WebAssembly (MIME type incorreto). O servidor precisa servir arquivos .wasm como application/wasm.',
+      };
+    }
     return { success: false, error: msg };
   }
 }

@@ -39,6 +39,7 @@ export function addTextToCanvas(
     charSpacing?: number;
     lineHeight?: number;
     boxMode?: 'point' | 'area';
+    position?: { x?: number; y?: number };
   },
   onSelect: () => void,
 ): void {
@@ -46,11 +47,18 @@ export function addTextToCanvas(
   const canvasHeight = pageDimensions.height;
   const isPointText = options.boxMode === 'point';
 
+  const defaultLeft = Math.round(canvasWidth / 2 - 180);
+  const defaultTop = Math.round(canvasHeight / 2 - 30);
+
+  const left =
+    options.position?.x !== undefined ? Math.round(options.position.x - 180) : defaultLeft;
+  const top = options.position?.y !== undefined ? Math.round(options.position.y - 20) : defaultTop;
+
   const commonProps = {
     originX: 'left' as const,
     originY: 'top' as const,
-    left: Math.round(canvasWidth / 2 - 180),
-    top: Math.round(canvasHeight / 2 - 30),
+    left,
+    top,
     width: 360,
     fontSize: options.fontSize ?? 36,
     fontWeight: options.fontWeight ?? 'bold',
@@ -384,10 +392,62 @@ export function updateSelectedObjectProperties(
     if (props.textAlign !== undefined) textObj.set('textAlign', props.textAlign);
     if (props.charSpacing !== undefined) textObj.set('charSpacing', props.charSpacing);
     if (props.lineHeight !== undefined) textObj.set('lineHeight', props.lineHeight);
+    if (props.fontFamily !== undefined && typeof document !== 'undefined' && 'fonts' in document) {
+      void document.fonts.ready.then(() => {
+        textObj.dirty = true;
+        fabricCanvas.requestRenderAll();
+      });
+    }
   }
 
   fabricCanvas.requestRenderAll();
   onComplete();
+}
+
+let internalClipboardObject: FabricObject | null = null;
+
+export async function copyActiveObject(fabricCanvas: FabricCanvas): Promise<boolean> {
+  const active = fabricCanvas.getActiveObject();
+  if (!active) return false;
+
+  try {
+    internalClipboardObject = await active.clone();
+    return true;
+  } catch (err) {
+    console.warn('Could not copy selected object:', err);
+    return false;
+  }
+}
+
+export function hasInternalClipboardObject(): boolean {
+  return internalClipboardObject !== null;
+}
+
+export async function pasteActiveObject(
+  fabricCanvas: FabricCanvas,
+  onComplete: () => void,
+): Promise<boolean> {
+  if (!internalClipboardObject) return false;
+
+  try {
+    const cloned = await internalClipboardObject.clone();
+    const nextLeft = (internalClipboardObject.left || 0) + 24;
+    const nextTop = (internalClipboardObject.top || 0) + 24;
+    cloned.set({
+      left: nextLeft,
+      top: nextTop,
+      name: `${(internalClipboardObject.get('name') as string) || 'obj'}-copy`,
+    });
+    internalClipboardObject = cloned;
+    fabricCanvas.add(cloned);
+    fabricCanvas.setActiveObject(cloned);
+    fabricCanvas.requestRenderAll();
+    onComplete();
+    return true;
+  } catch (err) {
+    console.warn('Could not paste copied object:', err);
+    return false;
+  }
 }
 
 export async function duplicateActiveObject(

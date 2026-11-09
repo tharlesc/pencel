@@ -95,9 +95,7 @@ export function VectorizePreview({
   const handleMouseUp = (): void => setIsPanning(false);
 
   const handleResetZoomAndPan = (): void => {
-    setZoomLevel(
-      naturalSize ? calculateFitZoom(naturalSize.width, naturalSize.height) : 1,
-    );
+    setZoomLevel(naturalSize ? calculateFitZoom(naturalSize.width, naturalSize.height) : 1);
     setPan({ x: 0, y: 0 });
   };
 

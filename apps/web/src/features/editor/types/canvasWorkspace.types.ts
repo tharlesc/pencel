@@ -50,3 +50,23 @@ export const FALLBACK_PAGE: DesignPage = {
   backgroundColor: '#FBFBFD',
   elements: [],
 };
+
+export function getSavedToolbarPosition(): 'bottom' | 'left' {
+  try {
+    const s =
+      typeof window !== 'undefined'
+        ? window.localStorage?.getItem('pencel_floating_toolbar_position')
+        : null;
+    return s === 'left' || s === 'bottom' ? s : 'bottom';
+  } catch {
+    return 'bottom';
+  }
+}
+
+export function saveToolbarPosition(pos: 'bottom' | 'left'): void {
+  try {
+    window.localStorage?.setItem('pencel_floating_toolbar_position', pos);
+  } catch {
+    /* ignore */
+  }
+}

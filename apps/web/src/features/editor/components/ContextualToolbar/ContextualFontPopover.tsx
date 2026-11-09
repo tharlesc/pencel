@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { Icon, Input } from '../../../../components/ui/index.js';
 import {
   EXPANDED_FONT_CATALOG,
@@ -21,12 +21,38 @@ export function ContextualFontPopover({
 }: ContextualFontPopoverProps): ReactElement {
   const [fontSearch, setFontSearch] = useState('');
   const [catalog, setCatalog] = useState<readonly FontOption[]>(EXPANDED_FONT_CATALOG);
+  const hoverTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     void fetchDynamicGoogleFontsCatalog().then((fonts) => {
-      setCatalog([...fonts]);
+      if (isMounted && fonts && fonts.length > EXPANDED_FONT_CATALOG.length) {
+        setCatalog([...fonts]);
+      }
     });
+    return () => {
+      isMounted = false;
+      if (hoverTimerRef.current !== null) {
+        window.clearTimeout(hoverTimerRef.current);
+      }
+    };
   }, []);
+
+  const handleMouseEnter = (font: FontOption): void => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+    }
+    hoverTimerRef.current = window.setTimeout(() => {
+      void loadWebFont(font);
+    }, 120);
+  };
+
+  const handleMouseLeave = (): void => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
 
   const filteredCategories = useMemo(() => {
     const cats = ['Sans-Serif', 'Serif', 'Display', 'Script', 'Monospace'] as const;
@@ -78,9 +104,8 @@ export function ContextualFontPopover({
                     onSelectFamily(font.family);
                     onClose();
                   }}
-                  onMouseEnter={() => {
-                    void loadWebFont(font);
-                  }}
+                  onMouseEnter={() => handleMouseEnter(font)}
+                  onMouseLeave={handleMouseLeave}
                   title={font.label}
                 >
                   <span className={styles.fontSampleText} style={{ fontFamily: font.family }}>

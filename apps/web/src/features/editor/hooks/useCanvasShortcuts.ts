@@ -15,6 +15,19 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === 'input' || tag === 'textarea' || target.isContentEditable;
 }
 
+function isTextInputTarget(target: EventTarget | null): boolean {
+  if (!target || !(target instanceof HTMLElement)) return false;
+  if (target.getAttribute('data-fabric') === 'textarea') {
+    return false;
+  }
+  const tag = target.tagName.toLowerCase();
+  return tag === 'input' || tag === 'textarea' || target.isContentEditable;
+}
+
+function isImageFileName(name: string): boolean {
+  return /\.(png|jpe?g|gif|webp|svg|avif|bmp|ico)$/i.test(name);
+}
+
 export function useCanvasShortcuts({
   engine,
   onSpaceStateChange,
@@ -24,34 +37,102 @@ export function useCanvasShortcuts({
 }: UseCanvasShortcutsOptions): void {
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent): void => {
-      if (isEditableTarget(e.target)) return;
+      if (isTextInputTarget(e.target)) return;
+      if (!engine) return;
 
-      const items = e.clipboardData?.items;
-      if (items && items.length > 0) {
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          if (item && item.type.startsWith('image/')) {
+      const isFabricTextEditing =
+        e.target instanceof HTMLElement && e.target.getAttribute('data-fabric') === 'textarea';
+
+      const clipboardData = e.clipboardData;
+      if (!clipboardData) return;
+
+      // 1. Collect image files from items and files
+      const imageFiles: File[] = [];
+      if (clipboardData.items && clipboardData.items.length > 0) {
+        for (let i = 0; i < clipboardData.items.length; i++) {
+          const item = clipboardData.items[i];
+          if (item && item.kind === 'file') {
             const file = item.getAsFile();
-            if (file) {
-              e.preventDefault();
-              const reader = new FileReader();
-              reader.onload = () => {
-                const dataUrl = reader.result as string;
-                if (dataUrl && engine) {
-                  void engine.addImageFromUrl(dataUrl, 'Imagem Colada');
-                }
-              };
-              reader.readAsDataURL(file);
-              return;
+            if (file && (file.type.startsWith('image/') || isImageFileName(file.name))) {
+              imageFiles.push(file);
             }
           }
         }
       }
 
-      const text = e.clipboardData?.getData('text/plain');
-      if (text && text.trim() && engine) {
+      if (imageFiles.length === 0 && clipboardData.files && clipboardData.files.length > 0) {
+        for (let i = 0; i < clipboardData.files.length; i++) {
+          const file = clipboardData.files[i];
+          if (file && (file.type.startsWith('image/') || isImageFileName(file.name))) {
+            imageFiles.push(file);
+          }
+        }
+      }
+
+      if (imageFiles.length > 0) {
         e.preventDefault();
-        engine.addText({ text: text.trim(), fontSize: 32 });
+        for (const file of imageFiles) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = reader.result;
+            if (typeof dataUrl === 'string') {
+              const label = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'Imagem Colada';
+              void engine.addImageFromUrl(dataUrl, label || 'Imagem Colada');
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+        return;
+      }
+
+      // 2. Check for HTML <img> tag
+      const html = clipboardData.getData('text/html');
+      if (html) {
+        const match = /<img\s+[^>]*src=["']([^"']+)["']/i.exec(html);
+        if (match && match[1]) {
+          e.preventDefault();
+          void engine.addImageFromUrl(match[1], 'Imagem Colada');
+          return;
+        }
+      }
+
+      // 3. Check for text or SVG
+      const text = clipboardData.getData('text/plain');
+      if (text && text.trim()) {
+        if (isFabricTextEditing) {
+          return;
+        }
+
+        const trimmed = text.trim();
+
+        if (
+          trimmed.startsWith('<svg') ||
+          (trimmed.startsWith('<?xml') && trimmed.includes('<svg'))
+        ) {
+          e.preventDefault();
+          const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(trimmed)}`;
+          void engine.addImageFromUrl(dataUri, 'Vetor SVG');
+          return;
+        }
+
+        if (trimmed.startsWith('data:image/')) {
+          e.preventDefault();
+          void engine.addImageFromUrl(trimmed, 'Imagem Colada');
+          return;
+        }
+
+        e.preventDefault();
+        engine.addText({
+          text: trimmed,
+          fontSize: trimmed.length > 80 ? 24 : 36,
+        });
+        return;
+      }
+
+      // 4. Fallback: Internal canvas copy
+      if (!isFabricTextEditing && engine.hasInternalClipboard?.()) {
+        e.preventDefault();
+        void engine.pasteCopied();
       }
     };
 

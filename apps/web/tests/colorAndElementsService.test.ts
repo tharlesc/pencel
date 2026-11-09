@@ -12,7 +12,9 @@ import {
   searchIconifyIcons,
 } from '../src/features/editor/services/elementsService.js';
 import {
+  BASE_FONT_CATALOG,
   EXPANDED_FONT_CATALOG,
+  buildGoogleFontUrl,
   loadWebFont,
 } from '../src/features/editor/services/fontLoaderService.js';
 
@@ -146,6 +148,36 @@ describe('Font Loader Service (Typography Expansion)', () => {
     if (systemFont) {
       const success = await loadWebFont(systemFont);
       expect(success).toBe(true);
+    }
+  });
+
+  it('provides an extensive static catalog directly bundled in project', () => {
+    expect(BASE_FONT_CATALOG.length).toBeGreaterThanOrEqual(30);
+    const bebas = BASE_FONT_CATALOG.find((f) => f.id === 'bebas-neue');
+    expect(bebas).toBeDefined();
+    const caveat = BASE_FONT_CATALOG.find((f) => f.id === 'caveat');
+    expect(caveat).toBeDefined();
+  });
+
+  it('generates valid Google Fonts URLs without requesting unavailable weights', () => {
+    const bebas = BASE_FONT_CATALOG.find((f) => f.id === 'bebas-neue');
+    expect(bebas).toBeDefined();
+    if (bebas) {
+      const url = buildGoogleFontUrl(bebas);
+      expect(url).toContain('family=Bebas+Neue');
+      expect(url).not.toContain('wght@0,300;0,400'); // never requests missing weights
+    }
+
+    const playfair = BASE_FONT_CATALOG.find((f) => f.id === 'playfair');
+    expect(playfair).toBeDefined();
+    if (playfair) {
+      const variantUrl = buildGoogleFontUrl(playfair, {
+        id: '700italic',
+        label: 'Bold Italic',
+        weight: '700',
+        style: 'italic',
+      });
+      expect(variantUrl).toContain('family=Playfair+Display:ital,wght@1,700');
     }
   });
 });

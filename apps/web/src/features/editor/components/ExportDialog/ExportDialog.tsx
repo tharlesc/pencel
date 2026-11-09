@@ -70,8 +70,8 @@ export function ExportDialog(props: ExportDialogProps): ReactElement | null {
 
   const open = props.open ?? session?.isExportDialogOpen ?? false;
   const onClose = props.onClose ?? session?.closeExportDialog ?? (() => {});
-  const dimensions =
-    props.dimensions ?? session?.activePage.dimensions ?? { width: 1080, height: 1080 };
+  const dimensions = props.dimensions ??
+    session?.activePage.dimensions ?? { width: 1080, height: 1080 };
   const documentTitle = props.documentTitle ?? session?.document.title ?? 'design';
   const onExportImage = props.onExportImage ?? engine?.exportImage ?? (() => '');
   const serializedJson = props.serializedJson ?? session?.serializedPreview ?? '{}';

@@ -48,9 +48,9 @@
 
 - **Auto-Fit e Pan:** Cálculo de escala ideal na montagem da pré-visualização para enquadrar completamente o vetor sem cortes.
 - **Alternador de Fundo do Palco de Preview:** Botões compactos de troca de fundo em 3 modos:
-  - *Xadrez (Checkerboard):* Padrão clássico de transparência para validar recortes.
-  - *Claro (Light):* Superfície clara para visualização de silhuetas e traços pretos/escuros.
-  - *Escuro (Dark):* Superfície escura para visualização de logotipos e elementos brancos.
+  - _Xadrez (Checkerboard):_ Padrão clássico de transparência para validar recortes.
+  - _Claro (Light):_ Superfície clara para visualização de silhuetas e traços pretos/escuros.
+  - _Escuro (Dark):_ Superfície escura para visualização de logotipos e elementos brancos.
 - **Remoção de Fundo Vetorial (`stripSvgBackground`):** Algoritmo que detecta e remove o elemento de fundo delimitador do SVG gerado pelo VTracer quando solicitado.
 - **Otimização de Lote no Canvas:** Ao transferir o SVG vetorizado para o palco do editor, o motor ativa `renderOnAddRemove = false`, aplica `objectCaching: true` aos caminhos filhos e efetua decimação de nós redundantes, eliminando qualquer travamento na UI do React.
 

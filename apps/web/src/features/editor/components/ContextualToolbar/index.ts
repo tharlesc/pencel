@@ -1,4 +1,5 @@
 export * from './ContextualToolbar.js';
+export * from './ContextualToolbar.types.js';
 export * from './ContextualAlignmentAndTrailing.js';
 export * from './ContextualBrushControls.js';
 export * from './ContextualColorPopover.js';
