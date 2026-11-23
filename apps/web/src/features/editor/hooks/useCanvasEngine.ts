@@ -56,7 +56,11 @@ export interface UseCanvasEngineResult {
   readonly pasteCopied: () => Promise<boolean>;
   readonly hasInternalClipboard: () => boolean;
   readonly applyTemplate: (templateId: string) => void;
-  readonly applyGeneratedLayout: (layout: GeneratedLayoutDto) => void;
+  readonly applyGeneratedLayout: (layout: GeneratedLayoutDto) => Promise<void>;
+  readonly getLayoutSnapshot: (
+    backgroundColor?: string,
+    title?: string,
+  ) => GeneratedLayoutDto | null;
   readonly updateSelectedProperties: (props: Partial<SelectedObjectProperties>) => void;
   readonly deleteSelected: () => void;
   readonly duplicateSelected: () => void;
@@ -326,11 +330,18 @@ export function useCanvasEngine({
   );
 
   const applyGeneratedLayout = useCallback(
-    (layout: GeneratedLayoutDto) => {
-      adapterRef.current?.applyGeneratedLayout(layout);
+    async (layout: GeneratedLayoutDto) => {
+      await adapterRef.current?.applyGeneratedLayout(layout);
       syncHistoryState();
     },
     [syncHistoryState],
+  );
+
+  const getLayoutSnapshot = useCallback(
+    (bg?: string, title?: string): GeneratedLayoutDto | null => {
+      return adapterRef.current?.exportLayoutSnapshot(bg ?? backgroundColor, title) ?? null;
+    },
+    [backgroundColor],
   );
 
   const updateSelectedProperties = useCallback(
@@ -670,6 +681,7 @@ export function useCanvasEngine({
     addImageFromUrl,
     applyTemplate,
     applyGeneratedLayout,
+    getLayoutSnapshot,
     updateSelectedProperties,
     deleteSelected,
     duplicateSelected,

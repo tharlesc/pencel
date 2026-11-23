@@ -14,6 +14,8 @@ export interface AiKeyCardProps {
   readonly aiConfig: AiUserConfig;
   readonly isEditingKey: boolean;
   readonly inlineKeyInput: string;
+  readonly useLocalEngine: boolean;
+  readonly onToggleLocalEngine: (enabled: boolean) => void;
   readonly onKeyInputChange: (val: string) => void;
   readonly onSaveKey: () => void;
   readonly onChangeKey: () => void;
@@ -24,12 +26,34 @@ export function AiKeyCard({
   aiConfig,
   isEditingKey,
   inlineKeyInput,
+  useLocalEngine,
+  onToggleLocalEngine,
   onKeyInputChange,
   onSaveKey,
   onChangeKey,
   onSelectSavedKey,
 }: AiKeyCardProps): ReactElement {
   const { t } = useI18n();
+
+  if (useLocalEngine && !isEditingKey) {
+    return (
+      <div className={styles.apiKeyStatusBadge}>
+        <div className={styles.apiKeyStatusLeft}>
+          <span className={styles.apiKeyStatusIcon}>
+            <Icon name="wand" size="xs" />
+          </span>
+          <span>{t('ai.localEngineActive')}</span>
+        </div>
+        <button
+          type="button"
+          className={styles.apiKeyChangeBtn}
+          onClick={() => onToggleLocalEngine(false)}
+        >
+          {t('ai.changeKey')}
+        </button>
+      </div>
+    );
+  }
 
   if (!aiConfig.apiKey || isEditingKey) {
     return (
@@ -49,6 +73,7 @@ export function AiKeyCard({
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSaveKey();
             }}
+            aria-label={t('ai.apiKeyRequired')}
           />
           <button
             type="button"
@@ -59,17 +84,28 @@ export function AiKeyCard({
             {t('ai.saveKey')}
           </button>
         </div>
-        <a
-          href={getProviderDefinition(aiConfig.provider).helpUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.apiKeyHelpLink}
-        >
-          <Icon name="link" size="xs" />
-          <span>
-            {t('ai.getKeyHelp')} ({getProviderDefinition(aiConfig.provider).helpLabel})
-          </span>
-        </a>
+        <div className={styles.apiKeyFooterRow}>
+          <a
+            href={getProviderDefinition(aiConfig.provider).helpUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.apiKeyHelpLink}
+          >
+            <Icon name="link" size="xs" />
+            <span>
+              {t('ai.getKeyHelp')} ({getProviderDefinition(aiConfig.provider).helpLabel})
+            </span>
+          </a>
+
+          <button
+            type="button"
+            className={styles.localEngineBtn}
+            onClick={() => onToggleLocalEngine(true)}
+          >
+            <Icon name="wand" size="xs" />
+            <span>{t('ai.localEngineToggle')}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -104,7 +140,7 @@ export function AiKeyCard({
           <span className={styles.apiKeyStatusIcon}>
             <Icon name="check" size="xs" />
           </span>
-          <span>
+          <span className={styles.apiKeyStatusText}>
             {t('ai.keyActive')}: {formatProviderDisplayName(aiConfig.provider)} ({aiConfig.model})
           </span>
         </div>

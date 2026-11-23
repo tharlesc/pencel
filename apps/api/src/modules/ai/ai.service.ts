@@ -1,4 +1,9 @@
 import type { ApiEnvConfig } from '../../config/env.js';
+import { fetchPhotosFromProvider } from '../media/media.service.js';
+import { synthesizeAutonomousLayout, synthesizeAutonomousVariations } from './ai.autonomous.js';
+import { analyzeDesignBrief } from './ai.designKnowledge.js';
+import { cleanJsonFromLlm, normalizeLlmResponse } from './ai.postprocess.js';
+import { buildCreativeSystemPrompt, buildCreativeUserPrompt } from './ai.prompts.js';
 import type {
   CanvasLayoutElementDto,
   GeneratedLayoutDto,
@@ -6,378 +11,180 @@ import type {
   GenerateLayoutResponse,
 } from './ai.types.js';
 
-interface ColorPalette {
-  readonly background: string;
-  readonly cardBg: string;
-  readonly accent: string;
-  readonly accentHover: string;
-  readonly highlight: string;
-  readonly textPrimary: string;
-  readonly textSecondary: string;
-  readonly textOnAccent: string;
-  readonly border: string;
+export { synthesizeAutonomousLayout, synthesizeAutonomousVariations };
+
+const SINGLE_CONCEPT_TIMEOUT_MS = 32_000;
+const MULTI_VARIATION_TIMEOUT_MS = 48_000;
+const GEMINI_MODEL_CACHE_TTL_MS = 10 * 60 * 1000;
+
+const geminiModelListCache = new Map<string, { readonly ts: number; readonly models: string[] }>();
+
+function getAttemptTimeoutMs(options: GenerateLayoutOptions): number {
+  return (options.variationsCount ?? 1) > 1
+    ? MULTI_VARIATION_TIMEOUT_MS
+    : SINGLE_CONCEPT_TIMEOUT_MS;
 }
 
-const PALETTES: Record<'tech' | 'promo' | 'minimal' | 'elegant' | 'vibrant', ColorPalette> = {
-  tech: {
-    background: '#0B0D13',
-    cardBg: '#151922',
-    accent: '#0A84FF',
-    accentHover: '#0071E3',
-    highlight: '#64D2FF',
-    textPrimary: '#FBFBFD',
-    textSecondary: '#8E8E93',
-    textOnAccent: '#FFFFFF',
-    border: '#2C2C2E',
-  },
-  promo: {
-    background: '#121214',
-    cardBg: '#1C1C1E',
-    accent: '#FF3B30',
-    accentHover: '#D70015',
-    highlight: '#FFD60A',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#AEAEC2',
-    textOnAccent: '#FFFFFF',
-    border: '#3A3A3C',
-  },
-  minimal: {
-    background: '#F5F5F7',
-    cardBg: '#FFFFFF',
-    accent: '#1D1D1F',
-    accentHover: '#000000',
-    highlight: '#0071E3',
-    textPrimary: '#1D1D1F',
-    textSecondary: '#6E6E73',
-    textOnAccent: '#FFFFFF',
-    border: '#D2D2D7',
-  },
-  elegant: {
-    background: '#16161D',
-    cardBg: '#21212B',
-    accent: '#D4AF37',
-    accentHover: '#AA8825',
-    highlight: '#F3E5AB',
-    textPrimary: '#FBFBFD',
-    textSecondary: '#98989D',
-    textOnAccent: '#16161D',
-    border: '#3A3A42',
-  },
-  vibrant: {
-    background: '#0D0E15',
-    cardBg: '#181A26',
-    accent: '#BF5AF2',
-    accentHover: '#AF52DE',
-    highlight: '#30D158',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#A1A1AA',
-    textOnAccent: '#FFFFFF',
-    border: '#33354A',
-  },
-};
-
-function inferCategoryFromPrompt(
-  prompt: string,
-): 'tech' | 'promo' | 'minimal' | 'elegant' | 'vibrant' {
-  const p = prompt.toLowerCase();
-  if (
-    p.includes('promo') ||
-    p.includes('black friday') ||
-    p.includes('desconto') ||
-    p.includes('sale') ||
-    p.includes('oferta') ||
-    p.includes('off')
-  ) {
-    return 'promo';
-  }
-  if (
-    p.includes('luxo') ||
-    p.includes('elegante') ||
-    p.includes('ouro') ||
-    p.includes('joia') ||
-    p.includes('imóve') ||
-    p.includes('arquitet')
-  ) {
-    return 'elegant';
-  }
-  if (
-    p.includes('clean') ||
-    p.includes('minimal') ||
-    p.includes('simples') ||
-    p.includes('frase') ||
-    p.includes('livro')
-  ) {
-    return 'minimal';
-  }
-  if (
-    p.includes('festa') ||
-    p.includes('show') ||
-    p.includes('festival') ||
-    p.includes('verão') ||
-    p.includes('carnaval') ||
-    p.includes('vibrante')
-  ) {
-    return 'vibrant';
-  }
-  return 'tech';
+function isAbortOrTimeoutError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const name = err.name.toLowerCase();
+  const msg = err.message.toLowerCase();
+  return (
+    name === 'aborterror' ||
+    name === 'timeouterror' ||
+    msg.includes('aborted') ||
+    msg.includes('timed out') ||
+    msg.includes('timeout')
+  );
 }
 
-function extractHeadlineAndSubtitle(
-  prompt: string,
-  category: 'tech' | 'promo' | 'minimal' | 'elegant' | 'vibrant',
-): { badge: string; headline: string; subtitle: string; cta: string } {
-  const p = prompt.trim();
-  const cleanPrompt = p.replace(/^(crie|gere|fazer|faça|quero|desenhe)\s+/i, '');
-
-  switch (category) {
-    case 'promo':
-      return {
-        badge: 'OFERTA ESPECIAL',
-        headline: cleanPrompt.length > 5 ? cleanPrompt.toUpperCase() : 'SUPER DESCONTO EXCLUSIVO',
-        subtitle: 'Aproveite até 50% OFF por tempo limitado. Estoque restrito!',
-        cta: 'GARANTIR OFERTA',
-      };
-    case 'elegant':
-      return {
-        badge: 'EXCLUSIVIDADE & DESIGN',
-        headline: cleanPrompt.length > 5 ? cleanPrompt : 'Elegância que Transcende o Tempo',
-        subtitle: 'Uma experiência singular criada para os mais exigentes apreciadores.',
-        cta: 'CONHECER COLEÇÃO',
-      };
-    case 'minimal':
-      return {
-        badge: 'DESIGN ESSENCIAL',
-        headline: cleanPrompt.length > 5 ? cleanPrompt : 'Menos ruído, mais clareza.',
-        subtitle: 'A harmonia perfeita entre forma, espaço em branco e propósito funcional.',
-        cta: 'EXPLORAR MAIS',
-      };
-    case 'vibrant':
-      return {
-        badge: 'NOVA EXPERIÊNCIA',
-        headline: cleanPrompt.length > 5 ? cleanPrompt.toUpperCase() : 'VIVA A INTENSIDADE',
-        subtitle: 'Conecte-se com novas ideias, energia criativa e momentos inesquecíveis.',
-        cta: 'PARTICIPAR AGORA',
-      };
-    case 'tech':
-    default:
-      return {
-        badge: 'INOVAÇÃO & TECNOLOGIA',
-        headline:
-          cleanPrompt.length > 5 ? cleanPrompt : 'A Próxima Geração do Seu Fluxo de Trabalho',
-        subtitle: 'Automatize tarefas, acelere sua criação gráfica e impulsione seus resultados.',
-        cta: 'COMEÇAR AGORA',
-      };
-  }
+function isEligibleGeminiTextModel(modelName: string): boolean {
+  const lower = modelName.toLowerCase();
+  if (!lower.startsWith('gemini-')) return false;
+  const blockedFragments = [
+    'tts',
+    'image',
+    'audio',
+    'live',
+    'embedding',
+    'aqa',
+    'vision',
+    'robotics',
+    'computer-use',
+    'deep-research',
+    'thinking',
+    'exp-0',
+    'learnlm',
+  ];
+  return !blockedFragments.some((frag) => lower.includes(frag));
 }
 
-function normalizeStyleCategory(
-  style?: string,
-  prompt = '',
-): 'tech' | 'promo' | 'minimal' | 'elegant' | 'vibrant' {
-  if (style === 'bold' || style === 'promo') return 'promo';
-  if (style === 'dark' || style === 'tech') return 'tech';
-  if (style === 'minimal') return 'minimal';
-  if (style === 'elegant') return 'elegant';
-  if (style === 'vibrant') return 'vibrant';
-  return inferCategoryFromPrompt(prompt);
-}
-
-/**
- * Autonomous Design Intelligence engine:
- * Synthesizes coordinated typography, balanced geometry, and spatial hierarchy
- * strictly according to artboard dimensions and prompt context.
- */
-export function synthesizeAutonomousLayout(options: GenerateLayoutOptions): GeneratedLayoutDto {
-  const width = options.dimensions?.width ?? 1080;
-  const height = options.dimensions?.height ?? 1080;
-
-  const styleCategory = normalizeStyleCategory(options.style, options.prompt);
-  const palette = PALETTES[styleCategory];
-  const content = extractHeadlineAndSubtitle(options.prompt, styleCategory);
-
-  const elements: CanvasLayoutElementDto[] = [];
-  const centerX = Math.round(width / 2);
-
-  // 1. Decorative geometric background accent (Glow or Floating Card)
-  const isDark = palette.background !== '#F5F5F7' && palette.background !== '#FFFFFF';
-
-  if (isDark) {
-    // Subtle circular gradient glow behind the content
-    const glowRadius = Math.round(Math.min(width, height) * 0.38);
-    elements.push({
-      id: 'bg-accent-glow',
-      type: 'circle',
-      name: 'Brilho Decorativo',
-      left: Math.round(centerX - glowRadius),
-      top: Math.round(height * 0.18 - glowRadius * 0.4),
-      radius: glowRadius,
-      fill: palette.accent,
-      opacity: 0.14,
-    });
-  }
-
-  // 2. Central Structural Frame / Container
-  const cardW = Math.round(width * 0.88);
-  const cardH = Math.round(height * 0.76);
-  const cardLeft = Math.round(width * 0.06);
-  const cardTop = Math.round(height * 0.12);
-
-  elements.push({
-    id: 'container-card',
-    type: 'rect',
-    name: 'Cartão Estrutural',
-    left: cardLeft,
-    top: cardTop,
-    width: cardW,
-    height: cardH,
-    rx: 28,
-    ry: 28,
-    fill: palette.cardBg,
-    stroke: palette.border,
-    strokeWidth: 1.5,
-    opacity: 0.94,
-  });
-
-  // 3. Overline Category Badge (Pill Shape + Text)
-  const badgeTextW = Math.min(Math.round(cardW * 0.6), Math.max(180, content.badge.length * 11));
-  const badgeH = 38;
-  const badgeTop = cardTop + Math.round(height * 0.05);
-
-  elements.push({
-    id: 'badge-pill',
-    type: 'rect',
-    name: 'Pílula Badge',
-    left: Math.round(centerX - badgeTextW / 2),
-    top: badgeTop,
-    width: badgeTextW,
-    height: badgeH,
-    rx: Math.round(badgeH / 2),
-    ry: Math.round(badgeH / 2),
-    fill: palette.accent,
-    opacity: 0.18,
-    stroke: palette.accent,
-    strokeWidth: 1,
-  });
-
-  elements.push({
-    id: 'badge-text',
-    type: 'textbox',
-    name: 'Texto Badge',
-    left: Math.round(centerX - badgeTextW / 2),
-    top: badgeTop + 9,
-    width: badgeTextW,
-    text: content.badge,
-    fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: 'Inter',
-    fill: isDark ? palette.highlight : palette.accent,
-    textAlign: 'center',
-  });
-
-  // 4. Headline / Title
-  const headlineW = Math.round(cardW * 0.84);
-  const headlineLeft = Math.round(centerX - headlineW / 2);
-  const headlineTop = badgeTop + badgeH + Math.round(height * 0.04);
-  const headlineFontSize = Math.max(32, Math.min(68, Math.round(width * 0.058)));
-
-  elements.push({
-    id: 'title-headline',
-    type: 'textbox',
-    name: 'Título Principal',
-    left: headlineLeft,
-    top: headlineTop,
-    width: headlineW,
-    text: content.headline,
-    fontSize: headlineFontSize,
-    fontWeight: 900,
-    fontFamily: 'Inter',
-    fill: palette.textPrimary,
-    textAlign: 'center',
-  });
-
-  // 5. Subtitle / Value Proposition
-  const subtitleW = Math.round(cardW * 0.78);
-  const subtitleLeft = Math.round(centerX - subtitleW / 2);
-  const subtitleTop = headlineTop + Math.round(headlineFontSize * 2.2) + 16;
-  const subtitleFontSize = Math.max(16, Math.min(26, Math.round(width * 0.024)));
-
-  elements.push({
-    id: 'subtitle-copy',
-    type: 'textbox',
-    name: 'Subtítulo',
-    left: subtitleLeft,
-    top: subtitleTop,
-    width: subtitleW,
-    text: content.subtitle,
-    fontSize: subtitleFontSize,
-    fontWeight: 500,
-    fontFamily: 'Inter',
-    fill: palette.textSecondary,
-    textAlign: 'center',
-  });
-
-  // 6. Primary CTA Button (Pill Rect + Text)
-  const ctaW = Math.round(Math.min(360, cardW * 0.65));
-  const ctaH = 60;
-  const ctaLeft = Math.round(centerX - ctaW / 2);
-  const ctaTop = Math.min(cardTop + cardH - 110, subtitleTop + 140);
-
-  elements.push({
-    id: 'cta-btn-shape',
-    type: 'rect',
-    name: 'Botão CTA',
-    left: ctaLeft,
-    top: ctaTop,
-    width: ctaW,
-    height: ctaH,
-    rx: 30,
-    ry: 30,
-    fill: palette.accent,
-  });
-
-  elements.push({
-    id: 'cta-btn-text',
-    type: 'textbox',
-    name: 'Texto CTA',
-    left: ctaLeft,
-    top: ctaTop + 18,
-    width: ctaW,
-    text: content.cta,
-    fontSize: 18,
-    fontWeight: 700,
-    fontFamily: 'Inter',
-    fill: palette.textOnAccent,
-    textAlign: 'center',
-  });
-
-  // 7. Footer Brand Note
-  const footerTop = cardTop + cardH + Math.round(height * 0.025);
-  elements.push({
-    id: 'footer-brand',
-    type: 'textbox',
-    name: 'Rodapé Marca',
-    left: Math.round(centerX - 160),
-    top: footerTop,
-    width: 320,
-    text: 'PENCEL STUDIO • DESIGN AUTÔNOMO',
-    fontSize: 11,
-    fontWeight: 600,
-    fontFamily: 'Inter',
-    fill: isDark ? '#6E6E73' : '#86868B',
-    textAlign: 'center',
-  });
-
-  return {
-    title: content.headline.slice(0, 40),
-    backgroundColor: palette.background,
-    elements,
-    explanation: `Layout sintetizado para o estilo "${styleCategory}" com paleta harmônica e hierarquia visual otimizada para ${width}×${height}px.`,
+export function buildGeminiGenerationConfig(
+  targetModel: string,
+  variationsCount: number,
+  includeThinkingConfig: boolean,
+): Record<string, unknown> {
+  const config: Record<string, unknown> = {
+    temperature: 0.7,
+    responseMimeType: 'application/json',
+    maxOutputTokens: variationsCount > 1 ? 8192 : 4096,
   };
+
+  if (!includeThinkingConfig) {
+    return config;
+  }
+
+  const lower = targetModel.toLowerCase();
+  if (/gemini-3/i.test(lower)) {
+    config.thinkingConfig = {
+      thinkingLevel: lower.includes('pro') ? 'low' : 'minimal',
+    };
+  } else if (/gemini-2\.5/i.test(lower)) {
+    // Gemini 2.5 Flash enables dynamic thinking by default (can take 40-90s); cap/disable for fast JSON
+    config.thinkingConfig = {
+      thinkingBudget: lower.includes('pro') ? 512 : 0,
+    };
+  }
+
+  return config;
+}
+
+function extractGeminiJsonText(json: {
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+  }>;
+}): string | null {
+  const parts = json.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts) || parts.length === 0) return null;
+
+  const nonThoughtTexts = parts
+    .filter((p) => !p.thought && typeof p.text === 'string' && p.text.trim().length > 0)
+    .map((p) => p.text!);
+
+  if (nonThoughtTexts.length > 0) {
+    return nonThoughtTexts.join('\n');
+  }
+
+  const fallbackText = parts.find(
+    (p) => typeof p.text === 'string' && p.text.trim().length > 0,
+  )?.text;
+  return fallbackText ?? null;
+}
+
+async function resolvePhotoUrlOnServer(
+  query: string,
+  env: ApiEnvConfig,
+): Promise<string | undefined> {
+  if (!query.trim() || env.nodeEnv === 'test') return undefined;
+  if (!env.unsplashAccessKey && !env.pexelsApiKey) return undefined;
+
+  try {
+    const provider = env.unsplashAccessKey ? 'unsplash' : 'pexels';
+    const raw = (await fetchPhotosFromProvider(
+      { provider, query: query.trim(), page: 1, perPage: 4 },
+      env,
+    )) as Record<string, unknown>;
+
+    if (provider === 'unsplash' && Array.isArray(raw.results)) {
+      const first = raw.results[0] as { urls?: { regular?: string; full?: string } } | undefined;
+      return first?.urls?.regular ?? first?.urls?.full;
+    }
+
+    if (provider === 'pexels' && Array.isArray(raw.photos)) {
+      const first = raw.photos[0] as { src?: { large2x?: string; large?: string } } | undefined;
+      return first?.src?.large2x ?? first?.src?.large;
+    }
+  } catch {
+    // Graceful fallback: frontend media search will resolve imageQuery if server keys are unavailable
+  }
+  return undefined;
+}
+
+async function enrichLayoutsWithStockPhotos(
+  layouts: readonly GeneratedLayoutDto[],
+  env: ApiEnvConfig,
+): Promise<GeneratedLayoutDto[]> {
+  if (env.nodeEnv === 'test' || (!env.unsplashAccessKey && !env.pexelsApiKey)) {
+    return [...layouts];
+  }
+
+  const queryCache = new Map<string, Promise<string | undefined>>();
+  const getPhoto = (q: string): Promise<string | undefined> => {
+    const key = q.trim().toLowerCase();
+    const existing = queryCache.get(key);
+    if (existing) return existing;
+    const promise = resolvePhotoUrlOnServer(q, env);
+    queryCache.set(key, promise);
+    return promise;
+  };
+
+  return Promise.all(
+    layouts.map(async (layout) => {
+      const hasUnresolvedImages = layout.elements.some(
+        (el) => el.type === 'image' && el.imageQuery && !el.imageUrl,
+      );
+      if (!hasUnresolvedImages) return layout;
+
+      const enrichedElements: CanvasLayoutElementDto[] = await Promise.all(
+        layout.elements.map(async (el) => {
+          if (el.type === 'image' && el.imageQuery && !el.imageUrl) {
+            const resolvedUrl = await getPhoto(el.imageQuery);
+            if (resolvedUrl) {
+              return { ...el, imageUrl: resolvedUrl };
+            }
+          }
+          return el;
+        }),
+      );
+
+      return { ...layout, elements: enrichedElements };
+    }),
+  );
 }
 
 /**
- * Attempts to generate a layout using an external LLM (Gemini or OpenAI)
- * if configured, or gracefully falls back to the autonomous synthesis engine.
+ * Generates one or more creative layouts using the configured external LLM provider
+ * (Gemini, Anthropic Claude, OpenAI, or DeepSeek) or the local Parametric Creative Studio Engine.
  */
 export async function generateLayoutWithAi(
   options: GenerateLayoutOptions,
@@ -388,6 +195,18 @@ export async function generateLayoutWithAi(
     return {
       success: false,
       error: 'Prompt é obrigatório para gerar o layout com IA.',
+    };
+  }
+
+  // Explicit local parametric studio mode or automated test environment
+  if (options.useLocalEngine || env.nodeEnv === 'test') {
+    const variations = synthesizeAutonomousVariations(options);
+    const enriched = await enrichLayoutsWithStockPhotos(variations, env);
+    return {
+      success: true,
+      layout: enriched[0],
+      variations: enriched,
+      source: 'autonomous',
     };
   }
 
@@ -402,6 +221,7 @@ export async function generateLayoutWithAi(
           : env.deepseekApiKey
             ? 'deepseek'
             : 'gemini');
+
   const effectiveKey =
     options.apiKey ||
     (effectiveProvider === 'gemini'
@@ -412,12 +232,20 @@ export async function generateLayoutWithAi(
           ? env.openaiApiKey
           : env.deepseekApiKey);
 
-  if (effectiveKey && env.nodeEnv !== 'test') {
+  if (effectiveKey) {
     if (effectiveProvider === 'gemini') {
       try {
-        const response = await callGeminiForLayout(options, effectiveKey, options.model);
-        if (response) {
-          return { success: true, layout: response };
+        const result = await callGeminiForLayout(options, effectiveKey, options.model);
+        if (result && result.layouts.length > 0) {
+          const enriched = await enrichLayoutsWithStockPhotos(result.layouts, env);
+          return {
+            success: true,
+            layout: enriched[0],
+            variations: enriched,
+            source: 'llm',
+            providerUsed: 'gemini',
+            modelUsed: result.modelUsed,
+          };
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -436,9 +264,17 @@ export async function generateLayoutWithAi(
 
     if (effectiveProvider === 'claude') {
       try {
-        const response = await callClaudeForLayout(options, effectiveKey, options.model);
-        if (response) {
-          return { success: true, layout: response };
+        const result = await callClaudeForLayout(options, effectiveKey, options.model);
+        if (result && result.layouts.length > 0) {
+          const enriched = await enrichLayoutsWithStockPhotos(result.layouts, env);
+          return {
+            success: true,
+            layout: enriched[0],
+            variations: enriched,
+            source: 'llm',
+            providerUsed: 'claude',
+            modelUsed: result.modelUsed,
+          };
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -457,9 +293,17 @@ export async function generateLayoutWithAi(
 
     if (effectiveProvider === 'openai') {
       try {
-        const response = await callOpenAiForLayout(options, effectiveKey, options.model);
-        if (response) {
-          return { success: true, layout: response };
+        const result = await callOpenAiForLayout(options, effectiveKey, options.model);
+        if (result && result.layouts.length > 0) {
+          const enriched = await enrichLayoutsWithStockPhotos(result.layouts, env);
+          return {
+            success: true,
+            layout: enriched[0],
+            variations: enriched,
+            source: 'llm',
+            providerUsed: 'openai',
+            modelUsed: result.modelUsed,
+          };
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -478,9 +322,17 @@ export async function generateLayoutWithAi(
 
     if (effectiveProvider === 'deepseek') {
       try {
-        const response = await callDeepSeekForLayout(options, effectiveKey, options.model);
-        if (response) {
-          return { success: true, layout: response };
+        const result = await callDeepSeekForLayout(options, effectiveKey, options.model);
+        if (result && result.layouts.length > 0) {
+          const enriched = await enrichLayoutsWithStockPhotos(result.layouts, env);
+          return {
+            success: true,
+            layout: enriched[0],
+            variations: enriched,
+            source: 'llm',
+            providerUsed: 'deepseek',
+            modelUsed: result.modelUsed,
+          };
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -498,265 +350,155 @@ export async function generateLayoutWithAi(
     }
   }
 
-  // Fallback in test mode for automated suite checks
-  if (env.nodeEnv === 'test') {
-    const layout = synthesizeAutonomousLayout(options);
-    return {
-      success: true,
-      layout,
-    };
-  }
-
   return {
     success: false,
     error:
-      'Chave de API não configurada. Por favor, insira sua chave do Google Gemini, Anthropic Claude, OpenAI ou DeepSeek em Configurações para que a IA crie seu design de forma autônoma.',
+      'Chave de API não configurada. Insira sua chave do Google Gemini, Anthropic Claude, OpenAI ou DeepSeek em Configurações, ou ative o Estúdio Local.',
   };
 }
 
-function cleanJsonFromLlm(text: string): string {
-  let cleaned = text.trim();
-  cleaned = cleaned
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```$/i, '')
-    .trim();
-  const firstBrace = cleaned.indexOf('{');
-  const lastBrace = cleaned.lastIndexOf('}');
-  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-  }
-  return cleaned;
-}
-
-function normalizeLlmLayout(
-  raw: unknown,
-  dimensions?: { width: number; height: number },
-): GeneratedLayoutDto | null {
-  if (!raw || typeof raw !== 'object') return null;
-  const obj = raw as Record<string, unknown>;
-
-  const defaultW = dimensions?.width ?? 1080;
-  const _defaultH = dimensions?.height ?? 1080;
-
-  const rawElements = Array.isArray(obj.elements)
-    ? obj.elements
-    : Array.isArray(obj.items)
-      ? obj.items
-      : Array.isArray(obj.components)
-        ? obj.components
-        : [];
-
-  const elements: CanvasLayoutElementDto[] = [];
-  for (let i = 0; i < rawElements.length; i++) {
-    const el = rawElements[i];
-    if (!el || typeof el !== 'object') continue;
-    const item = el as Record<string, unknown>;
-
-    const typeStr = String(item.type || '').toLowerCase();
-    const type: 'rect' | 'circle' | 'triangle' | 'textbox' =
-      typeStr === 'circle'
-        ? 'circle'
-        : typeStr === 'triangle'
-          ? 'triangle'
-          : typeStr === 'textbox' || typeStr === 'text'
-            ? 'textbox'
-            : 'rect';
-
-    const id = typeof item.id === 'string' && item.id ? item.id : `ai-el-${i + 1}`;
-    const name = typeof item.name === 'string' && item.name ? item.name : `Element ${i + 1}`;
-    const left = Math.round(Number(item.left) || 0);
-    const top = Math.round(Number(item.top) || 0);
-    const width = Math.round(Number(item.width) || (type === 'textbox' ? defaultW * 0.7 : 200));
-    const height = Math.round(Number(item.height) || (type === 'textbox' ? 60 : 200));
-
-    const elementDto: CanvasLayoutElementDto = {
-      id,
-      type,
-      name,
-      left,
-      top,
-      width,
-      height,
-      fill: typeof item.fill === 'string' ? item.fill : '#FFFFFF',
-      opacity: typeof item.opacity === 'number' ? Math.min(1, Math.max(0, item.opacity)) : 1,
-      ...(item.stroke ? { stroke: String(item.stroke) } : {}),
-      ...(item.strokeWidth ? { strokeWidth: Number(item.strokeWidth) } : {}),
-      ...(type === 'circle' ? { radius: Math.round(Number(item.radius) || width / 2) } : {}),
-      ...(type === 'rect' && item.rx
-        ? { rx: Number(item.rx), ry: Number(item.ry || item.rx) }
-        : {}),
-      ...(type === 'textbox'
-        ? {
-            text: typeof item.text === 'string' ? item.text : 'Título',
-            fontSize: Math.round(Number(item.fontSize) || 36),
-            fontWeight:
-              item.fontWeight === 'bold' || item.fontWeight === 700 || item.fontWeight === 900
-                ? 'bold'
-                : 'normal',
-            fontFamily: typeof item.fontFamily === 'string' ? item.fontFamily : 'Inter',
-            textAlign:
-              item.textAlign === 'center' || item.textAlign === 'right' ? item.textAlign : 'left',
-          }
-        : {}),
-    };
-
-    elements.push(elementDto);
-  }
-
-  if (elements.length === 0) return null;
-
-  const bgColor =
-    typeof obj.backgroundColor === 'string'
-      ? obj.backgroundColor
-      : typeof obj.background === 'string'
-        ? obj.background
-        : '#121214';
-
-  return {
-    title: typeof obj.title === 'string' ? obj.title.slice(0, 80) : 'Design Autônomo',
-    backgroundColor: bgColor,
-    explanation:
-      typeof obj.explanation === 'string'
-        ? obj.explanation
-        : 'Layout criado de forma autônoma pela inteligência artificial.',
-    elements,
-  };
+interface ProviderCallResult {
+  readonly layouts: GeneratedLayoutDto[];
+  readonly modelUsed: string;
 }
 
 async function getAvailableGeminiModels(apiKey: string): Promise<string[]> {
+  const cacheKey = `${apiKey.slice(0, 8)}:${apiKey.slice(-4)}`;
+  const cached = geminiModelListCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < GEMINI_MODEL_CACHE_TTL_MS) {
+    return cached.models;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-      {
-        method: 'GET',
-        signal: controller.signal,
-      },
-    );
-    clearTimeout(timeoutId);
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
+      method: 'GET',
+      headers: { 'x-goog-api-key': apiKey },
+      signal: controller.signal,
+    });
     if (!res.ok) return [];
     const data = (await res.json()) as {
       models?: Array<{ name?: string; supportedGenerationMethods?: string[] }>;
     };
-    return (data.models || [])
+    const models = (data.models || [])
       .filter((m) => m.name && m.supportedGenerationMethods?.includes('generateContent'))
-      .map((m) => m.name!.replace(/^models\//, ''));
+      .map((m) => m.name!.replace(/^models\//, ''))
+      .filter(isEligibleGeminiTextModel);
+
+    geminiModelListCache.set(cacheKey, { ts: Date.now(), models });
+    return models;
   } catch {
     return [];
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
-async function callGeminiForLayout(
+export async function callGeminiForLayout(
   options: GenerateLayoutOptions,
   apiKey: string,
   model = 'gemini-2.5-flash',
-): Promise<GeneratedLayoutDto | null> {
-  const width = options.dimensions?.width ?? 1080;
-  const height = options.dimensions?.height ?? 1080;
-
-  // 1. Discover models supported by this specific user API key
-  const availableModels = await getAvailableGeminiModels(apiKey);
-
-  // 2. Build prioritized candidate models
-  const candidateModels: string[] = [];
-
+): Promise<ProviderCallResult | null> {
   const sanitizedRequested =
     model === 'gemini-3.8-flash' || model === 'gemini-1.5-flash'
       ? 'gemini-2.5-flash'
       : model || 'gemini-2.5-flash';
 
-  if (availableModels.includes(sanitizedRequested)) {
-    candidateModels.push(sanitizedRequested);
-  }
+  const candidateQueue: string[] = Array.from(
+    new Set([sanitizedRequested, 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash']),
+  );
 
-  // Add available flash models first
-  for (const m of availableModels) {
-    if (m.includes('flash') && !candidateModels.includes(m)) {
-      candidateModels.push(m);
-    }
-  }
+  const systemInstructions = buildCreativeSystemPrompt(options);
+  const userQuery = buildCreativeUserPrompt(options);
+  const variationsCount = options.mode === 'refine' ? 1 : (options.variationsCount ?? 1);
+  const timeoutMs = getAttemptTimeoutMs(options);
 
-  // Add remaining available models
-  for (const m of availableModels) {
-    if (!candidateModels.includes(m)) {
-      candidateModels.push(m);
-    }
-  }
-
-  // Fallbacks if ListModels returned empty or blocked
-  const defaultFallbacks = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash-latest',
-    'gemini-1.5-flash',
-  ];
-  for (const fb of defaultFallbacks) {
-    if (!candidateModels.includes(fb)) {
-      candidateModels.push(fb);
-    }
-  }
-
-  const systemInstructions = `Você é um diretor de arte e engenheiro gráfico sênior no Pencel Studio.
-Crie um layout visual completo e profissional para um artboard de ${width}x${height}px.
-Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown ou crases) com a seguinte estrutura:
-{
-  "title": string,
-  "backgroundColor": "#hex",
-  "explanation": string,
-  "elements": [
-    {
-      "id": string,
-      "type": "rect" | "circle" | "triangle" | "textbox",
-      "name": string,
-      "left": number,
-      "top": number,
-      "width": number,
-      "height": number,
-      "radius": number,
-      "rx": number,
-      "ry": number,
-      "fill": "#hex",
-      "stroke": "#hex",
-      "strokeWidth": number,
-      "opacity": number,
-      "text": string,
-      "fontSize": number,
-      "fontWeight": "bold" | "normal" | 400 | 700 | 900,
-      "textAlign": "left" | "center" | "right"
-    }
-  ]
-}`;
-
-  const userQuery = `Prompt: "${options.prompt}". Estilo: "${options.style ?? 'automático'}". Dimensões: ${width}x${height}px.`;
-
+  let discoveredModelsLoaded = false;
   let lastError: Error | null = null;
+  let attempts = 0;
+  const maxAttempts = 5;
 
-  for (const targetModel of candidateModels) {
+  const invokeGeminiModel = async (
+    targetModel: string,
+    includeThinkingConfig: boolean,
+    inlineSystemPrompt: boolean,
+  ): Promise<Response> => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 28000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const requestBody: Record<string, unknown> = inlineSystemPrompt
+      ? {
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: `${systemInstructions}\n\n${userQuery}` }],
+            },
+          ],
+          generationConfig: buildGeminiGenerationConfig(
+            targetModel,
+            variationsCount,
+            includeThinkingConfig,
+          ),
+        }
+      : {
+          systemInstruction: {
+            parts: [{ text: systemInstructions }],
+          },
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: userQuery }],
+            },
+          ],
+          generationConfig: buildGeminiGenerationConfig(
+            targetModel,
+            variationsCount,
+            includeThinkingConfig,
+          ),
+        };
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`,
+      return await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: `${systemInstructions}\n\n${userQuery}` }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              responseMimeType: 'application/json',
-            },
-          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: JSON.stringify(requestBody),
           signal: controller.signal,
         },
       );
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  for (let idx = 0; idx < candidateQueue.length && attempts < maxAttempts; idx++) {
+    const targetModel = candidateQueue[idx]!;
+    attempts += 1;
+
+    try {
+      let res = await invokeGeminiModel(targetModel, true, false);
+
+      // If this model rejects thinkingConfig or systemInstruction with 400, retry same model cleanly
+      if (res.status === 400) {
+        const firstErrText = await res.text();
+        const lowerFirstErr = firstErrText.toLowerCase();
+        const isConfigRejection =
+          lowerFirstErr.includes('thinking') ||
+          lowerFirstErr.includes('systeminstruction') ||
+          lowerFirstErr.includes('system_instruction') ||
+          lowerFirstErr.includes('unknown name');
+
+        if (isConfigRejection) {
+          res = await invokeGeminiModel(targetModel, false, lowerFirstErr.includes('system'));
+        } else {
+          res = new Response(firstErrText, { status: 400, statusText: 'Bad Request' });
+        }
+      }
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -769,12 +511,11 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown ou crases) com 
           parsedMsg = errorJson?.error?.message ?? '';
           errorCode = errorJson?.error?.status ?? '';
         } catch {
-          // Ignore
+          // Ignore non-JSON error body
         }
 
         const lowerMsg = (parsedMsg + ' ' + errorText).toLowerCase();
 
-        // 1. Invalid API Key -> throw clear error
         const isFatalKeyError =
           res.status === 401 ||
           errorCode === 'UNAUTHENTICATED' ||
@@ -787,7 +528,6 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown ou crases) com 
           );
         }
 
-        // 2. Quota exceeded -> throw clear error
         const isQuotaError =
           res.status === 429 ||
           errorCode === 'RESOURCE_EXHAUSTED' ||
@@ -795,57 +535,104 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown ou crases) com 
           lowerMsg.includes('rate limit');
 
         if (isQuotaError) {
-          throw new Error(
-            'Limite de requisições ou cota gratuita excedida no Google Gemini. Tente novamente em alguns instantes.',
-          );
-        }
-
-        // 3. Model issue (not found, unsupported, not available, deprecated, permission denied)
-        const isModelIssue =
-          res.status === 404 ||
-          res.status === 400 ||
-          res.status === 403 ||
-          lowerMsg.includes('not found') ||
-          lowerMsg.includes('not supported') ||
-          lowerMsg.includes('not available') ||
-          lowerMsg.includes('deprecated') ||
-          lowerMsg.includes('permission_denied');
-
-        if (isModelIssue) {
+          // Free tier quotas are separate per Gemini model; try next candidate before giving up
           lastError = new Error(
-            parsedMsg || `Modelo "${targetModel}" não disponível para esta chave.`,
+            'Limite de requisições ou cota gratuita excedida no Google Gemini. Tente novamente em alguns instantes ou troque o modelo em Configurações.',
           );
           continue;
         }
 
-        // Non-model operational error - throw immediately
+        const isModelIssue =
+          res.status === 404 ||
+          res.status === 400 ||
+          res.status === 403 ||
+          res.status === 503 ||
+          lowerMsg.includes('not found') ||
+          lowerMsg.includes('not supported') ||
+          lowerMsg.includes('not available') ||
+          lowerMsg.includes('deprecated') ||
+          lowerMsg.includes('overloaded') ||
+          lowerMsg.includes('permission_denied');
+
+        if (isModelIssue) {
+          lastError = new Error(
+            parsedMsg || `Modelo "${targetModel}" indisponível para esta chave.`,
+          );
+          // Lazily discover available Flash models for this key only when a model fails
+          if (!discoveredModelsLoaded) {
+            discoveredModelsLoaded = true;
+            const discovered = await getAvailableGeminiModels(apiKey);
+            const flashFirst = [
+              ...discovered.filter((m) => m.includes('flash-lite')),
+              ...discovered.filter((m) => m.includes('flash') && !m.includes('flash-lite')),
+            ].filter((m) => !candidateQueue.includes(m));
+            if (flashFirst.length > 0) {
+              candidateQueue.splice(idx + 1, 0, ...flashFirst.slice(0, 3));
+            }
+          }
+          continue;
+        }
+
         throw new Error(
           parsedMsg || `Google Gemini API (${res.status}): ${errorText.slice(0, 160)}`,
         );
       }
 
       const json = (await res.json()) as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+        candidates?: Array<{
+          content?: { parts?: Array<{ text?: string; thought?: boolean }> };
+        }>;
       };
-      const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) return null;
+      const rawText = extractGeminiJsonText(json);
+      if (!rawText) {
+        lastError = new Error(
+          `O modelo "${targetModel}" retornou uma resposta vazia. Tentando alternativa.`,
+        );
+        continue;
+      }
 
       const cleaned = cleanJsonFromLlm(rawText);
       const parsed = JSON.parse(cleaned) as unknown;
-      return normalizeLlmLayout(parsed, options.dimensions);
+      const blueprint = analyzeDesignBrief(options);
+      const layouts = normalizeLlmResponse(
+        parsed,
+        options.dimensions,
+        options.archetype,
+        blueprint.summary,
+      );
+      if (layouts.length === 0) {
+        lastError = new Error(
+          `O modelo "${targetModel}" retornou um layout sem elementos válidos.`,
+        );
+        continue;
+      }
+      return { layouts, modelUsed: targetModel };
     } catch (err) {
+      if (isAbortOrTimeoutError(err)) {
+        lastError = new Error(
+          `Tempo limite esgotado (${Math.round(timeoutMs / 1000)}s) ao aguardar o modelo "${targetModel}". Tente um prompt mais direto, use 1 conceito ou selecione Gemini 2.5 Flash-Lite.`,
+        );
+        continue;
+      }
+
+      if (err instanceof SyntaxError) {
+        lastError = new Error(
+          `Resposta JSON incompleta recebida de "${targetModel}". Tentando próximo modelo.`,
+        );
+        continue;
+      }
+
       if (
         err instanceof Error &&
         (err.message.toLowerCase().includes('not found') ||
           err.message.toLowerCase().includes('not supported') ||
+          err.message.toLowerCase().includes('indisponível') ||
           err.message.toLowerCase().includes('não disponível'))
       ) {
         lastError = err;
         continue;
       }
       throw err;
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 
@@ -859,38 +646,37 @@ async function callOpenAiForLayout(
   options: GenerateLayoutOptions,
   apiKey: string,
   model = 'gpt-4o-mini',
-): Promise<GeneratedLayoutDto | null> {
-  const width = options.dimensions?.width ?? 1080;
-  const height = options.dimensions?.height ?? 1080;
+): Promise<ProviderCallResult | null> {
   const targetModel = model || 'gpt-4o-mini';
+  const isReasoningModel = /^o[134]/i.test(targetModel);
+
+  const systemInstructions = buildCreativeSystemPrompt(options);
+  const userQuery = buildCreativeUserPrompt(options);
+  const timeoutMs = getAttemptTimeoutMs(options);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 28000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const payload: Record<string, unknown> = {
+      model: targetModel,
+      messages: [
+        { role: 'system', content: systemInstructions },
+        { role: 'user', content: userQuery },
+      ],
+      response_format: { type: 'json_object' },
+    };
+    if (!isReasoningModel) {
+      payload.temperature = 0.72;
+    }
+
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: targetModel,
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um diretor de arte e engenheiro gráfico sênior no Pencel Studio.
-Crie um layout visual completo e profissional para um artboard de ${width}x${height}px.
-Retorne um objeto JSON com title, backgroundColor, explanation e elements (rect, circle, triangle, textbox).`,
-          },
-          {
-            role: 'user',
-            content: `Prompt: "${options.prompt}". Estilo: "${options.style ?? 'automático'}".`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
@@ -903,6 +689,16 @@ Retorne um objeto JSON com title, backgroundColor, explanation e elements (rect,
       } catch {
         // Ignore
       }
+      if (res.status === 401) {
+        throw new Error(
+          'Sua chave de API da OpenAI é inválida. Por favor, verifique a chave em Configurações.',
+        );
+      }
+      if (res.status === 429) {
+        throw new Error(
+          'Limite de requisições ou saldo insuficiente na OpenAI. Verifique sua conta.',
+        );
+      }
       throw new Error(parsedMsg || `OpenAI API (${res.status}): ${errorText.slice(0, 160)}`);
     }
 
@@ -914,7 +710,23 @@ Retorne um objeto JSON com title, backgroundColor, explanation e elements (rect,
 
     const cleaned = cleanJsonFromLlm(rawContent);
     const parsed = JSON.parse(cleaned) as unknown;
-    return normalizeLlmLayout(parsed, options.dimensions);
+    const blueprint = analyzeDesignBrief(options);
+    const layouts = normalizeLlmResponse(
+      parsed,
+      options.dimensions,
+      options.archetype,
+      blueprint.summary,
+    );
+    if (layouts.length === 0) return null;
+    return { layouts, modelUsed: targetModel };
+  } catch (err) {
+    if (isAbortOrTimeoutError(err)) {
+      throw new Error(
+        `Tempo limite esgotado (${Math.round(timeoutMs / 1000)}s) ao aguardar a OpenAI (${targetModel}).`,
+        { cause: err },
+      );
+    }
+    throw err;
   } finally {
     clearTimeout(timeoutId);
   }
@@ -924,54 +736,26 @@ async function callClaudeForLayout(
   options: GenerateLayoutOptions,
   apiKey: string,
   model = 'claude-3-7-sonnet-20250219',
-): Promise<GeneratedLayoutDto | null> {
-  const width = options.dimensions?.width ?? 1080;
-  const height = options.dimensions?.height ?? 1080;
+): Promise<ProviderCallResult | null> {
+  const candidateModels = Array.from(
+    new Set([
+      model || 'claude-sonnet-4-20250514',
+      'claude-sonnet-4-20250514',
+      'claude-3-7-sonnet-20250219',
+      'claude-3-5-sonnet-20241022',
+      'claude-3-5-haiku-20241022',
+    ]),
+  );
 
-  const candidateModels = [
-    model || 'claude-3-7-sonnet-20250219',
-    'claude-3-5-sonnet-20241022',
-    'claude-3-5-haiku-20241022',
-  ];
-
-  const systemInstructions = `Você é um diretor de arte e engenheiro gráfico sênior no Pencel Studio.
-Crie um layout visual completo e profissional para um artboard de ${width}x${height}px.
-Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown, crases ou texto explicativo fora do JSON) com a seguinte estrutura:
-{
-  "title": string,
-  "backgroundColor": "#hex",
-  "explanation": string,
-  "elements": [
-    {
-      "id": string,
-      "type": "rect" | "circle" | "triangle" | "textbox",
-      "name": string,
-      "left": number,
-      "top": number,
-      "width": number,
-      "height": number,
-      "radius": number,
-      "rx": number,
-      "ry": number,
-      "fill": "#hex",
-      "stroke": "#hex",
-      "strokeWidth": number,
-      "opacity": number,
-      "text": string,
-      "fontSize": number,
-      "fontWeight": "bold" | "normal" | 400 | 700 | 900,
-      "textAlign": "left" | "center" | "right"
-    }
-  ]
-}`;
-
-  const userQuery = `Prompt: "${options.prompt}". Estilo: "${options.style ?? 'automático'}". Dimensões: ${width}x${height}px.`;
+  const systemInstructions = buildCreativeSystemPrompt(options);
+  const userQuery = buildCreativeUserPrompt(options);
+  const timeoutMs = getAttemptTimeoutMs(options);
 
   let lastError: Error | null = null;
 
   for (const targetModel of candidateModels) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 28000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -983,15 +767,10 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown, crases ou text
         },
         body: JSON.stringify({
           model: targetModel,
-          max_tokens: 4096,
+          max_tokens: 6144,
           system: systemInstructions,
-          messages: [
-            {
-              role: 'user',
-              content: userQuery,
-            },
-          ],
-          temperature: 0.7,
+          messages: [{ role: 'user', content: userQuery }],
+          temperature: 0.72,
         }),
         signal: controller.signal,
       });
@@ -1051,8 +830,22 @@ Retorne EXCLUSIVAMENTE um objeto JSON válido (sem tags markdown, crases ou text
 
       const cleaned = cleanJsonFromLlm(rawText);
       const parsed = JSON.parse(cleaned) as unknown;
-      return normalizeLlmLayout(parsed, options.dimensions);
+      const blueprint = analyzeDesignBrief(options);
+      const layouts = normalizeLlmResponse(
+        parsed,
+        options.dimensions,
+        options.archetype,
+        blueprint.summary,
+      );
+      if (layouts.length === 0) return null;
+      return { layouts, modelUsed: targetModel };
     } catch (err) {
+      if (isAbortOrTimeoutError(err)) {
+        lastError = new Error(
+          `Tempo limite esgotado (${Math.round(timeoutMs / 1000)}s) ao aguardar o modelo Claude "${targetModel}".`,
+        );
+        continue;
+      }
       if (
         err instanceof Error &&
         (err.message.toLowerCase().includes('not found') ||
@@ -1075,40 +868,39 @@ async function callDeepSeekForLayout(
   options: GenerateLayoutOptions,
   apiKey: string,
   model = 'deepseek-chat',
-): Promise<GeneratedLayoutDto | null> {
-  const width = options.dimensions?.width ?? 1080;
-  const height = options.dimensions?.height ?? 1080;
+): Promise<ProviderCallResult | null> {
   const targetModel = model || 'deepseek-chat';
+  const isReasoner = targetModel.includes('reasoner');
+
+  const systemInstructions = buildCreativeSystemPrompt(options);
+  const userQuery = buildCreativeUserPrompt(options);
+  const timeoutMs = getAttemptTimeoutMs(options);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 28000);
-
-  const systemInstructions = `Você é um diretor de arte e engenheiro gráfico sênior no Pencel Studio.
-Crie um layout visual completo e profissional para um artboard de ${width}x${height}px.
-Retorne EXCLUSIVAMENTE um objeto JSON com title, backgroundColor, explanation e elements (rect, circle, triangle, textbox).`;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const payload: Record<string, unknown> = {
+      model: targetModel,
+      messages: [
+        { role: 'system', content: systemInstructions },
+        { role: 'user', content: userQuery },
+      ],
+    };
+
+    // DeepSeek-R1 (reasoner) rejects temperature / json_object in strict mode; handle safely
+    if (!isReasoner) {
+      payload.response_format = { type: 'json_object' };
+      payload.temperature = 0.72;
+    }
+
     const res = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: targetModel,
-        messages: [
-          {
-            role: 'system',
-            content: systemInstructions,
-          },
-          {
-            role: 'user',
-            content: `Prompt: "${options.prompt}". Estilo: "${options.style ?? 'automático'}". Dimensões: ${width}x${height}px.`,
-          },
-        ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
@@ -1143,7 +935,23 @@ Retorne EXCLUSIVAMENTE um objeto JSON com title, backgroundColor, explanation e 
 
     const cleaned = cleanJsonFromLlm(rawContent);
     const parsed = JSON.parse(cleaned) as unknown;
-    return normalizeLlmLayout(parsed, options.dimensions);
+    const blueprint = analyzeDesignBrief(options);
+    const layouts = normalizeLlmResponse(
+      parsed,
+      options.dimensions,
+      options.archetype,
+      blueprint.summary,
+    );
+    if (layouts.length === 0) return null;
+    return { layouts, modelUsed: targetModel };
+  } catch (err) {
+    if (isAbortOrTimeoutError(err)) {
+      throw new Error(
+        `Tempo limite esgotado (${Math.round(timeoutMs / 1000)}s) ao aguardar o DeepSeek (${targetModel}).`,
+        { cause: err },
+      );
+    }
+    throw err;
   } finally {
     clearTimeout(timeoutId);
   }
