@@ -1,4 +1,6 @@
-export type AiProvider = 'gemini' | 'openai' | 'claude' | 'deepseek';
+import type { AiProvider } from '@pencel/shared-types';
+
+export type { AiProvider };
 
 export interface ModelOption {
   readonly id: string;
@@ -27,12 +29,12 @@ export const AI_PROVIDERS: readonly ProviderDefinition[] = [
     models: [
       {
         id: 'gemini-2.5-flash',
-        name: 'Gemini 2.5 Flash (Recommended / Latest)',
+        name: 'Gemini 2.5 Flash (Recommended / Fast)',
         isRecommended: true,
       },
+      { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash-Lite (Ultra Fast / High Quota)' },
+      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Art Direction / Complex)' },
       { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-      { id: 'gemini-1.5-flash-latest', name: 'Gemini 1.5 Flash (Latest)' },
-      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
     ],
   },
   {
@@ -43,6 +45,10 @@ export const AI_PROVIDERS: readonly ProviderDefinition[] = [
     helpUrl: 'https://console.anthropic.com/settings/keys',
     helpLabel: 'Anthropic Console',
     models: [
+      {
+        id: 'claude-sonnet-4-20250514',
+        name: 'Claude Sonnet 4 (Latest Flagship)',
+      },
       {
         id: 'claude-3-7-sonnet-20250219',
         name: 'Claude 3.7 Sonnet (Hybrid Reasoning / Recommended)',
@@ -61,9 +67,10 @@ export const AI_PROVIDERS: readonly ProviderDefinition[] = [
     helpLabel: 'OpenAI Platform',
     models: [
       { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Recommended)', isRecommended: true },
+      { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini (Fast & Structured)' },
+      { id: 'gpt-4.1', name: 'GPT-4.1 (High Precision)' },
       { id: 'gpt-4o', name: 'GPT-4o' },
       { id: 'o3-mini', name: 'o3-mini' },
-      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
     ],
   },
   {

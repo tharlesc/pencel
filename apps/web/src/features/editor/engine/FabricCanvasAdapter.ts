@@ -29,7 +29,10 @@ import {
   type TargetImageMetadata,
   type VectorizeApplyMode,
 } from './vectorTraceEngine.js';
-import { applyGeneratedLayoutToCanvas } from './generatedLayoutEngine.js';
+import {
+  applyGeneratedLayoutToCanvas,
+  extractLayoutSnapshotFromCanvas,
+} from './generatedLayoutEngine.js';
 import type { GeneratedLayoutDto } from '../services/aiLayoutService.js';
 
 export type EditorToolMode = 'select' | 'directSelect' | 'pen' | 'brush' | 'eraser';
@@ -184,7 +187,7 @@ export class FabricCanvasAdapter {
     this.callbacks?.onCanvasChange();
   }
 
-  public addText(options: AddTextOptions): void {
+  public readonly addText = (options: AddTextOptions): void => {
     if (this.fabricCanvas)
       shapeText.addTextToCanvas(
         this.fabricCanvas,
@@ -192,9 +195,9 @@ export class FabricCanvasAdapter {
         options,
         this.onSelUpdate,
       );
-  }
+  };
 
-  public addShape(options: AddShapeOptions): void {
+  public readonly addShape = (options: AddShapeOptions): void => {
     if (this.fabricCanvas)
       shapeText.addShapeToCanvas(
         this.fabricCanvas,
@@ -202,16 +205,14 @@ export class FabricCanvasAdapter {
         options,
         this.onSelUpdate,
       );
-  }
+  };
 
-  public addImage(
+  public readonly addImage = (
     url: string,
     altText = 'Imagem',
     fallbackUrl?: string,
     position?: { x?: number; y?: number; left?: number; top?: number },
-  ): Promise<void> {
-    return this.addImageFromUrl(url, altText, fallbackUrl, position);
-  }
+  ): Promise<void> => this.addImageFromUrl(url, altText, fallbackUrl, position);
 
   public async addImageFromUrl(
     url: string,
@@ -243,26 +244,37 @@ export class FabricCanvasAdapter {
       );
   }
 
-  public applyGeneratedLayout(layout: GeneratedLayoutDto): void {
-    if (this.fabricCanvas)
-      applyGeneratedLayoutToCanvas(
-        this.fabricCanvas,
-        this.viewport.pageDimensions,
-        layout,
-        () => this.clearObjects(),
-        this.onCommit,
-      );
+  public async applyGeneratedLayout(layout: GeneratedLayoutDto): Promise<void> {
+    if (!this.fabricCanvas) return;
+    await applyGeneratedLayoutToCanvas(
+      this.fabricCanvas,
+      this.viewport.pageDimensions,
+      layout,
+      () => this.clearObjects(),
+      this.onCommit,
+      this.managedObjectUrls,
+    );
   }
 
-  public updateSelectedProperties(props: Partial<SelectedObjectProperties>): void {
+  public readonly exportLayoutSnapshot = (
+    backgroundColor?: string,
+    title?: string,
+  ): GeneratedLayoutDto | null =>
+    this.fabricCanvas
+      ? extractLayoutSnapshotFromCanvas(
+          this.fabricCanvas,
+          backgroundColor ?? this.viewport.backgroundColor,
+          title,
+        )
+      : null;
+
+  public readonly updateSelectedProperties = (props: Partial<SelectedObjectProperties>): void => {
     if (this.fabricCanvas)
       shapeText.updateSelectedObjectProperties(this.fabricCanvas, props, this.onCommitSel);
-  }
-
-  public deleteSelected(): void {
+  };
+  public readonly deleteSelected = (): void => {
     if (this.fabricCanvas) shapeText.deleteSelectedObjects(this.fabricCanvas, this.onSelClear);
-  }
-
+  };
   public async duplicateSelected(): Promise<void> {
     if (!this.fabricCanvas) return;
     await shapeText.duplicateActiveObject(this.fabricCanvas, () => {
@@ -270,11 +282,8 @@ export class FabricCanvasAdapter {
       this.history.save(this.fabricCanvas);
     });
   }
-
-  public async copySelected(): Promise<boolean> {
-    return this.fabricCanvas ? shapeText.copyActiveObject(this.fabricCanvas) : false;
-  }
-
+  public readonly copySelected = (): Promise<boolean> =>
+    this.fabricCanvas ? shapeText.copyActiveObject(this.fabricCanvas) : Promise.resolve(false);
   public async pasteCopied(): Promise<boolean> {
     if (!this.fabricCanvas) return false;
     return shapeText.pasteActiveObject(this.fabricCanvas, () => {
@@ -282,10 +291,7 @@ export class FabricCanvasAdapter {
       this.history.save(this.fabricCanvas);
     });
   }
-
-  public hasInternalClipboard(): boolean {
-    return shapeText.hasInternalClipboardObject();
-  }
+  public readonly hasInternalClipboard = (): boolean => shapeText.hasInternalClipboardObject();
 
   public async selectSubject(
     mode: 'select' | 'removeBg' = 'select',
@@ -313,30 +319,29 @@ export class FabricCanvasAdapter {
 
   public readonly bringForward = (): void => this.layers.bringForward();
   public readonly sendBackward = (): void => this.layers.sendBackward();
-  public clearObjects(): void {
+  public readonly clearObjects = (): void => {
     if (this.fabricCanvas) shapeText.clearCanvasObjects(this.fabricCanvas, this.onSelClear);
-  }
+  };
   public readonly getLayers = (): readonly LayerItem[] => this.layers.getLayers();
 
-  public toggleLayerMask(
+  public readonly toggleLayerMask = (
     layerName?: string,
     shape: 'circle' | 'rounded' | 'ellipse' = 'circle',
-  ): void {
+  ): void => {
     if (this.fabricCanvas)
       subjectMask.toggleLayerMaskOnCanvas(this.fabricCanvas, layerName, shape, this.onCommitSel);
-  }
-
-  public invertLayerMask(layerName?: string): void {
+  };
+  public readonly invertLayerMask = (layerName?: string): void => {
     if (this.fabricCanvas)
       subjectMask.invertLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
-  }
-
-  public removeLayerMask(layerName?: string): void {
+  };
+  public readonly removeLayerMask = (layerName?: string): void => {
     if (this.fabricCanvas)
       subjectMask.removeLayerMaskOnCanvas(this.fabricCanvas, layerName, this.onCommitSel);
-  }
-
-  public applyCropToSelected(mode: '1:1' | '4:3' | '16:9' | 'inset' | 'reset' = 'inset'): void {
+  };
+  public readonly applyCropToSelected = (
+    mode: '1:1' | '4:3' | '16:9' | 'inset' | 'reset' = 'inset',
+  ): void => {
     if (this.fabricCanvas)
       subjectMask.applyCropToSelectedOnCanvas(
         this.fabricCanvas,
@@ -344,12 +349,11 @@ export class FabricCanvasAdapter {
         () => this.removeLayerMask(),
         this.onCommitSel,
       );
-  }
-
-  public performBooleanOperation(operation: BooleanPathOperation): void {
+  };
+  public readonly performBooleanOperation = (operation: BooleanPathOperation): void => {
     if (this.fabricCanvas)
       shapeText.performBooleanOperationOnCanvas(this.fabricCanvas, operation, this.onCommitSel);
-  }
+  };
 
   public readonly selectObjectByName = (name: string): void => this.layers.selectByName(name);
   public readonly selectObjectsByNames = (names: readonly string[]): void =>

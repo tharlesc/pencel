@@ -56,6 +56,7 @@ import {
   Plus,
   RectangleHorizontal,
   RectangleVertical,
+  RefreshCw,
   RotateCcw,
   RotateCw,
   Ruler,
@@ -172,6 +173,7 @@ export const ICON_REGISTRY = {
   orientationLandscape: RectangleHorizontal,
   settings: Settings,
   key: Key,
+  refresh: RefreshCw,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICON_REGISTRY;
